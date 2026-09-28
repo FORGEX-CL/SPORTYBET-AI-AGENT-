@@ -16,27 +16,12 @@ export function aggregateSelectionReports(reports=[]){
     item.risk=Math.max(item.risk,r.risks?.length?Math.min(1,r.risks.length*.2):0);
     byKey.set(key,item);
   }
-  return [...byKey.values()].map(x=>({
-    ...x,
-    predictiveAgreement:x.predictiveAgents.length/5,
-    agreement:x.predictiveAgents.length/5,
-    score:scoreSelection({...x,agreement:x.predictiveAgents.length/5})
-  })).sort((a,b)=>b.score-a.score);
+  return [...byKey.values()].map(x=>({...x,predictiveAgreement:x.predictiveAgents.length/5,agreement:x.predictiveAgents.length/5,score:scoreSelection({...x,agreement:x.predictiveAgents.length/5})})).sort((a,b)=>b.score-a.score);
 }
-
 export function runHeadAnalyst(reports,{minScore=.55,maxSelections=50,minPredictiveAgents=2,minDataQuality=.5}={}){
   const aggregated=aggregateSelectionReports(reports);
   const candidates=aggregated.filter(x=>x.predictiveAgents.length>=minPredictiveAgents&&x.dataQuality>=minDataQuality&&x.score>=minScore);
   const rejected=aggregated.filter(x=>!candidates.includes(x));
   const accepted=candidates.slice(0,maxSelections);
-  return {
-    accepted,
-    rejected,
-    noBet:accepted.length===0,
-    reasoning:accepted.length
-      ? "Accepted only selections supported by the minimum number of predictive agents, sufficient data quality and the configured score threshold."
-      : "NO BET: no selection met predictive-agent, data-quality and score requirements.",
-    requirements:{minScore,minPredictiveAgents,minDataQuality},
-    decidedAt:new Date().toISOString()
-  };
+  return{accepted,rejected,noBet:accepted.length===0,reasoning:accepted.length?"Accepted only selections supported by the minimum number of predictive agents, sufficient data quality and the configured score threshold.":"NO BET: no selection met predictive-agent, data-quality and score requirements.",requirements:{minScore,minPredictiveAgents,minDataQuality},decidedAt:new Date().toISOString()};
 }
