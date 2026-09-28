@@ -1,31 +1,21 @@
 # SportyBet AI Agent
 
-Autonomous multi-agent sports analysis platform focused on SportyBet.
+Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 
-## Product direction
+## Verified source facts
+SportyBet's public Nigeria site currently exposes many sports, including football, basketball, tennis, eFootball, table tennis, eBasketball, eTennis, ice hockey, handball, volleyball, baseball, American football, cricket, darts, MMA, boxing, badminton, beach volleyball, futsal, rugby, snooker, Basketball 3x3, Counter-Strike, Dota 2 and League of Legends. SportyBet also documents a maximum of 50 selections in a betslip. These facts are used as product constraints; live odds and event data must come from the verified SportyBet interface.
 
-- 7 specialized AI roles: statistics, football, multi-sport, SportyBet market intelligence, odds/value, risk/contrarian, and head analyst.
-- SportyBet is the intended primary source for event, market, selection and odds data.
-- The system will generate up to 10 candidate tickets.
-- Each ticket can contain up to 50 selections, subject to SportyBet's current rules.
-- Each selection will retain the SportyBet event/match identifier, market, selection and observed odds.
-- Combined odds are calculated from the current captured selections and must be revalidated when data changes.
-- Every selection and ticket is stored for post-match evaluation.
-- Agent performance is measured over time so mistakes become structured feedback.
-- The platform does not fabricate booking codes. If SportyBet exposes a legitimate supported mechanism for booking-code creation, it can be integrated; otherwise the UI provides the exact selections needed to recreate the betslip on SportyBet.
+## Architecture
+Seven agents: Statistics, Football Specialist, Multi-Sport Specialist, SportyBet Market Intelligence, Odds & Value, Risk/Contrarian, Head Analyst.
 
-## Data-source rule
+The ticket engine supports up to 10 candidate tickets and up to 50 selections per ticket. Each selection preserves the SportyBet event ID, market ID, selection ID and captured odds. Tickets must be revalidated before use so removed markets or changed odds are not silently presented as current.
 
-Do not replace SportyBet market/odds data with invented live data. The ingestion layer must be verified against SportyBet before production use.
+The learning layer records predictions, settles them against results, and classifies failed selections for later agent-performance analysis.
 
-## Run locally
+## Integrity rule
+Never invent SportyBet odds, event IDs, market IDs, selection IDs or booking codes. The repository contains a source adapter boundary rather than an undocumented API guess.
 
-```bash
+## Development
 npm install
 npm run dev
-```
-
-## Current status
-
-Phase 1: dashboard and system architecture scaffold.
-Next: verified SportyBet ingestion adapter, normalized event/market schema, agent orchestration, ticket engine, and result-learning pipeline.
+npm run build
