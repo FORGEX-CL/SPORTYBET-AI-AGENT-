@@ -6,11 +6,12 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 
 - SportyBet source boundary for verified Nigeria HTTPS pages, including the official lite host.
 - Public SportyBet football event-row parser aligned to the current `time + ID → teams → 1X2 odds` layout.
-- SportyBet market-block parsing for observed football and selected multi-sport market families.
+- SportyBet event-detail URL construction from verified event IDs.
+- Event-detail market parsing for observed football markets including Exact Goals, Goal Range, Teams to Score, Smart Combo, Correct Score and Precanned BetBuilder.
 - Sport-specific market catalogue and evidence rules.
 - Feed validation and freshness gates; empty feeds are never considered live.
 - Verified web-source snapshot loader with source URL and capture metadata.
-- Dashboard refresh control for requesting a verified SportyBet snapshot.
+- Dashboard refresh control that requests a verified SportyBet snapshot and then attempts event-detail enrichment for up to 20 football events.
 - Seven-agent runtime, specialist reports, debate state and Head Analyst filtering.
 - Cross-market candidate scoring and ticket construction.
 - Maximum 10 candidate tickets and 50 selections per ticket.
@@ -22,11 +23,13 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 
 Live data must come from verified SportyBet data. Never invent event IDs, market IDs, selection IDs, odds, results or booking codes. A missing, stale or unparseable source remains unavailable.
 
-The browser refresh path is deliberately fail-closed: if SportyBet returns a page that cannot be parsed, the dashboard keeps the feed unavailable instead of displaying fabricated data.
+Event-detail enrichment is best-effort and fail-closed per event: if a detail page cannot be fetched or parsed, the original verified event remains, and the failure is surfaced to the dashboard.
+
+The current implementation is source-backed for football ingestion. It does not claim that the public page exposes every internal SportyBet identifier needed for external booking-code generation.
 
 ## Pipeline
 
-SportyBet → public source → parser → normalized feed → market analysis → specialist agents → debate → Head Analyst → candidate tickets → fresh-data revalidation → results → learning.
+SportyBet → public source → parser → normalized feed → event-detail enrichment → market analysis → specialist agents → debate → Head Analyst → candidate tickets → fresh-data revalidation → results → learning.
 
 ## Development
 
