@@ -79,7 +79,7 @@ export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS}={}){
 
     try{
       const portfolioScore=scorePortfolio(picks);
-      tickets.push(buildTicket(picks,{
+      tickets.push(buildTicket(picks,{snapshot:{source:"SportyBet",sourceUrl:null,capturedAt:new Date().toISOString()},
         strategy:profile.id,
         strategyLabel:profile.label,
         score:portfolioScore,
