@@ -11,6 +11,9 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Sport-specific market catalogue and evidence rules.
 - Feed validation and freshness gates; empty feeds are never considered live.
 - Verified web-source snapshot loader with source URL and capture metadata.
+- Same-origin production API routes for SportyBet football ingestion and Results ingestion, avoiding direct browser-to-SportyBet requests.
+- Production SportyBet source health endpoint.
+- Server ingestion uses bounded five-request concurrency for event-detail enrichment and 15-second source-request timeouts.
 - Dashboard refresh control that requests a verified SportyBet snapshot and then attempts event-detail enrichment for up to 20 football events.
 - Six specialist analysis passes plus a Head Analyst decision layer.
 - Predictive-evidence gate: market existence alone cannot approve a selection.
