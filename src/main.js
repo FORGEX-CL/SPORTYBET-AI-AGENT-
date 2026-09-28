@@ -9,7 +9,7 @@ import { settleFootballSelection } from "./data/sportybetResultsParser.js";
 
 const emptyFeed=normalizeSportyBetFeed([]);
 const initialLedger=loadLearningLedger();
-const state={feed:emptyFeed,analysis:analyzeSportyBetFeed(emptyFeed),ledger:initialLedger,learning:learningSummary(initialLedger),agents:AGENT_ROLES.map(a=>({...a,status:"READY"})),loading:false,error:"",detailFailures:0,resultFailures:0,lastResultSync:null};
+const state={feed:emptyFeed,analysis:analyzeSportyBetFeed(emptyFeed,{agentPerformance:initialLedger.performance}),ledger:initialLedger,learning:learningSummary(initialLedger),agents:AGENT_ROLES.map(a=>({...a,status:"READY"})),loading:false,error:"",detailFailures:0,resultFailures:0,lastResultSync:null};
 
 const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 
@@ -68,13 +68,13 @@ async function loadFeed(){
     const enriched=await enrichSportyBetFootballEvents(snapshot.events,{maxEvents:20});
     state.detailFailures=enriched.failures.length;
     state.feed=normalizeSportyBetFeed(enriched.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});
-    state.analysis=analyzeSportyBetFeed(state.feed);
+    state.analysis=analyzeSportyBetFeed(state.feed,{agentPerformance:state.ledger.performance});
     state.ledger=registerTickets(state.ledger,state.analysis.tickets??[]);
     try{await syncResults();}catch{state.resultFailures=1;state.lastResultSync="RESULT SOURCE UNAVAILABLE";}
     safeSaveLearning();
   }catch(error){
     state.feed=normalizeSportyBetFeed([]);
-    state.analysis=analyzeSportyBetFeed(state.feed);
+    state.analysis=analyzeSportyBetFeed(state.feed,{agentPerformance:state.ledger.performance});
     state.error=error instanceof Error?error.message:"SportyBet feed could not be loaded";
   }finally{state.loading=false;render();}
 }
