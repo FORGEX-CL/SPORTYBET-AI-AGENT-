@@ -12,14 +12,18 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Feed validation and freshness gates; empty feeds are never considered live.
 - Verified web-source snapshot loader with source URL and capture metadata.
 - Dashboard refresh control that requests a verified SportyBet snapshot and then attempts event-detail enrichment for up to 20 football events.
-- Six specialist analysis passes plus the Head Analyst decision layer.
+- Six specialist analysis passes plus a Head Analyst decision layer.
 - Predictive-evidence gate: market existence alone cannot approve a selection.
+- Risk/Contrarian challenge round with severity and Head Analyst veto for high-severity challenges.
 - Feed-level report aggregation and candidate scoring.
 - Maximum 10 candidate tickets and 50 selections per ticket.
 - Ticket construction is blocked unless candidates have sufficient predictive evidence and data quality.
+- Prediction records retain agent attribution, challenge context, sport, market, odds range and confidence band.
+- Persistent browser learning ledger with deduplication across feed refreshes.
+- Agent performance summaries by sport, market, odds range and confidence band, plus Risk challenge vindication/false-positive counts.
 - Fresh-feed ticket revalidation and odds-change detection.
 - Prediction settlement, error classification and learning summary.
-- Parser, feed, feed-analysis and event-detail regression fixtures via `npm run test:core`.
+- Parser, feed, analysis, debate and learning regression fixtures via `npm run test:core`.
 
 ## Integrity
 
@@ -27,13 +31,17 @@ Live data must come from verified SportyBet data. Never invent event IDs, market
 
 The Head Analyst requires multiple predictive-agent signals and sufficient data quality. A market appearing on SportyBet is not itself evidence that the selection should be recommended.
 
+Risk is intentionally separated from predictive support. Its job is to challenge selections, not increase their predictive agreement.
+
 Event-detail enrichment is best-effort and fail-closed per event: if a detail page cannot be fetched or parsed, the original verified event remains, and the failure is surfaced to the dashboard.
+
+The learning ledger stores predictions locally in the browser. It is updated only from explicit settlement results supplied to the settlement layer; it does not manufacture wins, losses or historical performance.
 
 The current implementation is source-backed for football ingestion. It does not claim that the public page exposes every internal SportyBet identifier needed for external booking-code generation.
 
 ## Pipeline
 
-SportyBet → public source → parser → normalized feed → event-detail enrichment → market analysis → specialist agents → internal challenge state → Head Analyst → candidate tickets → fresh-data revalidation → results → learning.
+SportyBet → public source → parser → normalized feed → event-detail enrichment → market analysis → specialist agents → Risk challenge → Head Analyst → candidate tickets → fresh-data revalidation → result settlement → agent learning memory.
 
 ## Development
 
