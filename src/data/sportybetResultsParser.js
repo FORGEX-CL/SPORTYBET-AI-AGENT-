@@ -9,6 +9,13 @@ function parseScore(line){
   return match?{home:Number(match[1]),away:Number(match[2])}:null;
 }
 
+function toIsoDate(value){
+  const match=String(value).match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\s+(\\d{1,2}):(\\d{2})$/);
+  if(!match)return null;
+  const [,day,month,year,hour,minute]=match;
+  return new Date(Date.UTC(Number(year),Number(month)-1,Number(day),Number(hour),Number(minute))).toISOString();
+}
+
 export function parseSportyBetFootballResults(text=""){
   const lines=cleanLines(text),results=[];
   for(let i=0;i<lines.length;i++){
@@ -23,7 +30,9 @@ export function parseSportyBetFootballResults(text=""){
     if(HALF_SCORE.test(lines[cursor]??"")){const m=lines[cursor].match(HALF_SCORE);halfTime={home:Number(m[1]),away:Number(m[2])};cursor++;}
     const away=lines[cursor++]??"";
     if(!away||SCORE.test(away))continue;
-    results.push({eventId,sport:"football",home,away,finalScore,halfTime,status:"settled",source:"SportyBet"});
+    const rawDate=DATE_TIME_ID.test(lines[i])?lines[i]:null;
+    const playedAt=rawDate?toIsoDate(rawDate):null;
+    results.push({eventId,sport:"football",home,away,finalScore,halfTime,playedAt,status:"settled",source:"SportyBet"});
     i=cursor-1;
   }
   return results;
