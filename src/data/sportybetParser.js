@@ -16,7 +16,18 @@ function splitTeams(line=""){
 }
 
 function stripHtml(value=""){
-  return value.replace(/<[^>]+>/g," ").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").replace(/\s+/g," ").trim();
+  return value
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<\/(?:div|p|li|a|h[1-6]|tr|td|th|section|article|header|footer)>/gi,"\n")
+    .replace(/<[^>]+>/g," ")
+    .replace(/&nbsp;/gi," ")
+    .replace(/&amp;/gi,"&")
+    .replace(/&quot;/gi,'"')
+    .replace(/&#39;/gi,"'")
+    .split(/\r?\n/)
+    .map(line=>line.replace(/\s+/g," ").trim())
+    .filter(Boolean)
+    .join("\n");
 }
 
 function extractPrematchLinks(html=""){
@@ -28,7 +39,7 @@ function extractPrematchLinks(html=""){
       const eventId=url.searchParams.get("eventId");
       if(!eventId||!/^sr:match:\d+$/.test(eventId)||seen.has(eventId))continue;
       seen.add(eventId);
-      links.push({eventId,url:url.toString(),text:stripHtml(match[2])});
+      links.push({eventId,url:url.toString(),text:stripHtml(match[2]).replace(/\s+/g," ")});
     }catch{}
   }
   return links;
