@@ -2,9 +2,10 @@ import "./styles.css";
 import { AGENT_ROLES } from "./core/agents.js";
 import { analyzeSportyBetFeed } from "./core/feedAnalysis.js";
 import { normalizeSportyBetFeed, requireFreshFeed } from "./core/feedPipeline.js";
-import { loadLearningLedger, learningSummary, registerTickets, saveLearningLedger, settlePendingFromSportyBetResults } from "./core/learningLedger.js";
+import { loadLearningLedger, learningSummary, registerTickets, saveLearningLedger, settlePendingFromSportyBetResults, recordSportyBetResults } from "./core/learningLedger.js";
 import { fetchSportyBetFootballApi, fetchSportyBetResultsApi, fetchSportyBetHealthApi } from "./data/sportybetApi.js";
 import { settleFootballSelection } from "./data/sportybetResultsParser.js";
+import { buildHistoricalEvidenceByEvent } from "./core/sportybetHistory.js";
 import { compareTicketToFeed } from "./core/ticketDelta.js";
 
 const emptyFeed=normalizeSportyBetFeed([]);
@@ -87,7 +88,7 @@ function render(){
   document.querySelector("#app").innerHTML=`
 <header class="topbar"><div><div class="eyebrow">AUTONOMOUS SPORTS ANALYSIS</div><h1>SPORTYBET <span>AI AGENT</span></h1></div><div class="source"><i class="${fresh.fresh?"live":""}"></i> ${fresh.fresh?"VERIFIED FEED":"VERIFIED SOURCE REQUIRED"}</div></header>
 <main>
-<section class="hero"><div><p class="label">AI BOARD</p><h2>Seven specialists. One analysis room.</h2><p class="muted">Evidence, value, risk and debate are separated before a ticket becomes a candidate.</p></div><div class="scan-card"><div class="scan-title">DATA STATUS</div><strong>${status}</strong><span>${state.feed.eventCount} events · ${state.feed.marketCount} markets · ${fresh.fresh?"fresh":"no live feed loaded"}</span><button class="refresh" id="refresh-feed" ${state.loading?"disabled":""}>${state.loading?"SYNCING…":"REFRESH SPORTYBET"}</button><div class="decision-line"><span>MARKET MODEL</span><b>${state.analysis.modelSummary?.pricedSelections??0} PRICED · ${state.analysis.modelSummary?.positiveValueSelections??0} POSITIVE VALUE</b></div><div class="decision-line"><span>SOURCE HEALTH</span><b>${String(state.sourceHealth.status??"UNKNOWN").toUpperCase()}${state.sourceHealth.parsedFootballEvents?` · ${state.sourceHealth.parsedFootballEvents} EVENTS`:""}</b></div><div class="decision-line"><span>HEAD ANALYST</span><b>${decisionText}</b></div><div class="decision-line"><span>RISK CHALLENGES</span><b>${debateCount}</b></div><div class="decision-line"><span>RESULT SYNC</span><b>${state.lastResultSync??"NOT SYNCED"}</b></div><div class="decision-line"><span>LEARNING</span><b>${state.learning.settled}/${state.learning.totalPredictions} SETTLED</b></div><div class="decision-line"><span>FEEDBACK</span><b>${state.learning.agents?.length?`${state.learning.agents.filter(a=>a.settled>=5).length} AGENTS CALIBRATED`:"NO HISTORY"}</b></div>${state.detailFailures?`<em class="feed-error">${state.detailFailures} event detail page(s) could not be enriched; original verified event data retained.</em>`:""}${state.resultFailures?`<em class="feed-error">${state.resultFailures} result-source issue(s) occurred; unresolved predictions were left unsettled.</em>`:""}${state.error?`<em class="feed-error">${escapeHtml(state.error)}</em>`:""}</div></section>
+<section class="hero"><div><p class="label">AI BOARD</p><h2>Seven specialists. One analysis room.</h2><p class="muted">Evidence, value, risk and debate are separated before a ticket becomes a candidate.</p></div><div class="scan-card"><div class="scan-title">DATA STATUS</div><strong>${status}</strong><span>${state.feed.eventCount} events · ${state.feed.marketCount} markets · ${fresh.fresh?"fresh":"no live feed loaded"}</span><button class="refresh" id="refresh-feed" ${state.loading?"disabled":""}>${state.loading?"SYNCING…":"REFRESH SPORTYBET"}</button><div class="decision-line"><span>MARKET MODEL</span><b>${state.analysis.modelSummary?.pricedSelections??0} PRICED · ${state.analysis.modelSummary?.positiveValueSelections??0} POSITIVE VALUE</b></div><div class="decision-line"><span>SOURCE HEALTH</span><b>${String(state.sourceHealth.status??"UNKNOWN").toUpperCase()}${state.sourceHealth.parsedFootballEvents?` · ${state.sourceHealth.parsedFootballEvents} EVENTS`:""}</b></div><div class="decision-line"><span>HEAD ANALYST</span><b>${decisionText}</b></div><div class="decision-line"><span>RISK CHALLENGES</span><b>${debateCount}</b></div><div class="decision-line"><span>RESULT SYNC</span><b>${state.lastResultSync??"NOT SYNCED"}</b></div><div class="decision-line"><span>LEARNING</span><b>${state.learning.settled}/${state.learning.totalPredictions} SETTLED</b></div><div class="decision-line"><span>HISTORY</span><b>${state.ledger.resultHistory?.length??0} SPORTYBET RESULTS</b></div><div class="decision-line"><span>FEEDBACK</span><b>${state.learning.agents?.length?`${state.learning.agents.filter(a=>a.settled>=5).length} AGENTS CALIBRATED`:"NO HISTORY"}</b></div>${state.detailFailures?`<em class="feed-error">${state.detailFailures} event detail page(s) could not be enriched; original verified event data retained.</em>`:""}${state.resultFailures?`<em class="feed-error">${state.resultFailures} result-source issue(s) occurred; unresolved predictions were left unsettled.</em>`:""}${state.error?`<em class="feed-error">${escapeHtml(state.error)}</em>`:""}</div></section>
 <section><div class="section-head"><div><p class="label">AGENT BOARD</p><h3>Specialists</h3></div><span class="count">${state.analysis.reports.length} REPORTS · ${debateCount} CHALLENGES</span></div><div class="agents">${agents.map((a,i)=>`<article class="agent"><div class="agent-num">${String(i+1).padStart(2,"0")}</div><div><h4>${a.name}</h4><p>${a.focus}</p></div><div class="agent-state">${a.status}</div></article>`).join("")}</div></section>
 <section><div class="section-head"><div><p class="label">TICKET ENGINE</p><h3>Top 10 candidates</h3></div><span class="count">UP TO 50 PICKS EACH</span></div><div class="tickets">${Array.from({length:10},(_,i)=>{const ticket=tickets[i];return`<article class="ticket"><span class="ticket-id">TICKET #${i+1}</span><h4>${ticket?Number(ticket.combinedOdds).toFixed(2):"—"} <small>COMBINED ODDS</small></h4><div class="ticket-meta"><span>${ticket?ticket.selectionCount:0} selections</span><span>${ticket?escapeHtml(ticket.strategyLabel??"Candidate"):"No approved candidate"}</span></div><button data-ticket-index="${i}" ${ticket?"":"disabled"}>${ticket?"VIEW TICKET":"UNAVAILABLE"}</button></article>`}).join("")}</div></section>
 ${renderSelectedTicket(state.selectedTicket)}
@@ -98,22 +99,23 @@ ${renderSelectedTicket(state.selectedTicket)}
 }
 
 async function syncResults(){
-  const pending=state.ledger.predictions.filter(p=>p.status!=="won"&&p.status!=="lost");
-  if(!pending.length){state.lastResultSync="NO PENDING";return;}
   const snapshot=await fetchSportyBetResultsApi();
+  state.ledger=recordSportyBetResults(state.ledger,snapshot.results??[],snapshot.capturedAt??null);
+  const pending=state.ledger.predictions.filter(p=>p.status!=="won"&&p.status!=="lost");
   const selectionResults=[];
   for(const prediction of pending){
     for(const selection of prediction.selections){
       const result=snapshot.results.find(r=>String(r.eventId)===String(selection.eventId));
       if(!result)continue;
       const settled=settleFootballSelection(result,{marketName:selection.marketName,selectionName:selection.selection});
-      selectionResults.push({eventId:selection.eventId,marketId:selection.marketId,selectionId:selection.selectionId,result:settled,source:"SportyBet"});
+      selectionResults.push({eventId:selection.eventId,marketId:selection.marketId,selectionId:selection.selectionId,result:settled,settlementSource:"SportyBet"});
     }
   }
   if(selectionResults.length)state.ledger=settlePendingFromSportyBetResults(state.ledger,selectionResults);
   state.learning=learningSummary(state.ledger);
   safeSaveLearning();
-  state.lastResultSync=`${snapshot.resultCount} SportyBet results`;
+  state.lastResultSync=String(snapshot.resultCount)+" SportyBet results · "+String(state.ledger.resultHistory?.length??0)+" stored";
+  return snapshot;
 }
 
 async function loadFeed({preserveTicketId=null}={}){
@@ -127,10 +129,12 @@ async function loadFeed({preserveTicketId=null}={}){
     const snapshot=await fetchSportyBetFootballApi();
     state.detailFailures=snapshot.detailFailures?.length??0;
     state.feed=normalizeSportyBetFeed(snapshot.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});
-    state.analysis=analyzeSportyBetFeed(state.feed,{agentPerformance:state.ledger.performance});
+    try{await syncResults();}catch{state.resultFailures=1;state.lastResultSync="RESULT SOURCE UNAVAILABLE";}
+    const historicalEvidence=buildHistoricalEvidenceByEvent(state.feed.events,state.ledger.resultHistory??[]);
+    const evidenceByEvent=Object.fromEntries(Object.entries(historicalEvidence).map(([eventId,historical])=>[eventId,{__historical:historical}]));
+    state.analysis=analyzeSportyBetFeed(state.feed,{evidenceByEvent,agentPerformance:state.ledger.performance});
     state.ledger=registerTickets(state.ledger,state.analysis.tickets??[]);
     if(preserveTicketId){const replacement=state.analysis.tickets?.find(t=>t.ticketId===preserveTicketId);state.selectedTicket=replacement??state.selectedTicket;}
-    try{await syncResults();}catch{state.resultFailures=1;state.lastResultSync="RESULT SOURCE UNAVAILABLE";}
     safeSaveLearning();
   }catch(error){
     state.feed=normalizeSportyBetFeed([]);
