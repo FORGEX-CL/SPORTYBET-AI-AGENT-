@@ -61,3 +61,7 @@ npm run dev
 
 - Canonical event identity: the parser keeps SportyBet's `sr:match:*` detail-link ID as the primary event key and preserves the displayed SportyBet event ID separately.
 - Current football market parsing includes observed combination, Multigoals, Multiscores, clean-sheet, Smart Combo, Correct Score, handicap, totals and player/BetBuilder families from SportyBet event pages.
+- Transparent SportyBet market-consensus model (`sportybet-market-implied-v1`) for normalized probabilities, cross-market consistency and expected-value proxy.
+- Specialist agents now consume verified SportyBet market signals by default rather than empty confidence placeholders.
+- Football result settlement now covers 1X2, Double Chance, Draw No Bet, handicap, Asian handicap, totals, GG/NG, exact goals, goal ranges, goal bounds, winning margin, odd/even, correct score and half-time/full-time where the published result contains the required information.
+- Void legs in accumulators are now handled as void/push outcomes; a void leg plus winning remaining legs can settle as a ticket win.
