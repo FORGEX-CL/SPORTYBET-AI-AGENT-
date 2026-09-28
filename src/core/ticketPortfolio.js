@@ -15,7 +15,7 @@ export const TICKET_PROFILES=Object.freeze([
 
 const clamp=x=>Math.max(0,Math.min(1,Number(x)||0));
 const eventKey=s=>String(s.eventId);
-const contextKey=s=>\`\${s.sport??"unknown"}::\${s.marketName??"unknown"}::\${s.league??"unknown"}\`;
+const contextKey=s=>`${s.sport??"unknown"}::${s.marketName??"unknown"}::${s.league??"unknown"}`;
 
 function candidatePriority(selection,usedContexts){
   const base=Number(selection.score)||0;
@@ -73,7 +73,7 @@ export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS,sourceUr
     const picks=selectForTarget(candidates,target,seed);
     if(!picks.length)continue;
 
-    const fingerprint=picks.map(s=>\`\${s.eventId}:\${s.marketId}:\${s.selectionId}\`).sort().join("|");
+    const fingerprint=picks.map(s=>`${s.eventId}:${s.marketId}:${s.selectionId}`).sort().join("|");
     if(usedFingerprints.has(fingerprint))continue;
     usedFingerprints.add(fingerprint);
 
