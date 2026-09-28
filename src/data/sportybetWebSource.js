@@ -1,4 +1,5 @@
 import { createSportyBetAdapter } from "./sportybetAdapter.js";
+import { normalizeSportyBetFeed } from "../core/feedPipeline.js";
 import { parseFootballMainRows } from "./sportybetParser.js";
 
 export async function fetchSportyBetFootballSnapshot({fetcher=fetch,url="https://lite.sportybet.com/ng/lite"}={}){
@@ -6,12 +7,6 @@ export async function fetchSportyBetFootballSnapshot({fetcher=fetch,url="https:/
   const response=await adapter.fetchPublicPage(url);
   const html=await response.text();
   const events=parseFootballMainRows(html);
-  return {
-    source:"SportyBet",
-    sourceUrl:url,
-    capturedAt:new Date().toISOString(),
-    eventCount:events.length,
-    events,
-    parseStatus:events.length?"parsed":"no_events_parsed"
-  };
+  if(!events.length)throw new Error("SportyBet source returned no parseable football event rows");
+  return normalizeSportyBetFeed(events,{sourceUrl:url,capturedAt:new Date().toISOString()});
 }
