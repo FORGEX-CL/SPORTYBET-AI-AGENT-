@@ -1,8 +1,7 @@
 import { createSportyBetAdapter } from "../src/data/sportybetAdapter.js";
 import { normalizeSportyBetFeed } from "../src/core/feedPipeline.js";
-import { parseFootballMainRows } from "../src/data/sportybetParser.js";
+import { parseFootballMainPage } from "../src/data/sportybetParser.js";
 import { parseSportyBetFootballPage } from "../src/data/sportybetParser.js";
-import { buildSportyBetEventDetailUrl } from "../src/data/sportybetWebSource.js";
 
 const LIST_URL="https://lite.sportybet.com/ng/lite";
 const MAX_EVENTS=20;
@@ -35,7 +34,7 @@ export default async function handler(req,res){
   try{
     const adapter=createSportyBetAdapter();
     const sourceText=await fetchText(adapter,LIST_URL);
-    const events=parseFootballMainRows(htmlToVisibleText(sourceText));
+    const events=parseFootballMainPage(sourceText);
     if(!events.length)throw new Error("SportyBet source returned no parseable football events");
 
     const enriched=[];
@@ -45,7 +44,8 @@ export default async function handler(req,res){
     for(let offset=0;offset<selected.length;offset+=batchSize){
       const batch=selected.slice(offset,offset+batchSize);
       const settled=await Promise.allSettled(batch.map(async event=>{
-        const detailUrl=buildSportyBetEventDetailUrl(event.eventId);
+        const detailUrl=event.detailUrl;
+        if(!detailUrl)throw new Error("SportyBet event has no verified detail URL");
         const detailText=await fetchText(adapter,detailUrl);
         const detail=parseSportyBetFootballPage(htmlToVisibleText(detailText),{eventId:event.eventId});
         return detail?{...event,...detail,markets:detail.markets.length?detail.markets:event.markets}:event;
