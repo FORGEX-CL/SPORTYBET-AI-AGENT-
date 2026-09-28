@@ -23,7 +23,7 @@ export async function fetchSportyBetFootballEvent({fetcher=fetch,eventId}={}){
   if(!event)throw new Error("SportyBet event page returned no parseable event/markets");
   return {source:"SportyBet",sourceUrl:url,capturedAt:new Date().toISOString(),event};
 }
-export async function enrichSportyBetFootballEvents(events,{fetcher=fetch,maxEvents=20}={}){
+export async function enrichSportyBetFootballEvents(events,{fetcher=fetch,maxEvents=50}={}){
   const selected=events.filter(e=>e?.sport==="football"&&e?.eventId).slice(0,maxEvents);
   const enriched=[];const failures=[];
   for(const event of selected){
