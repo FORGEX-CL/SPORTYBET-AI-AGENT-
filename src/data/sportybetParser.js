@@ -115,13 +115,21 @@ export function parseSportyBetFootballPage(htmlOrText="",{eventId=""}={}){
   });
 }
 
+const normalizeTeamText=value=>String(value??"").toLowerCase().replace(/[^a-z0-9]+/g,"");
 export function parseFootballMainPage(html=""){
   const text=stripHtml(html);
   const events=parseFootballMainRows(text);
   const links=extractPrematchLinks(html);
+  const unused=[...links];
   return events.map((event,index)=>{
-    const link=links[index];
-    if(!link)return event;
+    const home=normalizeTeamText(event.home),away=normalizeTeamText(event.away);
+    let linkIndex=unused.findIndex(link=>{
+      const textValue=normalizeTeamText(link.text);
+      return home&&away&&textValue.includes(home)&&textValue.includes(away);
+    });
+    if(linkIndex<0)linkIndex=Math.min(index,unused.length-1);
+    if(linkIndex<0)return event;
+    const link=unused.splice(linkIndex,1)[0];
     return normalizeEvent({...event,eventId:link.eventId,sourceEventId:event.sourceEventId||event.eventId,detailUrl:link.url,sport:"football"});
   });
 }
