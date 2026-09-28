@@ -65,3 +65,7 @@ npm run dev
 - Specialist agents now consume verified SportyBet market signals by default rather than empty confidence placeholders.
 - Football result settlement now covers 1X2, Double Chance, Draw No Bet, handicap, Asian handicap, totals, GG/NG, exact goals, goal ranges, goal bounds, winning margin, odd/even, correct score and half-time/full-time where the published result contains the required information.
 - Void legs in accumulators are now handled as void/push outcomes; a void leg plus winning remaining legs can settle as a ticket win.
+- SportyBet result history is persisted locally and reused as historical evidence for the Statistics and Football specialists.
+- Historical evidence includes recent form, home/away splits, goals scored/conceded, clean-sheet rate, both-teams-to-score rate and over-2.5 rate when enough verified SportyBet results have been accumulated.
+- The first installation starts with no historical sample; the system does not invent missing form or statistics.
+- Verified football event enrichment now supports up to 50 event detail pages per feed run.
