@@ -12,3 +12,5 @@ export async function fetchSportyBetFootballApi(){
 export async function fetchSportyBetResultsApi(){
   return getJson("/api/sportybet-results");
 }
+
+export async function fetchSportyBetHealthApi(){return getJson("/api/health");}
