@@ -40,16 +40,25 @@ export default async function handler(req,res){
 
     const enriched=[];
     const failures=[];
-    for(const event of events.slice(0,MAX_EVENTS)){
-      try{
+    const selected=events.slice(0,MAX_EVENTS);
+    const batchSize=5;
+    for(let offset=0;offset<selected.length;offset+=batchSize){
+      const batch=selected.slice(offset,offset+batchSize);
+      const settled=await Promise.allSettled(batch.map(async event=>{
         const detailUrl=buildSportyBetEventDetailUrl(event.eventId);
         const detailText=await fetchText(adapter,detailUrl);
         const detail=parseSportyBetFootballPage(htmlToVisibleText(detailText),{eventId:event.eventId});
-        enriched.push(detail?{...event,...detail,markets:detail.markets.length?detail.markets:event.markets}:event);
-      }catch(error){
-        failures.push({eventId:event.eventId,error:error instanceof Error?error.message:"detail_failed"});
-        enriched.push(event);
-      }
+        return detail?{...event,...detail,markets:detail.markets.length?detail.markets:event.markets}:event;
+      }));
+      settled.forEach((result,index)=>{
+        const event=batch[index];
+        if(result.status==="fulfilled"){
+          enriched.push(result.value);
+        }else{
+          failures.push({eventId:event.eventId,error:result.reason instanceof Error?result.reason.message:"detail_failed"});
+          enriched.push(event);
+        }
+      });
     }
 
     const feed=normalizeSportyBetFeed(enriched,{
