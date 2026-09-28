@@ -7,19 +7,16 @@ export const SPORTYBET_FOOTBALL_MARKET_FAMILIES=Object.freeze([
 
 export function classifyMarket(name=""){
   const n=name.trim().toLowerCase();
-  if(n==="1x2") return "result";
-  if(n.includes("asian handicap")) return "asian_handicap";
-  if(n==="handicap"||n.startsWith("handicap ")) return "handicap";
-  if(n.includes("over/under")) return "totals";
-  if(n.includes("double chance")) return "double_chance";
-  if(n.includes("no bet")) return "draw_no_bet";
-  if(n.includes("goal")) return "goals";
-  if(n.includes("score")) return "score";
-  if(n.includes("smart combo")) return "combo";
-  if(n.includes("winning margin")) return "margin";
-  return "other";
+  if(n==="1x2")return"result";
+  if(n.includes("asian handicap"))return"asian_handicap";
+  if(n==="handicap"||n.startsWith("handicap "))return"handicap";
+  if(n.includes("over/under"))return"totals";
+  if(n.includes("double chance"))return"double_chance";
+  if(n.includes("no bet"))return"draw_no_bet";
+  if(n.includes("goal"))return"goals";
+  if(n.includes("score"))return"score";
+  if(n.includes("smart combo"))return"combo";
+  if(n.includes("winning margin"))return"margin";
+  return"other";
 }
-
-export function buildMarketCatalogue(markets=[]){
-  return markets.map(m=>({...m,category:classifyMarket(m.name)}));
-}
+export function buildMarketCatalogue(markets=[]){return markets.map(m=>({...m,category:classifyMarket(m.name)}));}
