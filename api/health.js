@@ -1,5 +1,5 @@
 import { createSportyBetAdapter } from "../src/data/sportybetAdapter.js";
-import { parseFootballMainRows } from "../src/data/sportybetParser.js";
+import { parseFootballMainPage } from "../src/data/sportybetParser.js";
 
 const SOURCE_URL="https://lite.sportybet.com/ng/lite";
 
@@ -24,7 +24,7 @@ export default async function handler(req,res){
     const adapter=createSportyBetAdapter();
     const response=await adapter.fetchPublicPage(SOURCE_URL);
     const html=await response.text();
-    const events=parseFootballMainRows(htmlToVisibleText(html));
+    const events=parseFootballMainPage(html);
     const ok=response.ok&&events.length>0;
     res.status(ok?200:502).json({
       status:ok?"ok":"degraded",
