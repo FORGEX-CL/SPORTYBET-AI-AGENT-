@@ -6,18 +6,6 @@ import { parseSportyBetFootballPage } from "../src/data/sportybetParser.js";
 const LIST_URL="https://lite.sportybet.com/ng/lite";
 const MAX_EVENTS=20;
 
-function htmlToVisibleText(html=""){
-  return html.replace(/<script[\s\S]*?<\/script>/gi,"\n")
-    .replace(/<style[\s\S]*?<\/style>/gi,"\n")
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi,"\n")
-    .replace(/<svg[\s\S]*?<\/svg>/gi,"\n")
-    .replace(/<[^>]+>/g,"\n")
-    .replace(/&nbsp;/gi," ")
-    .replace(/&amp;/gi,"&")
-    .replace(/&quot;/gi,'"')
-    .replace(/&#39;/gi,"'");
-}
-
 async function fetchText(adapter,url){
   const response=await adapter.fetchPublicPage(url);
   return response.text();
