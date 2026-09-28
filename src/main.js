@@ -43,7 +43,7 @@ function bindTicketButtons(){
     render();
   }));
   document.querySelector("#close-ticket")?.addEventListener("click",()=>{state.selectedTicket=null;render();});
-  document.querySelector("#recheck-ticket")?.addEventListener("click",()=>loadFeed({preserveTicketId:ticket.ticketId}));
+  document.querySelector("#recheck-ticket")?.addEventListener("click",()=>loadFeed({preserveTicketId:state.selectedTicket?.ticketId??null}));
 }
 
 function render(){
