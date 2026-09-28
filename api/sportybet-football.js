@@ -47,7 +47,7 @@ export default async function handler(req,res){
         const detailUrl=event.detailUrl;
         if(!detailUrl)throw new Error("SportyBet event has no verified detail URL");
         const detailText=await fetchText(adapter,detailUrl);
-        const detail=parseSportyBetFootballPage(htmlToVisibleText(detailText),{eventId:event.eventId});
+        const detail=parseSportyBetFootballPage(detailText,{eventId:event.eventId});
         return detail?{...event,...detail,markets:detail.markets.length?detail.markets:event.markets}:event;
       }));
       settled.forEach((result,index)=>{
