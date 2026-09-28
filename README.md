@@ -20,7 +20,8 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Ticket construction is blocked unless candidates have sufficient predictive evidence and data quality.
 - Prediction records retain agent attribution, challenge context, sport, market, odds range and confidence band.
 - Persistent browser learning ledger with deduplication across feed refreshes.
-- Agent performance summaries by sport, market, odds range and confidence band, plus Risk challenge vindication/false-positive counts.
+- Agent performance summaries by sport, sport-market context, odds range and confidence band, plus Risk challenge vindication/false-positive counts.
+- Conservative historical feedback: only contexts with at least five settled outcomes can adjust a future specialist confidence, with small sample sizes shrunk toward neutral.
 - Fresh-feed ticket revalidation and odds-change detection.
 - Official SportyBet Results ingestion for football settlement, including event IDs and final scores.
 - Prediction settlement, error classification and learning summary.
