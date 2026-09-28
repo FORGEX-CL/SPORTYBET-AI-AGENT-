@@ -18,7 +18,7 @@ function splitTeams(line=""){
 function stripHtml(value=""){
   return value
     .replace(/<br\s*\/?>/gi,"\n")
-    .replace(/<\/(?:div|p|li|a|h[1-6]|tr|td|th|section|article|header|footer)>/gi,"\n")
+    .replace(/<\/(?:div|p|li|h[1-6]|tr|td|th|section|article|header|footer)>/gi,"\n")
     .replace(/<[^>]+>/g," ")
     .replace(/&nbsp;/gi," ")
     .replace(/&amp;/gi,"&")
