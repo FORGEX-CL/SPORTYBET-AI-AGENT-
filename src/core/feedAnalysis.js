@@ -11,5 +11,5 @@ export function analyzeSportyBetFeed(feed,{evidenceByEvent={},modelProbabilities
     debate.push(...result.debate);
   }
   const accepted=eventAnalyses.flatMap(x=>x.decision.accepted);
-  return{eventAnalyses,reports,debate,decision:{accepted,rejected:reports.filter(r=>!accepted.some(a=>a.eventId===r.eventId&&a.marketId===r.marketId&&a.selectionId===r.selectionId)),noBet:accepted.length===0,reasoning:accepted.length?"Candidates survived specialist analysis, Risk/Contrarian challenges and historical feedback gates.":"NO BET: no selection survived verified evidence, challenges, data-quality and historical-feedback gates."},tickets:buildTicketPortfolio(accepted)};
+  return{eventAnalyses,reports,debate,decision:{accepted,rejected:reports.filter(r=>!accepted.some(a=>a.eventId===r.eventId&&a.marketId===r.marketId&&a.selectionId===r.selectionId)),noBet:accepted.length===0,reasoning:accepted.length?"Candidates survived specialist analysis, Risk/Contrarian challenges and historical feedback gates.":"NO BET: no selection survived verified evidence, challenges, data-quality and historical-feedback gates."},tickets:buildTicketPortfolio(accepted,{sourceUrl:feed.sourceUrl,capturedAt:feed.capturedAt})};
 }
