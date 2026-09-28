@@ -1,5 +1,6 @@
 import { analyzeEventMarkets } from "./marketAnalyzer.js";
 import { statisticsAnalysis, footballAnalysis, multiSportAnalysis, marketAnalysis, oddsAnalysis, riskAnalysis, scoreReport } from "./specialists.js";
+import { buildChallengeRound } from "./debate.js";
 import { runHeadAnalyst } from "./headAnalyst.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={}}={}){
@@ -16,9 +17,10 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={}}={
         oddsAnalysis(event,rawMarket,selection,modelProbabilities[selection.selectionId]??null),
         riskAnalysis(event,rawMarket,selection,context.risks??[])
       ];
-      const agreement=reportsForSelection.filter(r=>["statistics","football","multiSport","odds","risk"].includes(r.agentId)&&Number(r.confidence)>0&&Number(r.dataQuality)>0).length/5;
+      const agreement=reportsForSelection.filter(r=>["statistics","football","multiSport","odds"].includes(r.agentId)&&Number(r.confidence)>0&&Number(r.dataQuality)>0).length/4;
       reports.push(...reportsForSelection.map(r=>scoreReport(r,agreement)));
     }
   }
-  return{markets,reports,decision:runHeadAnalyst(reports)};
+  const debate=buildChallengeRound(reports);
+  return{markets,reports,debate,decision:runHeadAnalyst(reports,{debate})};
 }
