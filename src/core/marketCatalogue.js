@@ -5,6 +5,11 @@ export const SPORTYBET_FOOTBALL_MARKET_FAMILIES=Object.freeze([
 "Correct Score","Smart Combo"
 ]);
 
+export const SPORTYBET_OBSERVED_FOOTBALL_MARKETS=Object.freeze([
+"1X2","Over/Under","Over/Under - Early Goals","Double Chance","Double Chance - 1UP",
+"1st Goal","Handicap","Asian Handicap"
+]);
+
 export function classifyMarket(name=""){
   const n=name.trim().toLowerCase();
   if(n==="1x2")return"result";
@@ -19,4 +24,11 @@ export function classifyMarket(name=""){
   if(n.includes("winning margin"))return"margin";
   return"other";
 }
-export function buildMarketCatalogue(markets=[]){return markets.map(m=>({...m,category:classifyMarket(m.name)}));}
+
+export function buildMarketCatalogue(markets=[]){
+  return markets.map(m=>({...m,category:classifyMarket(m.name)}));
+}
+
+export function isObservedSportyBetMarket(name=""){
+  return SPORTYBET_OBSERVED_FOOTBALL_MARKETS.some(x=>x.toLowerCase()===name.trim().toLowerCase());
+}
