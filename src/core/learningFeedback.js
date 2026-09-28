@@ -24,7 +24,8 @@ export function getAgentHistoricalFeedback(performance={},agentId,{sport="unknow
   if(!agent)return{available:false,reliability:.5,weight:0,source:"none",settled:0};
 
   const candidates=[
-    {source:"sport+market",stat:contextStat(agent.bySport,sport)},
+    {source:"sport+market",stat:contextStat(agent.bySportMarket,`${sport}::${market}`)},
+    {source:"sport",stat:contextStat(agent.bySport,sport)},
     {source:"market",stat:contextStat(agent.byMarket,market)},
     {source:"odds",stat:contextStat(agent.byOddsRange,oddsRange)},
     {source:"confidence",stat:contextStat(agent.byConfidenceBand,confidenceBand)},
