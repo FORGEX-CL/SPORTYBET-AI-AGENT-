@@ -4,6 +4,7 @@ import "../src/core/feedPipeline.fixture.js";
 import "../src/core/feedAnalysis.fixture.js";
 import "../src/core/debate.fixture.js";
 import "../src/core/headAnalyst.fixture.js";
+import "../src/core/ticketPortfolio.fixture.js";
 import "../src/core/learning.fixture.js";
 import "../src/core/learningLedger.fixture.js";
 import "../src/data/sportybetResults.fixture.js";
