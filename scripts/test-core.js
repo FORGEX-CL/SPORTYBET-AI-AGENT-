@@ -16,3 +16,5 @@ import "../src/core/learningFeedback.fixture.js";
 import { runCoreFixtures } from "../src/core/testSuite.js";
 const result=runCoreFixtures();
 console.log(JSON.stringify(result,null,2));
+
+import "../src/core/sportybetHistory.fixture.js";
