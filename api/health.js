@@ -3,18 +3,6 @@ import { parseFootballMainPage } from "../src/data/sportybetParser.js";
 
 const SOURCE_URL="https://lite.sportybet.com/ng/lite";
 
-function htmlToVisibleText(html=""){
-  return html.replace(/<script[\s\S]*?<\/script>/gi,"\n")
-    .replace(/<style[\s\S]*?<\/style>/gi,"\n")
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi,"\n")
-    .replace(/<svg[\s\S]*?<\/svg>/gi,"\n")
-    .replace(/<[^>]+>/g,"\n")
-    .replace(/&nbsp;/gi," ")
-    .replace(/&amp;/gi,"&")
-    .replace(/&quot;/gi,'"')
-    .replace(/&#39;/gi,"'");
-}
-
 export default async function handler(req,res){
   res.setHeader("Cache-Control","no-store");
   res.setHeader("X-Source","SportyBet");
