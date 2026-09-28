@@ -1,0 +1,56 @@
+import { createPredictionRecord, settlePrediction, updateAgentPerformance, summarizeAgentPerformance, summarizeLearning } from "./learning.js";
+
+export const LEARNING_STORAGE_KEY="sportybet-ai-agent:learning:v1";
+
+export function createLearningLedger({predictions=[],performance={}}={}){
+  return{version:1,predictions:[...predictions],performance:structuredClone(performance),updatedAt:new Date().toISOString()};
+}
+
+export function registerTickets(ledger,tickets=[]){
+  const existing=new Set((ledger.predictions??[]).map(p=>p.ticketId));
+  const additions=tickets.filter(t=>t?.ticketId&&!existing.has(t.ticketId)).map(createPredictionRecord);
+  if(!additions.length)return ledger;
+  return createLearningLedger({predictions:[...(ledger.predictions??[]),...additions],performance:ledger.performance});
+}
+
+export function settleLedger(ledger,results=[]){
+  if(!Array.isArray(results)||!results.length)return ledger;
+  const byTicket=new Map();
+  for(const result of results){
+    if(!result?.ticketId)continue;
+    const list=byTicket.get(result.ticketId)??[];
+    list.push(result);
+    byTicket.set(result.ticketId,list);
+  }
+  const predictions=(ledger.predictions??[]).map(prediction=>{
+    const resultsForTicket=byTicket.get(prediction.ticketId);
+    return resultsForTicket?settlePrediction(prediction,resultsForTicket):prediction;
+  });
+  const performance=updateAgentPerformance({},predictions.filter(p=>p.status==="won"||p.status==="lost"||p.status==="partial"));
+  return createLearningLedger({predictions,performance});
+}
+
+export function learningSummary(ledger){
+  return{
+    ...summarizeLearning(ledger.predictions??[]),
+    agents:summarizeAgentPerformance(ledger.performance??{})
+  };
+}
+
+export function saveLearningLedger(ledger,{storage=globalThis.localStorage}={}){
+  if(!storage)throw new Error("localStorage unavailable");
+  storage.setItem(LEARNING_STORAGE_KEY,JSON.stringify(ledger));
+  return ledger;
+}
+
+export function loadLearningLedger({storage=globalThis.localStorage}={}){
+  if(!storage)return createLearningLedger();
+  const raw=storage.getItem(LEARNING_STORAGE_KEY);
+  if(!raw)return createLearningLedger();
+  try{
+    const parsed=JSON.parse(raw);
+    return createLearningLedger({predictions:Array.isArray(parsed.predictions)?parsed.predictions:[],performance:parsed.performance&&typeof parsed.performance==="object"?parsed.performance:{}});
+  }catch{
+    return createLearningLedger();
+  }
+}
