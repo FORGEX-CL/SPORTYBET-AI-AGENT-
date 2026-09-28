@@ -66,7 +66,7 @@ document.querySelector("#app").innerHTML = `
     <section class="architecture">
       <div class="section-head"><div><p class="label">PIPELINE</p><h3>How the system will work</h3></div></div>
       <div class="flow">
-        <span>SportyBet</span><b>→</b><span>Market Intelligence</span><b>→</b><span>6 specialist analyses</span><b>→</b><span>Head Analyst</span><b>→</b><span>Top 10 tickets</span><b>→</b><span>Result learning</span>
+        <span>SportyBet</span><b>→</b><span>Market Intelligence</span><b>→</b><span>7-agent analysis</span><b>→</b><span>Head Analyst</span><b>→</b><span>Top 10 tickets</span><b>→</b><span>Result learning</span>
       </div>
     </section>
   </main>
