@@ -1,5 +1,5 @@
 import { buildAgentCandidates } from "./agentPipeline.js";
-import { buildCandidateTickets } from "./ticketBuilder.js";
+import { buildTicketPortfolio } from "./ticketPortfolio.js";
 
 export function analyzeSportyBetFeed(feed,{evidenceByEvent={},modelProbabilitiesByEvent={},agentPerformance={}}={}){
   if(!feed?.events?.length)return{eventAnalyses:[],reports:[],debate:[],decision:{accepted:[],rejected:[],noBet:true,reasoning:"NO BET: no verified SportyBet events available."},tickets:[]};
@@ -11,5 +11,5 @@ export function analyzeSportyBetFeed(feed,{evidenceByEvent={},modelProbabilities
     debate.push(...result.debate);
   }
   const accepted=eventAnalyses.flatMap(x=>x.decision.accepted);
-  return{eventAnalyses,reports,debate,decision:{accepted,rejected:reports.filter(r=>!accepted.some(a=>a.eventId===r.eventId&&a.marketId===r.marketId&&a.selectionId===r.selectionId)),noBet:accepted.length===0,reasoning:accepted.length?"Candidates survived specialist analysis, Risk/Contrarian challenges and historical feedback gates.":"NO BET: no selection survived verified evidence, challenges, data-quality and historical-feedback gates."},tickets:buildCandidateTickets(accepted)};
+  return{eventAnalyses,reports,debate,decision:{accepted,rejected:reports.filter(r=>!accepted.some(a=>a.eventId===r.eventId&&a.marketId===r.marketId&&a.selectionId===r.selectionId)),noBet:accepted.length===0,reasoning:accepted.length?"Candidates survived specialist analysis, Risk/Contrarian challenges and historical feedback gates.":"NO BET: no selection survived verified evidence, challenges, data-quality and historical-feedback gates."},tickets:buildTicketPortfolio(accepted)};
 }
