@@ -1,7 +1,7 @@
 import { buildTicketPortfolio } from "./ticketPortfolio.js";
 const selections=Array.from({length:50},(_,i)=>({
-  eventId:\`e\${i+1}\`,marketId:"m1",selectionId:"1",sport:i%2?"football":"basketball",league:i%5?"L1":"L2",marketName:i%3?"1X2":"Over/Under",
-  selection:\`Pick \${i+1}\`,odds:2,score:.8-(i*.005),dataQuality:.9,predictiveAgents:["statistics","football"],available:true
+  eventId:`e${i+1}`,marketId:"m1",selectionId:"1",sport:i%2?"football":"basketball",league:i%5?"L1":"L2",marketName:i%3?"1X2":"Over/Under",
+  selection:`Pick ${i+1}`,odds:2,score:.8-(i*.005),dataQuality:.9,predictiveAgents:["statistics","football"],available:true
 }));
 const tickets=buildTicketPortfolio(selections,{sourceUrl:"https://lite.sportybet.com/ng/lite",capturedAt:"2026-09-28T17:00:00.000Z"});
 if(tickets.length!==10)throw new Error("Portfolio should create 10 unique ticket profiles with 50 viable events");
