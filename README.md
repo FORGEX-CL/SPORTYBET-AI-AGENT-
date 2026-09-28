@@ -19,6 +19,7 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Maximum 10 candidate tickets and 50 selections per ticket.
 - Diversified ticket portfolio profiles with different selection counts and context mix.
 - Functional ticket detail viewer exposing exact event IDs, market IDs, selections and current odds from the verified feed.
+- Ticket-to-feed revalidation showing validated, odds-changed, unavailable, missing-event and stale-feed states, including recalculated combined odds when all selections remain available.
 - Ticket construction is blocked unless candidates have sufficient predictive evidence and data quality.
 - Prediction records retain agent attribution, challenge context, sport, market, odds range and confidence band.
 - Persistent browser learning ledger with deduplication across feed refreshes.
