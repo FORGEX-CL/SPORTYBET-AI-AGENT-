@@ -1,0 +1,10 @@
+import { createPredictionRecord, settlePrediction, updateAgentPerformance, summarizeAgentPerformance } from "./learning.js";
+const ticket={ticketId:"t1",createdAt:new Date().toISOString(),combinedOdds:4,selections:[{eventId:"e1",marketId:"m1",selectionId:"1",sport:"football",marketName:"1X2",odds:2,score:.8,confidence:.8,dataQuality:.9,predictiveAgents:["statistics","football"],agents:["statistics","football","market","risk"],debate:[{from:"risk",severity:"high"}]}]};
+const record=createPredictionRecord(ticket);
+const settled=settlePrediction(record,[{eventId:"e1",marketId:"m1",selectionId:"1",result:"lost",source:"fixture"}]);
+const performance=updateAgentPerformance({},[settled]);
+const summary=summarizeAgentPerformance(performance);
+if(summary.length!==4)throw new Error("Agent performance attribution fixture failed");
+if(summary.find(x=>x.agentId==="statistics")?.lost!==1)throw new Error("Predictive agent loss tracking failed");
+if(summary.find(x=>x.agentId==="statistics")?.challengeVindicated!==1)throw new Error("Risk challenge attribution failed");
+console.log("Agent learning fixture passed");
