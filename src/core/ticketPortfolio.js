@@ -57,7 +57,7 @@ function stableSortCandidates(selections){
     .sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0));
 }
 
-export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS}={}){
+export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS,sourceUrl=null,capturedAt=null}={}){
   const candidates=stableSortCandidates(selections);
   if(!candidates.length)return[];
   const tickets=[];
@@ -79,7 +79,7 @@ export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS}={}){
 
     try{
       const portfolioScore=scorePortfolio(picks);
-      tickets.push(buildTicket(picks,{snapshot:{source:"SportyBet",sourceUrl:null,capturedAt:new Date().toISOString()},
+      tickets.push(buildTicket(picks,{snapshot:{source:"SportyBet",sourceUrl,capturedAt:capturedAt??new Date().toISOString()},
         strategy:profile.id,
         strategyLabel:profile.label,
         score:portfolioScore,
