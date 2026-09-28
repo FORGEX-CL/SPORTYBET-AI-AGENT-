@@ -20,7 +20,7 @@ const contextKey=s=>\`\${s.sport??"unknown"}::\${s.marketName??"unknown"}::\${s.
 function candidatePriority(selection,usedContexts){
   const base=Number(selection.score)||0;
   const context=contextKey(selection);
-  const penalty=usedContexts.has(context)?.06:0;
+  const penalty=usedContexts.has(context)?0.06:0;
   return base-penalty;
 }
 
