@@ -4,7 +4,7 @@ import { parseFootballMainPage } from "../src/data/sportybetParser.js";
 import { parseSportyBetFootballPage } from "../src/data/sportybetParser.js";
 
 const LIST_URL="https://lite.sportybet.com/ng/lite";
-const MAX_EVENTS=20;
+const MAX_EVENTS=50;
 
 async function fetchText(adapter,url){
   const response=await adapter.fetchPublicPage(url);
