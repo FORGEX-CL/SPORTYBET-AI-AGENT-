@@ -58,3 +58,6 @@ npm install
 npm run test:core
 npm run build
 npm run dev
+
+- Canonical event identity: the parser keeps SportyBet's `sr:match:*` detail-link ID as the primary event key and preserves the displayed SportyBet event ID separately.
+- Current football market parsing includes observed combination, Multigoals, Multiscores, clean-sheet, Smart Combo, Correct Score, handicap, totals and player/BetBuilder families from SportyBet event pages.
