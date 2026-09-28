@@ -33,12 +33,14 @@ export function statisticsAnalysis(event,market,selection,stats={}){
   const signal=stats.marketSignal;
   const derived=signalEvidence(signal,"Source statistics");
   const externalEvidence=stats.evidence??[];
+  const historicalSupport=Number(stats.dataQuality)>0?{confidence:Number(stats.confidence)||0,dataQuality:Number(stats.dataQuality)||0,formSignal:stats.formSignal??null,goalSignal:stats.goalSignal??null}:null;
   return{
     ...base(event,market,selection),
     agentId:"statistics",
     evidence:[...externalEvidence,...derived.evidence],
     confidence:Math.max(Number(stats.confidence)||0,derived.confidence*.82),
-    dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality),
+    dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality,historicalSupport?.dataQuality??0),
+    historicalSupport,
     sportEvaluation:evaluateSportEvidence(event.sport,{evidenceCount:(externalEvidence.length+derived.evidence.length),dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality),marketName:market.name}),
     analysisBasis:derived.modelType??"no-source-model"
   };
@@ -49,12 +51,14 @@ export function footballAnalysis(event,market,selection,context={}){
   const derived=signalEvidence(signal,"Football market consistency");
   const externalEvidence=context.evidence??[];
   const consistency=Number(signal?.crossMarketAgreement)||0;
+  const historicalSupport={dataQuality:Number(context.dataQuality)||0,formSignal:context.formSignal??null,goalSignal:context.goalSignal??null};
   return{
     ...base(event,market,selection),
     agentId:"football",
     evidence:[...externalEvidence,...derived.evidence],
     confidence:Math.max(Number(context.confidence)||0,Math.min(1,derived.confidence*.75+consistency*.20)),
     dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),
+    historicalSupport,
     crossMarketAgreement:consistency,
     analysisBasis:derived.modelType??"no-source-model"
   };
