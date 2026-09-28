@@ -13,15 +13,10 @@ export function createSportyBetAdapter({fetcher=fetch}={}){
   };
 }
 
-export function parseVisibleFootballRows(text=""){
-  const rows=[];
-  const pattern=/([^\n]+?)\s+ID\s+(\d+)\s+([^\n]+?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)/g;
-  for(const match of text.matchAll(pattern)){
-    rows.push({league:match[1].trim(),eventId:match[2],matchup:match[3].trim(),odds:[Number(match[4]),Number(match[5])]});
-  }
-  return rows;
+export function assertSportyBetSource(url){
+  if(typeof url!=="string"||!url.startsWith(SPORTYBET_BASE)) throw new Error("Only verified SportyBet Nigeria source URLs are accepted");
+  return true;
 }
 
-// The public SportyBet pages visibly expose event IDs, markets and odds,
-// but the application must not guess private JSON endpoints or booking-code APIs.
-// A verified transport/parser can be added here without changing the core models.
+// Do not guess private endpoints or booking-code APIs.
+// A transport/parser must be explicitly verified before being connected to production ingestion.
