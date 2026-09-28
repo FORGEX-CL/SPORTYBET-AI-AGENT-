@@ -22,6 +22,7 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Persistent browser learning ledger with deduplication across feed refreshes.
 - Agent performance summaries by sport, market, odds range and confidence band, plus Risk challenge vindication/false-positive counts.
 - Fresh-feed ticket revalidation and odds-change detection.
+- Official SportyBet Results ingestion for football settlement, including event IDs and final scores.
 - Prediction settlement, error classification and learning summary.
 - Parser, feed, analysis, debate and learning regression fixtures via `npm run test:core`.
 
@@ -41,7 +42,7 @@ The current implementation is source-backed for football ingestion. It does not 
 
 ## Pipeline
 
-SportyBet → public source → parser → normalized feed → event-detail enrichment → market analysis → specialist agents → Risk challenge → Head Analyst → candidate tickets → fresh-data revalidation → result settlement → agent learning memory.
+SportyBet → public source → parser → normalized feed → event-detail enrichment → market analysis → specialist agents → Risk challenge → Head Analyst → candidate tickets → fresh-data revalidation → official SportyBet Results → result settlement → agent learning memory.
 
 ## Development
 
