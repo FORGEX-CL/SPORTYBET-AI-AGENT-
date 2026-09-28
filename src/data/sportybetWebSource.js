@@ -19,7 +19,7 @@ export async function fetchSportyBetFootballSnapshot({fetcher=fetch,url="https:/
 export async function fetchSportyBetFootballEvent({fetcher=fetch,eventId}={}){
   const url=buildSportyBetEventDetailUrl(eventId);
   const adapter=createSportyBetAdapter({fetcher});const response=await adapter.fetchPublicPage(url);const html=await response.text();
-  const visibleText=htmlToVisibleText(html);const event=parseSportyBetFootballPage(visibleText,{eventId:String(eventId).replace(/^sr:match:/,"")});
+  const event=parseSportyBetFootballPage(html,{eventId:String(eventId)});
   if(!event)throw new Error("SportyBet event page returned no parseable event/markets");
   return {source:"SportyBet",sourceUrl:url,capturedAt:new Date().toISOString(),event};
 }
@@ -27,7 +27,7 @@ export async function enrichSportyBetFootballEvents(events,{fetcher=fetch,maxEve
   const selected=events.filter(e=>e?.sport==="football"&&e?.eventId).slice(0,maxEvents);
   const enriched=[];const failures=[];
   for(const event of selected){
-    try{const detail=event.detailUrl?await fetchSportyBetFootballEvent({fetcher,eventId:event.eventId}):await fetchSportyBetFootballEvent({fetcher,eventId:event.eventId});enriched.push({...event,...detail.event,markets:detail.event.markets.length?detail.event.markets:event.markets});}
+    try{const detail=await fetchSportyBetFootballEvent({fetcher,eventId:event.eventId});enriched.push({...event,...detail.event,markets:detail.event.markets.length?detail.event.markets:event.markets});}
     catch(error){failures.push({eventId:event.eventId,error:error instanceof Error?error.message:"event_detail_failed"});enriched.push(event);}
   }
   return {events:enriched,failures,requested:selected.length};
