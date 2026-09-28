@@ -3,8 +3,7 @@ import { AGENT_ROLES } from "./core/agents.js";
 import { analyzeSportyBetFeed } from "./core/feedAnalysis.js";
 import { normalizeSportyBetFeed, requireFreshFeed } from "./core/feedPipeline.js";
 import { loadLearningLedger, learningSummary, registerTickets, saveLearningLedger, settlePendingFromSportyBetResults } from "./core/learningLedger.js";
-import { enrichSportyBetFootballEvents, fetchSportyBetFootballSnapshot } from "./data/sportybetWebSource.js";
-import { fetchSportyBetFootballResults } from "./data/sportybetResultsWebSource.js";
+import { fetchSportyBetFootballApi, fetchSportyBetResultsApi } from "./data/sportybetApi.js";
 import { settleFootballSelection } from "./data/sportybetResultsParser.js";
 import { compareTicketToFeed } from "./core/ticketDelta.js";
 
@@ -101,7 +100,7 @@ ${renderSelectedTicket(state.selectedTicket)}
 async function syncResults(){
   const pending=state.ledger.predictions.filter(p=>p.status!=="won"&&p.status!=="lost");
   if(!pending.length){state.lastResultSync="NO PENDING";return;}
-  const snapshot=await fetchSportyBetFootballResults();
+  const snapshot=await fetchSportyBetResultsApi();
   const selectionResults=[];
   for(const prediction of pending){
     for(const selection of prediction.selections){
@@ -120,10 +119,9 @@ async function syncResults(){
 async function loadFeed({preserveTicketId=null}={}){
   state.loading=true;state.error="";state.detailFailures=0;state.resultFailures=0;state.selectedTicket=preserveTicketId?state.selectedTicket:null;render();
   try{
-    const snapshot=await fetchSportyBetFootballSnapshot();
-    const enriched=await enrichSportyBetFootballEvents(snapshot.events,{maxEvents:20});
-    state.detailFailures=enriched.failures.length;
-    state.feed=normalizeSportyBetFeed(enriched.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});
+    const snapshot=await fetchSportyBetFootballApi();
+    state.detailFailures=snapshot.detailFailures?.length??0;
+    state.feed=normalizeSportyBetFeed(snapshot.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});
     state.analysis=analyzeSportyBetFeed(state.feed,{agentPerformance:state.ledger.performance});
     state.ledger=registerTickets(state.ledger,state.analysis.tickets??[]);
     if(preserveTicketId){const replacement=state.analysis.tickets?.find(t=>t.ticketId===preserveTicketId);state.selectedTicket=replacement??state.selectedTicket;}
