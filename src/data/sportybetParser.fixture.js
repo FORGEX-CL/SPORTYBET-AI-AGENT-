@@ -25,10 +25,10 @@ const merged=parseSportyBetFootballPage(sample+"\n"+detail,{eventId:"22471"});
 if(!merged||merged.markets.length<3)throw new Error("SportyBet event detail merge fixture failed");
 console.log("SportyBet parser fixtures passed");
 
-const html=\`<div>International UEFA Nations League</div><div>28/09 Monday 19:45 ID 38043</div><div><a href="https://lite.sportybet.com/ng/lite/preMatch/detail?eventId=sr%3Amatch%3A68931476&fromUrl=%2Fng%2Flite">Belgium France</a></div><div>3.98</div><div>4.03</div><div>1.92</div>\`;
+const html=`<div>International UEFA Nations League</div><div>28/09 Monday 19:45 ID 38043</div><div><a href="https://lite.sportybet.com/ng/lite/preMatch/detail?eventId=sr%3Amatch%3A68931476&fromUrl=%2Fng%2Flite">Belgium France</a></div><div>3.98 4.03 1.92</div>`;
 const mapped=parseFootballMainPage(html);
 if(mapped.length!==1||mapped[0].eventId!=="sr:match:68931476"||mapped[0].sourceEventId!=="38043"||!mapped[0].detailUrl)throw new Error("SportyBet canonical event-link fixture failed");
-const detailText=\`28/09 Monday 19:45 ID 38043
+const detailText=`28/09 Monday 19:45 ID 38043
 Belgium
 France
 1X2
@@ -42,7 +42,7 @@ Away (0:1) 1.28
 Asian Handicap -0.5
 Home (-0.5) 3.70
 Away (+0.5) 1.28
-\`;
+`;
 const canonicalDetail=parseSportyBetFootballPage(detailText,{eventId:"sr:match:68931476"});
 if(canonicalDetail?.home!=="Belgium"||canonicalDetail?.away!=="France"||canonicalDetail?.sourceEventId!=="38043"||canonicalDetail?.markets.some(m=>m.name==="Handicap 0:1")===false||canonicalDetail?.markets.some(m=>m.name==="Asian Handicap -0.5")===false)throw new Error("SportyBet canonical detail fixture failed");
 console.log("SportyBet parser canonical-ID fixtures passed");
