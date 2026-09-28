@@ -4,29 +4,27 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 
 ## Current build
 
-The repository now contains:
-- SportyBet source boundary and tolerant event parser.
-- Normalized events, markets and selections.
-- SportyBet market-family classification.
-- Seven-agent runtime contracts.
-- Specialist report contracts for statistics, football, multi-sport, market intelligence, odds/value and risk.
-- Head Analyst decision and debate state.
-- Selection scoring using confidence, value, risk, data quality and agreement.
-- Candidate ticket construction with a maximum of 10 tickets and 50 selections per ticket.
-- Prediction settlement and error classification.
+- SportyBet source boundary and normalized event/market/selection models.
+- Verified-source football parsing and multi-market parsing.
+- Feed validation and freshness gates.
+- Seven-agent runtime, specialist reports, debate state and Head Analyst filtering.
+- Cross-market candidate scoring and ticket construction.
+- Maximum 10 candidate tickets and 50 selections per ticket.
+- Fresh-feed ticket revalidation and odds-change detection.
+- Prediction settlement, error classification and learning summary.
+- Core executable fixture suite via `npm run test:core`.
 
-## Integrity rules
+## Integrity
 
-Live event data, market data and odds must originate from verified SportyBet data. The system does not invent event IDs, odds, selections or booking codes. A missing or stale source record must be treated as unavailable.
-
-The analysis layer separates **observed facts** from **model inputs**. An odds price alone is not treated as proof that a selection has value.
+Live data must come from verified SportyBet data. Never invent event IDs, market IDs, selection IDs, odds, results or booking codes. A missing or stale source field remains unavailable.
 
 ## Pipeline
 
-SportyBet → parser → normalized markets → specialist agents → debate → Head Analyst → candidate tickets → revalidation → results → learning.
+SportyBet → parser → normalized feed → markets → specialist agents → debate → Head Analyst → candidate tickets → fresh-data revalidation → results → learning.
 
 ## Development
 
 npm install
-npm run dev
+npm run test:core
 npm run build
+npm run dev
