@@ -9,6 +9,7 @@ import "../src/core/ticketDelta.fixture.js";
 import "../src/core/learning.fixture.js";
 import "../src/core/learningLedger.fixture.js";
 import "../src/data/sportybetResults.fixture.js";
+import "../src/data/sportybetApi.fixture.js";
 import "../src/core/learningFeedback.fixture.js";
 import { runCoreFixtures } from "../src/core/testSuite.js";
 const result=runCoreFixtures();
