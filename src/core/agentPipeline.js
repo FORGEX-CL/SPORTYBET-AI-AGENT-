@@ -3,20 +3,27 @@ import { statisticsAnalysis, footballAnalysis, multiSportAnalysis, marketAnalysi
 import { buildChallengeRound } from "./debate.js";
 import { runHeadAnalyst } from "./headAnalyst.js";
 import { applyHistoricalFeedback, feedbackForReport } from "./learningFeedback.js";
+import { buildSportyBetMarketSignals, getSportyBetMarketSignal } from "./sourceSignalEngine.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={}}={}){
-  const markets=analyzeEventMarkets(event),reports=[];
+  const markets=analyzeEventMarkets(event);
+  const signals=buildSportyBetMarketSignals(event);
+  const reports=[];
   for(const market of markets){
     const rawMarket=event.markets.find(m=>m.marketId===market.marketId);
     for(const selection of market.selections){
-      const context=evidence[selection.selectionId]??{};
+      const signal=getSportyBetMarketSignal(signals,event,rawMarket,selection);
+      const selectionKey=selection.selectionId;
+      const context=evidence[selectionKey]??{};
+      const suppliedModel=modelProbabilities[selectionKey];
+      const modelInput=suppliedModel??signal;
       const reportsForSelection=[
-        statisticsAnalysis(event,rawMarket,selection,context.statistics??{}),
-        footballAnalysis(event,rawMarket,selection,context.football??{}),
-        multiSportAnalysis(event,rawMarket,selection,context.multiSport??{}),
+        statisticsAnalysis(event,rawMarket,selection,{...(context.statistics??{}),marketSignal:signal}),
+        footballAnalysis(event,rawMarket,selection,{...(context.football??{}),marketSignal:signal}),
+        multiSportAnalysis(event,rawMarket,selection,{...(context.multiSport??{}),marketSignal:signal}),
         marketAnalysis(event,rawMarket,selection),
-        oddsAnalysis(event,rawMarket,selection,modelProbabilities[selection.selectionId]??null),
-        riskAnalysis(event,rawMarket,selection,context.risks??[])
+        oddsAnalysis(event,rawMarket,selection,modelInput),
+        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal})
       ].map(report=>{
         const feedback=feedbackForReport(agentPerformance,report);
         const adjusted=applyHistoricalFeedback(report.confidence,feedback);
@@ -27,5 +34,11 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
     }
   }
   const debate=buildChallengeRound(reports);
-  return{markets,reports,debate,decision:runHeadAnalyst(reports,{debate})};
+  return{
+    markets,
+    signals,
+    reports,
+    debate,
+    decision:runHeadAnalyst(reports,{debate})
+  };
 }
