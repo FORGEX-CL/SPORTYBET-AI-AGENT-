@@ -3,8 +3,7 @@ import { statisticsAnalysis, footballAnalysis, multiSportAnalysis, marketAnalysi
 import { runHeadAnalyst } from "./headAnalyst.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={}}={}){
-  const markets=analyzeEventMarkets(event);
-  const reports=[];
+  const markets=analyzeEventMarkets(event),reports=[];
   for(const market of markets){
     const rawMarket=event.markets.find(m=>m.marketId===market.marketId);
     for(const selection of market.selections){
@@ -21,5 +20,5 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={}}={
       reports.push(...reportsForSelection.map(r=>scoreReport(r,agreement)));
     }
   }
-  return {markets,reports,decision:runHeadAnalyst(reports)};
+  return{markets,reports,decision:runHeadAnalyst(reports)};
 }
