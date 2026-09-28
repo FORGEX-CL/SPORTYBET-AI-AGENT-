@@ -6,6 +6,7 @@ import "../src/core/debate.fixture.js";
 import "../src/core/learning.fixture.js";
 import "../src/core/learningLedger.fixture.js";
 import "../src/data/sportybetResults.fixture.js";
+import "../src/core/learningFeedback.fixture.js";
 import { runCoreFixtures } from "../src/core/testSuite.js";
 const result=runCoreFixtures();
 console.log(JSON.stringify(result,null,2));
