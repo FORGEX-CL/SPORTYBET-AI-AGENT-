@@ -19,3 +19,9 @@ Never invent SportyBet odds, event IDs, market IDs, selection IDs or booking cod
 npm install
 npm run dev
 npm run build
+
+
+## Current SportyBet integration finding
+The official SportyBet Nigeria public pages expose a JavaScript-rendered betting interface and a lighter public page that visibly contains event IDs and odds. SportyBet's help page confirms that the market list appears under each selected match and that selections are added to the betslip from the displayed odds. The adapter therefore targets the public SportyBet source boundary while deliberately avoiding undocumented/private API assumptions.
+
+Source: SportyBet Nigeria official pages and help documentation.
