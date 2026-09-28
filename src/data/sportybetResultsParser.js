@@ -1,5 +1,3 @@
-import { normalizeSelection } from "../core/types.js";
-
 const cleanLines=text=>text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 const TIME_ID=/^\d{1,2}:\d{2}\s+ID\s+(\d+)$/;
 const DATE_TIME_ID=/^\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}$/;
