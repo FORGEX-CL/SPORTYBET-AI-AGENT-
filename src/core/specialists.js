@@ -89,7 +89,7 @@ export function marketAnalysis(event,market,selection){
 
 export function oddsAnalysis(event,market,selection,modelProbability=null){
   const implied=impliedProbability(selection.odds);
-  const model=modelProbability?.modelProbability??null;
+  const model=typeof modelProbability==="number"?modelProbability:(modelProbability?.modelProbability??null);
   const value=model==null||implied==null?null:(model*Number(selection.odds))-1;
   return{
     ...base(event,market,selection),
@@ -97,10 +97,11 @@ export function oddsAnalysis(event,market,selection,modelProbability=null){
     modelProbability:model,
     value,
     expectedValue:value,
-    confidence:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.confidence)||0)),
-    dataQuality:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.dataQuality)||0)),
+    confidence:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.confidence??.5)||0)),
+    dataQuality:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.dataQuality??.6)||0)),
     evidence:modelProbability?.evidence??[],
-    marketConsensus:modelProbability?.consensusProbability??model
+    marketConsensus:modelProbability?.consensusProbability??model,
+    modelType:modelProbability?.modelType??"external-model"
   };
 }
 
