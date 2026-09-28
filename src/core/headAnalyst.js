@@ -13,10 +13,12 @@ export function aggregateSelectionReports(reports=[],debate=[]){
     item.agents.push(r.agentId);
     if(PREDICTIVE_AGENTS.has(r.agentId)){
       if(clamp(r.dataQuality)>0&&clamp(r.confidence)>0)item.predictiveAgents.push(r.agentId);
-      item.predictiveConfidence=Math.max(item.predictiveConfidence,clamp(r.confidence));
-      item.predictiveDataQuality=Math.max(item.predictiveDataQuality,clamp(r.dataQuality));
+      item.predictiveConfidence+=clamp(r.confidence);
+      item.predictiveDataQuality+=clamp(r.dataQuality);
       item.value=Math.max(item.value,Number(r.value)||0);
     }
+    item.predictiveConfidence=item.predictiveAgents.length?item.predictiveConfidence/item.predictiveAgents.length:0;
+    item.predictiveDataQuality=item.predictiveAgents.length?item.predictiveDataQuality/item.predictiveAgents.length:0;
     item.confidence=item.predictiveConfidence;
     item.dataQuality=item.predictiveDataQuality;
     if(r.agentId==="risk")item.risk=Math.max(item.risk,Array.isArray(r.risks)?Math.min(1,r.risks.length*.2):0);
