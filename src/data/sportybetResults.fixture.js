@@ -1,12 +1,16 @@
 import { parseSportyBetFootballResults, settleFootballSelection } from "./sportybetResultsParser.js";
-const sample=`24/09/2026 18:45
-35093
-Austria
-3:1
-H1 1:0
-Israel`;
+const sample="24/09/2026 18:45\n35093\nAustria\n3:1\nH1 1:0\nIsrael";
 const results=parseSportyBetFootballResults(sample);
 if(results.length!==1||results[0].eventId!=="35093"||results[0].finalScore.home!==3||results[0].away!=="Israel")throw new Error("SportyBet result parser fixture failed");
 if(settleFootballSelection(results[0],{marketName:"1X2",selectionName:"Home"})!=="won")throw new Error("1X2 settlement fixture failed");
 if(settleFootballSelection(results[0],{marketName:"Over/Under",selectionName:"Over 3.5"})!=="lost")throw new Error("Total settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Draw No Bet",selectionName:"Home"})!=="won")throw new Error("DNB settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Handicap 0:1",selectionName:"Home (0:1)"})!=="lost")throw new Error("Handicap settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Asian Handicap -0.5",selectionName:"Home (-0.5)"})!=="won")throw new Error("Asian handicap settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Exact Goals",selectionName:"4"})!=="won")throw new Error("Exact goals settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Goal Range",selectionName:"4-6"})!=="won")throw new Error("Goal range settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Winning Margin",selectionName:"Home by 2"})!=="won")throw new Error("Winning margin settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Odd/Even",selectionName:"Even"})!=="won")throw new Error("Odd/even settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Correct Score",selectionName:"3:1"})!=="won")throw new Error("Correct score settlement fixture failed");
+if(settleFootballSelection(results[0],{marketName:"Half Time/Full Time",selectionName:"Home/Home"})!=="won")throw new Error("Half/full settlement fixture failed");
 console.log("SportyBet results fixture passed");
