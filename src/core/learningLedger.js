@@ -1,14 +1,15 @@
 import { createPredictionRecord, settlePrediction, updateAgentPerformance, summarizeAgentPerformance, summarizeLearning } from "./learning.js";
 
 export const LEARNING_STORAGE_KEY="sportybet-ai-agent:learning:v1";
+const ticketFingerprint=ticket=>[...(ticket.selections??[])].map(s=>`${s.eventId}:${s.marketId}:${s.selectionId}`).sort().join("|");
 
 export function createLearningLedger({predictions=[],performance={}}={}){
   return{version:1,predictions:[...predictions],performance:structuredClone(performance),updatedAt:new Date().toISOString()};
 }
 
 export function registerTickets(ledger,tickets=[]){
-  const existing=new Set((ledger.predictions??[]).map(p=>p.ticketId));
-  const additions=tickets.filter(t=>t?.ticketId&&!existing.has(t.ticketId)).map(createPredictionRecord);
+  const existing=new Set((ledger.predictions??[]).map(p=>p.fingerprint??[...(p.selections??[])].map(s=>`${s.eventId}:${s.marketId}:${s.selectionId}`).sort().join("|")));
+  const additions=tickets.filter(t=>t?.ticketId&&!existing.has(ticketFingerprint(t))).map(t=>({...createPredictionRecord(t),fingerprint:ticketFingerprint(t)}));
   if(!additions.length)return ledger;
   return createLearningLedger({predictions:[...(ledger.predictions??[]),...additions],performance:ledger.performance});
 }
@@ -31,10 +32,7 @@ export function settleLedger(ledger,results=[]){
 }
 
 export function learningSummary(ledger){
-  return{
-    ...summarizeLearning(ledger.predictions??[]),
-    agents:summarizeAgentPerformance(ledger.performance??{})
-  };
+  return{...summarizeLearning(ledger.predictions??[]),agents:summarizeAgentPerformance(ledger.performance??{})};
 }
 
 export function saveLearningLedger(ledger,{storage=globalThis.localStorage}={}){
