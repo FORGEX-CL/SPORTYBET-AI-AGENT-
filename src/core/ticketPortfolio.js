@@ -15,19 +15,22 @@ export const TICKET_PROFILES=Object.freeze([
 
 const clamp=x=>Math.max(0,Math.min(1,Number(x)||0));
 const eventKey=s=>String(s.eventId);
-const contextKey=s=>`${s.sport??"unknown"}::${s.marketName??"unknown"}::${s.league??"unknown"}`;
+const contextKey=s=>`${s.sport??"unknown"}::${s.league??"unknown"}::${s.marketName??"unknown"}`;
+const leagueKey=s=>`${s.sport??"unknown"}::${s.league??"unknown"}`;
 
 function candidatePriority(selection,usedContexts){
   const base=Number(selection.score)||0;
   const context=contextKey(selection);
   const penalty=usedContexts.has(context)?0.06:0;
-  return base-penalty;
+  const leaguePenalty=usedLeagues.has(leagueKey(selection))?0.035:0;
+  return base-penalty-leaguePenalty;
 }
 
 function selectForTarget(candidates,target,seed=[]){
   const chosen=[...seed];
   const usedEvents=new Set(chosen.map(eventKey));
   const usedContexts=new Set(chosen.map(contextKey));
+  const usedLeagues=new Set(chosen.map(leagueKey));
   const remaining=candidates.filter(s=>!usedEvents.has(eventKey(s)));
   while(chosen.length<target&&remaining.length){
     remaining.sort((a,b)=>candidatePriority(b,usedContexts)-candidatePriority(a,usedContexts));
@@ -35,6 +38,7 @@ function selectForTarget(candidates,target,seed=[]){
     chosen.push(next);
     usedEvents.add(eventKey(next));
     usedContexts.add(contextKey(next));
+    usedLeagues.add(leagueKey(next));
   }
   return chosen;
 }
@@ -45,7 +49,8 @@ function scorePortfolio(selections){
   const contexts=new Set(selections.map(contextKey)).size;
   const contextDiversity=contexts/selections.length;
   const eventDiversity=new Set(selections.map(eventKey)).size/selections.length;
-  return (average*.65)+(contextDiversity*.20)+(eventDiversity*.15);
+  const leagueDiversity=new Set(selections.map(leagueKey)).size/selections.length;
+  return (average*.55)+(contextDiversity*.15)+(leagueDiversity*.15)+(eventDiversity*.15);
 }
 
 function stableSortCandidates(selections){
