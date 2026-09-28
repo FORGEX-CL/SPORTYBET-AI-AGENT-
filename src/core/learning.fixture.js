@@ -7,4 +7,8 @@ const summary=summarizeAgentPerformance(performance);
 if(summary.length!==4)throw new Error("Agent performance attribution fixture failed");
 if(summary.find(x=>x.agentId==="statistics")?.lost!==1)throw new Error("Predictive agent loss tracking failed");
 if(summary.find(x=>x.agentId==="statistics")?.challengeVindicated!==1)throw new Error("Risk challenge attribution failed");
+const voidTicket={ticketId:"t2",createdAt:new Date().toISOString(),combinedOdds:2,selections:[{eventId:"e2",marketId:"m2",selectionId:"h",sport:"football",marketName:"Draw No Bet",odds:1.5,score:.7,confidence:.7,dataQuality:.8,predictiveAgents:["odds"],agents:["odds","market","risk"],debate:[]},{eventId:"e3",marketId:"m3",selectionId:"1",sport:"football",marketName:"1X2",odds:1.8,score:.7,confidence:.7,dataQuality:.8,predictiveAgents:["odds"],agents:["odds","market"],debate:[]}]};
+const voidRecord=createPredictionRecord(voidTicket);
+const voidSettled=settlePrediction(voidRecord,[{eventId:"e2",marketId:"m2",selectionId:"h",result:"void_or_push",source:"fixture"},{eventId:"e3",marketId:"m3",selectionId:"1",result:"won",source:"fixture"}]);
+if(voidSettled.status!=="won")throw new Error("Void leg accumulator settlement failed");
 console.log("Agent learning fixture passed");
