@@ -6,8 +6,8 @@ function htmlToVisibleText(html=""){
   return html.replace(/<script[\s\S]*?<\/script>/gi,"\n").replace(/<style[\s\S]*?<\/style>/gi,"\n").replace(/<noscript[\s\S]*?<\/noscript>/gi,"\n").replace(/<svg[\s\S]*?<\/svg>/gi,"\n").replace(/<[^>]+>/g,"\n").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").replace(/\r/g,"");
 }
 export function buildSportyBetEventDetailUrl(eventId){
-  if(!/^\d+$/.test(String(eventId))&& !/^sr%3Amatch%3A\d+$/.test(String(eventId)))throw new Error("SportyBet eventId must come from a verified SportyBet source");
-  const normalized=String(eventId).startsWith("sr%3Amatch%3A")?decodeURIComponent(String(eventId)):String(eventId).startsWith("sr:match:")?String(eventId):`sr:match:${eventId}`;
+  const normalized=String(eventId);
+  if(!/^sr:match:\d+$/.test(normalized))throw new Error("SportyBet detail URL requires the canonical sr:match event ID from a verified source link");
   return `https://lite.sportybet.com/ng/lite/preMatch/detail?eventId=${encodeURIComponent(normalized)}`;
 }
 export async function fetchSportyBetFootballSnapshot({fetcher=fetch,url="https://lite.sportybet.com/ng/lite"}={}){
