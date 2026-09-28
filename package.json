@@ -1,14 +1,8 @@
 {
-  "name": "sportybet-ai-agent",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^7.1.7"
-  }
+  "name":"sportybet-ai-agent",
+  "private":true,
+  "version":"0.1.0",
+  "type":"module",
+  "scripts":{"dev":"vite","build":"vite build","preview":"vite preview","test:core":"node scripts/test-core.js"},
+  "devDependencies":{"vite":"^7.1.7"}
 }
