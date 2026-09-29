@@ -1,7 +1,6 @@
 import { buildHistoricalEvidence } from "./sportybetHistory.js";
 import { buildHistoricalModel } from "./historicalModel.js";
 import { settleFootballSelection } from "../data/sportybetResultsParser.js";
-import { impliedProbability } from "./analysisEngine.js";
 
 function normalizeEntry(entry){
   if(!entry)return{meta:null,points:[]};
@@ -15,8 +14,10 @@ function latestPreKickoff(entry,startMs){
 }
 
 function keyParts(key){
-  const [eventId,marketId,selectionId]=String(key).split(":");
-  return{eventId,marketId,selectionId};
+  const parts=String(key).split(":");
+  const selectionId=parts.pop()??"";
+  const marketId=parts.pop()??"";
+  return{eventId:parts.join(":"),marketId,selectionId};
 }
 
 function addMetric(store,metric){
