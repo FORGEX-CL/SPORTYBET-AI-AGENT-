@@ -14,14 +14,19 @@ export function aggregateSelectionReports(reports=[],debate=[]){
     if(PREDICTIVE_AGENTS.has(r.agentId)){
       if(clamp(r.dataQuality)>0&&clamp(r.confidence)>0){
         item.predictiveAgents.push(r.agentId);
-        item.predictiveConfidence+=clamp(r.confidence);
-        item.predictiveDataQuality+=clamp(r.dataQuality);
+        const historyWeight=.70+(.30*clamp(r.historicalFeedback?.weight));
+        const qualityWeight=.80+(.20*clamp(r.dataQuality));
+        const evidenceWeight=r.independentEvidence?1:.85;
+        const agentWeight=historyWeight*qualityWeight*evidenceWeight;
+        item.predictiveConfidence+=clamp(r.confidence)*agentWeight;
+        item.predictiveConfidenceWeight+=agentWeight;
+        item.predictiveDataQuality+=clamp(r.dataQuality)*agentWeight;
         item.independentEvidence+=Number(r.independentEvidence)||0;
       }
       item.value=Math.max(item.value,Number(r.value)||0);
     }
-    item.confidence=item.predictiveAgents.length?item.predictiveConfidence/item.predictiveAgents.length:0;
-    item.dataQuality=item.predictiveAgents.length?item.predictiveDataQuality/item.predictiveAgents.length:0;
+    item.confidence=item.predictiveConfidenceWeight?item.predictiveConfidence/item.predictiveConfidenceWeight:0;
+    item.dataQuality=item.predictiveConfidenceWeight?item.predictiveDataQuality/item.predictiveConfidenceWeight:0;
     if(r.agentId==="risk")item.risk=Math.max(item.risk,Array.isArray(r.risks)?Math.min(1,r.risks.length*.2):0);
     item.debate=debateFor(debate,key);
     byKey.set(key,item);
