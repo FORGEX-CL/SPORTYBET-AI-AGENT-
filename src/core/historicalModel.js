@@ -115,7 +115,7 @@ function modelForSelection(market,selection,distribution,goals){
   return null;
 }
 
-export function buildHistoricalModel(event,market,selection,historical={}){
+export function buildHistoricalModelContext(event,historical={}){
   if(String(event?.sport).toLowerCase()!=="football")return null;
   const home=historical?.home,away=historical?.away;
   const minimumSample=Math.min(home?.sample??0,away?.sample??0);
@@ -123,7 +123,14 @@ export function buildHistoricalModel(event,market,selection,historical={}){
   const goals=expectedGoals(home,away);
   if(!goals)return null;
   const matrix=scoreMatrix(goals.homeLambda,goals.awayLambda);
-  const distribution=distributionFromMatrix(matrix);
+  return{minimumSample,goals,distribution:distributionFromMatrix(matrix)};
+}
+
+export function buildHistoricalModel(event,market,selection,historical={},preparedContext=null){
+  if(String(event?.sport).toLowerCase()!=="football")return null;
+  const context=preparedContext??buildHistoricalModelContext(event,historical);
+  if(!context)return null;
+  const {minimumSample,goals,distribution}=context;
   const probability=modelForSelection(market,selection,distribution,goals);
   if(!Number.isFinite(probability))return null;
   const confidence=clamp(.32+(Math.min(minimumSample,5)/5)*.46+(Math.min(1,Math.abs(goals.homeLambda-goals.awayLambda)/1.2)*.10));
