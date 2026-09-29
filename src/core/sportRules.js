@@ -1,7 +1,7 @@
 const clamp=x=>Math.max(0,Math.min(1,Number(x)||0));
 export const SPORT_RULES=Object.freeze({
- football:{minEvidence:2,preferred:["1X2","Double Chance","Over/Under","Asian Handicap"],avoid:["Correct Score"],note:"Use team form, home/away and goal evidence before market selection."},
- tennis:{minEvidence:2,preferred:["Match Winner","Set Handicap","Game Handicap","Total Games"],avoid:[],note:"Separate match, set and game-level evidence; do not treat set/game lines as interchangeable."},
+ football:{minEvidence:2,preferred:["1X2","Double Chance","Over/Under","Over/Under - Early Goals","Handicap","Asian Handicap"],avoid:["Correct Score"],note:"Use team form, home/away and goal evidence before market selection."},
+ tennis:{minEvidence:2,preferred:["Winner","1st set - winner","Set handicap","Game handicap","Total games","Player total games","to win a set"],avoid:["Correct Score"],note:"Separate match, set and game-level evidence; do not treat set/game lines as interchangeable."},
  basketball:{minEvidence:2,preferred:["Match Winner","Point Handicap","Total Points"],avoid:[],note:"Use pace, scoring and period context when available."},
  volleyball:{minEvidence:2,preferred:["Match Winner","Set Handicap","Total Sets"],avoid:[],note:"Separate match and set-level evidence."},
  handball:{minEvidence:2,preferred:["Match Winner","Goal Handicap","Total Goals"],avoid:[],note:"Use scoring rate and team-strength evidence."},
