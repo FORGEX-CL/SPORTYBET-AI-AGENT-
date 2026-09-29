@@ -51,7 +51,10 @@ export function ticketSelectionAnswer(state,ticket,index){
   const accepted=(state.analysis?.decision?.accepted??[]).some(x=>x.eventId===selection.eventId&&x.marketId===selection.marketId&&x.selectionId===selection.selectionId);
   const avgConfidence=reports.length?reports.reduce((s,r)=>s+(Number(r.confidence)||0),0)/reports.length:0;
   const riskReports=reports.filter(r=>Array.isArray(r.risks)&&r.risks.length);
-  return`Selection ${index+1}: ${selection.selection}. Market: ${selection.marketName??"unknown"}. Odds at snapshot: ${Number(selection.odds).toFixed(2)}. Specialist reports linked: ${reports.length}. Average specialist confidence: ${pct(avgConfidence)}. Risk reports: ${riskReports.length}. Related challenge messages: ${challenges.length}. Decision-layer status: ${accepted?"accepted":"not accepted"}. Current ticket data should be rechecked before any use.`;
+  const resolution=challenges.find(d=>d.type==="resolution");
+  const disagreement=Number(resolution?.disagreementIndex);
+  const disagreementText=Number.isFinite(disagreement)?` Disagreement index: ${pct(disagreement)}.`:" Disagreement index: n/a.";
+  return`Selection ${index+1}: ${selection.selection}. Market: ${selection.marketName??"unknown"}. Odds at snapshot: ${Number(selection.odds).toFixed(2)}. Specialist reports linked: ${reports.length}. Average specialist confidence: ${pct(avgConfidence)}. Risk reports: ${riskReports.length}. Related challenge messages: ${challenges.length}.${disagreementText} Decision-layer status: ${accepted?"accepted":"not accepted"}. Current ticket data should be rechecked before any use.`;
 }
 
 export function buildAiReply(state,q){
@@ -69,6 +72,12 @@ export function buildAiReply(state,q){
   if(s.includes("who are")||s.includes("agents"))return"The room has 7 agents: Statistics, Football, Multi-Sport, SportyBet Market Intelligence, Odds & Value, Risk / Contrarian, and Head Analyst.";
   if(s.includes("risk"))return agentAnswer(state,"risk");
   if(s.includes("odds"))return agentAnswer(state,"odds");
+  if(s.includes("disagreement")||s.includes("agent disagreement")||s.includes("consensus")){
+    const resolutions=(state.analysis?.debate??[]).filter(d=>d.type==="resolution");
+    const avg=resolutions.length?resolutions.reduce((sum,d)=>sum+(Number(d.disagreementIndex)||0),0)/resolutions.length:0;
+    const high=resolutions.filter(d=>d.decision==="reject").length;
+    return`Debate monitor: ${resolutions.length} selection resolution(s) recorded. Average disagreement index: ${pct(avg)}. ${high} resolution(s) remain blocked by the current debate rules. Treat this as model uncertainty context, not a guarantee of outcome.`;
+  }
   if(s.includes("head analyst")||s.includes("decision"))return agentAnswer(state,"head");
   if(s.includes("ticket"))return`Current candidates: ${state.analysis?.tickets?.length??0}. Open a candidate for exact selections and revalidation.`;
   if(s.includes("source")||s.includes("sportybet"))return`Current verified feed: ${state.feed.eventCount} events and ${state.feed.marketCount} markets. Source captured at ${state.feed.capturedAt??"unknown"}.`;
