@@ -21,13 +21,33 @@ function ticketCopyText(ticket){return[`SPORTYBET AI AGENT · ${ticket.strategyL
 async function copyTicket(ticket){const text=ticketCopyText(ticket);try{await navigator.clipboard.writeText(text);state.error="Ticket copied to clipboard.";}catch{const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();state.error="Ticket copied to clipboard.";}render();}
 function bindTicketButtons(){document.querySelectorAll("[data-ticket-index]").forEach(button=>button.addEventListener("click",()=>{const index=Number(button.getAttribute("data-ticket-index"));state.selectedTicket=state.analysis.tickets?.[index]??null;render();}));document.querySelector("#copy-ticket")?.addEventListener("click",()=>copyTicket(state.selectedTicket));document.querySelector("#close-ticket")?.addEventListener("click",()=>{state.selectedTicket=null;render();});document.querySelector("#recheck-ticket")?.addEventListener("click",()=>loadFeed({preserveTicketId:state.selectedTicket?.ticketId??null}));}
 
+function agentEvidence(agentId){
+  const reports=(state.analysis.reports??[]).filter(r=>r.agentId===agentId);
+  const accepted=(state.analysis.decision?.accepted??[]).filter(x=>reports.some(r=>r.eventId===x.eventId&&r.marketId===x.marketId&&r.selectionId===x.selectionId));
+  return {reports,accepted};
+}
+function agentAnswer(agentId){
+  const role=AGENT_ROLES.find(a=>a.id===agentId);
+  const {reports,accepted}=agentEvidence(agentId);
+  if(!state.feed.eventCount)return role.name+": no verified SportyBet feed is loaded yet.";
+  if(agentId==="head")return `Head Analyst: ${accepted.length} selection(s) survived the current evidence and challenge gates. ${state.analysis.decision?.reasoning??"No decision summary available."}`;
+  if(agentId==="risk")return `Risk / Contrarian Agent: ${state.analysis.debate?.length??0} challenge message(s) are recorded. I challenge failure modes and do not treat market availability alone as evidence.`;
+  if(agentId==="odds")return `Odds & Value Agent: ${reports.length} priced selection report(s) are recorded; ${reports.filter(r=>Number(r.value)>0).length} have a positive value proxy in the current model.`;
+  return role.name+`: ${reports.length} report(s) recorded. ${accepted.length} corresponding selection(s) are currently accepted by the decision layer.`;
+}
 function aiReply(q){
-  const s=String(q||"").toLowerCase();
-  if(!state.feed.eventCount)return"Refresh the source feed first.";
-  if(s.includes("risk"))return"Current risk challenges: "+(state.analysis.debate?.length??0)+". Recheck the latest source data before using a candidate.";
-  if(s.includes("ticket"))return"Current candidates: "+(state.analysis.tickets?.length??0)+". Open a candidate to inspect its selections.";
-  if(s.includes("odds"))return"Priced selections: "+(state.analysis.modelSummary?.pricedSelections??0)+". Refresh the feed because prices can move.";
-  return"Ask me about the current feed, agents, candidates, risk checks, odds or the staged plan.";
+  const raw=String(q||"").trim(),s=raw.toLowerCase();
+  if(!state.feed.eventCount)return"No verified SportyBet feed is loaded. Refresh the source first.";
+  const agentMatch=AGENT_ROLES.find(a=>s.includes(a.name.toLowerCase())||s.includes(a.id.toLowerCase()));
+  if(agentMatch)return agentAnswer(agentMatch.id);
+  if(s.includes("who are")||s.includes("agents"))return"The room has 7 agents: Statistics, Football, Multi-Sport, SportyBet Market Intelligence, Odds & Value, Risk / Contrarian, and Head Analyst.";
+  if(s.includes("why")&&s.includes("ticket"))return"Open the ticket to inspect its exact selections, odds and current revalidation status. The decision layer records evidence and challenge context rather than inventing a reason.";
+  if(s.includes("risk"))return agentAnswer("risk");
+  if(s.includes("odds"))return agentAnswer("odds");
+  if(s.includes("head analyst")||s.includes("decision"))return agentAnswer("head");
+  if(s.includes("ticket"))return"Current candidates: "+(state.analysis.tickets?.length??0)+". Open a candidate for exact selections and revalidation.";
+  if(s.includes("source")||s.includes("sportybet"))return`Current verified feed: ${state.feed.eventCount} events and ${state.feed.marketCount} markets. Source captured at ${state.feed.capturedAt??"unknown"}.`;
+  return"I can explain the current SportyBet feed, any specialist agent, risk challenges, odds evidence, Head Analyst decisions, or a specific ticket.";
 }
 function stagedPlan(){
   const t=state.analysis.tickets??[];
@@ -46,7 +66,7 @@ function renderRolloverRows(){
   return rolloverRows().map(r=>`<div class="rollover-row"><span>DAY ${r.day}</span><span>${formatNaira(r.start)} × <b>${odds.toFixed(2)}</b></span><strong>${formatNaira(r.end)}</strong></div>`).join("");
 }
 function aiPanel(){
-  return `<button class="ai-tab" id="open-ai">AI AGENTS</button><aside class="ai-drawer" id="ai-drawer"><div class="ai-drawer-head"><div><p class="label">SPORTYBET AI</p><h3>Agent room</h3></div><button id="close-ai" class="ai-close">×</button></div><div class="ai-chat" id="ai-chat"><div class="ai-msg agent-msg"><b>AI Agents</b><p>Ask a question about the current dashboard.</p></div></div><div class="ai-quick"><button data-q="What is the current risk?">Risk check</button><button data-q="Show ticket status">Candidates</button><button id="show-plan">Rollover plan</button></div><form id="ai-form" class="ai-form"><input id="ai-input" placeholder="Ask the AI Agents..." autocomplete="off"><button>SEND</button></form><div id="plan-card" class="plan-card"><b>ROLLOVER PLAN</b><div class="rollover-controls"><label>STARTING STAKE<input id="rollover-stake" type="number" value="1500" min="1" step="100"></label><label>DAYS<input id="rollover-days" type="number" value="5" min="1" max="30"></label><label>DAILY ODDS<input id="rollover-odds" type="number" value="5" min="1" step="0.01"></label></div><div class="rollover-table" id="rollover-table">${renderRolloverRows()}</div><small>Example: N1,500 × 5.00 = N7,500, then N7,500 × 5.00 = N37,500. Mathematical projection only; it does not guarantee betting results.</small></div></div></aside>`
+  return `<button class="ai-tab" id="open-ai">AI AGENTS</button><aside class="ai-drawer" id="ai-drawer"><div class="ai-drawer-head"><div><p class="label">SPORTYBET AI</p><h3>Agent room</h3></div><button id="close-ai" class="ai-close">×</button></div><div class="ai-chat" id="ai-chat"><div class="ai-msg agent-msg"><b>AI Agents</b><p>Ask a question about the current dashboard.</p></div></div><div class="ai-quick"><button data-q="What did the Risk Agent find?">Risk Agent</button><button data-q="What did the Odds Agent find?">Odds Agent</button><button data-q="What did the Head Analyst decide?">Head Analyst</button><button data-q="Who are the agents?">All agents</button><button id="show-plan">Rollover plan</button></div><form id="ai-form" class="ai-form"><input id="ai-input" placeholder="Ask the AI Agents..." autocomplete="off"><button>SEND</button></form><div id="plan-card" class="plan-card"><b>ROLLOVER PLAN</b><div class="rollover-controls"><label>STARTING STAKE<input id="rollover-stake" type="number" value="1500" min="1" step="100"></label><label>DAYS<input id="rollover-days" type="number" value="5" min="1" max="30"></label><label>DAILY ODDS<input id="rollover-odds" type="number" value="5" min="1" step="0.01"></label></div><div class="rollover-table" id="rollover-table">${renderRolloverRows()}</div><small>Example: N1,500 × 5.00 = N7,500, then N7,500 × 5.00 = N37,500. Mathematical projection only; it does not guarantee betting results.</small></div></div></aside>`
 }
 function bindAi(){
   document.querySelector("#open-ai")?.addEventListener("click",()=>document.querySelector("#ai-drawer")?.classList.add("open"));
