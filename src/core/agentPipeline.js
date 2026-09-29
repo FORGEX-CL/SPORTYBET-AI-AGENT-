@@ -4,12 +4,14 @@ import { buildChallengeRound } from "./debate.js";
 import { runHeadAnalyst } from "./headAnalyst.js";
 import { applyHistoricalFeedback, feedbackForReport } from "./learningFeedback.js";
 import { buildSportyBetMarketSignals, getSportyBetMarketSignal } from "./sourceSignalEngine.js";
-import { buildHistoricalModel } from "./historicalModel.js";
+import { buildHistoricalModel, buildHistoricalModelContext } from "./historicalModel.js";
 import { buildPlatinumEnsemble } from "./platinumEnsemble.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={}}={}){
   const markets=analyzeEventMarkets(event);
   const signals=buildSportyBetMarketSignals(event);
+  const historical=evidence.__historical??{};
+  const historicalModelContext=buildHistoricalModelContext(event,historical);
   const reports=[];
   for(const market of markets){
     const rawMarket=event.markets.find(m=>m.marketId===market.marketId);
@@ -17,10 +19,9 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
       const signal=getSportyBetMarketSignal(signals,event,rawMarket,selection);
       const selectionKey=selection.selectionId;
       const context=evidence[selectionKey]??{};
-      const historical=evidence.__historical??{};
       const historicalEvidence=Array.isArray(historical.evidence)?historical.evidence:[];
       const suppliedModel=modelProbabilities[selectionKey];
-      const historicalModel=buildHistoricalModel(event,rawMarket,selection,historical);
+      const historicalModel=buildHistoricalModel(event,rawMarket,selection,historical,historicalModelContext);
       const statisticsContext={...(context.statistics??{}),evidence:[...(context.statistics?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.statistics?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.statistics?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
       const footballContext={...(context.football??{}),evidence:[...(context.football?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.football?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.football?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
       const platinumEnsemble=buildPlatinumEnsemble({
