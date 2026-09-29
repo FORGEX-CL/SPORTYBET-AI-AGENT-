@@ -153,7 +153,8 @@ export function riskAnalysis(event,market,selection,risks=[],context={}){
     confidence:assessment.confidence,
     dataQuality:signal?Math.max(.7,Number(signal.dataQuality)||0):1,
     evidence:signal?.evidence??[],
-    settlement:context.settlement
+    settlement:context.settlement,
+    settlementStatus:context.settlement?.status??"unsupported"
   };
 }
 
