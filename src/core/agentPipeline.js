@@ -18,7 +18,7 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
     const rawMarket=event.markets.find(m=>m.marketId===market.marketId);
     for(const selection of market.selections){
       const signal=getSportyBetMarketSignal(signals,event,rawMarket,selection);
-      const settlement=settlementSupport(rawMarket.name);
+      const settlement=settlementSupport(rawMarket.name,selection.name);
       const selectionKey=selection.selectionId;
       const context=evidence[selectionKey]??{};
       const historicalEvidence=Array.isArray(historical.evidence)?historical.evidence:[];
