@@ -1,3 +1,6 @@
+import { createSessionToken } from "../auth/_auth.js";
+process.env.SPORTYBET_AUTH_SECRET="basketball-fixture-secret-that-is-long-enough";
+const session=createSessionToken("basketball-user",Math.floor(Date.now()/1000));
 const mockFetch=async()=>new Response(`International - Eurocup, Women
 23/09 Wednesday
 Points
@@ -11,7 +14,7 @@ AEO Proteas Voulas  Elizur Ramla
 
 const {createBasketballHandler}=await import("../../api/sportybet-basketball.js");
 let payload=null,statusCode=null;
-const req={method:"GET"};
+const req={method:"GET",headers:{cookie:`sportybet_session=${session}`}};
 const res={setHeader(){},status(code){statusCode=code;return this;},json(data){payload=data;}};
 await createBasketballHandler({fetcher:mockFetch})(req,res);
 if(statusCode!==200||payload?.source!=="SportyBet"||payload?.eventCount!==1||payload?.events?.[0]?.sport!=="basketball")throw new Error("SportyBet basketball API fixture failed");
