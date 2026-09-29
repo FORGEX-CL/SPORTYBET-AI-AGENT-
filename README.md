@@ -101,3 +101,13 @@ GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` 
 - Leakage-safe walk-forward backtesting replays the historical Poisson model against stored SportyBet results using only pre-kickoff information and reports Brier score, log loss, win rate and expected-value diagnostics.
 - Recent agent drift is compared with baseline forecasting quality; degrading agents are downweighted and penalized by the Head Analyst.
 - DNB and total markets use settlement-aware win/push/loss probability semantics where applicable.
+
+## Private account access
+
+- The dashboard is protected by a username/password login before any SportyBet data endpoint is available.
+- Passwords are never stored in plaintext; the server verifies salted scrypt password hashes from the AUTH_USERS_JSON deployment secret.
+- Sessions use signed, HttpOnly, Secure, SameSite cookies with an 8-hour lifetime.
+- Usernames are normalized and must be unique within the configured AUTH_USERS_JSON registry.
+- Never commit usernames/passwords, password hashes, session secrets, or .env files to GitHub. Never share account credentials with another person.
+- Provision an account by generating a hash with `npm run auth:hash`, then placing the generated username/hash pair in AUTH_USERS_JSON and setting SPORTYBET_AUTH_SECRET in the deployment environment.
+- The login page intentionally has no password-recovery shortcut that would expose credentials; account provisioning remains an operator-controlled deployment step.
