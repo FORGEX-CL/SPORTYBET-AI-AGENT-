@@ -1,6 +1,7 @@
 import { createSportyBetAdapter } from "../src/data/sportybetAdapter.js";
 import { normalizeSportyBetFeed } from "../src/core/feedPipeline.js";
 import { parseBasketballMainPage } from "../src/data/sportybetSportsParser.js";
+import { requireAuth } from "./auth/_auth.js";
 
 const SOURCE_URL="https://lite.sportybet.com/ng/lite/events?marketId=18&sportId=sr%3Asport%3A2";
 
@@ -9,6 +10,7 @@ export function createBasketballHandler({fetcher=globalThis.fetch}={}){
     res.setHeader("Cache-Control","no-store");
     res.setHeader("X-Source","SportyBet");
     if(req.method!=="GET"){res.status(405).json({error:"Method not allowed"});return;}
+    if(!requireAuth(req,res))return;
     try{
       const adapter=createSportyBetAdapter({fetcher});
       const response=await adapter.fetchPublicPage(SOURCE_URL);
