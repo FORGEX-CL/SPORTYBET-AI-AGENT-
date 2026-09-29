@@ -34,11 +34,14 @@ export function aggregateSelectionReports(reports=[],debate=[]){
     byKey.set(key,item);
   }
   return [...byKey.values()].map(x=>{
+    const driftAgents=x.agentForecasts.filter(f=>f.historicalFeedback?.drift?.status==="degrading").length;
+    const warningDriftAgents=x.agentForecasts.filter(f=>f.historicalFeedback?.drift?.status==="warning").length;
+    const driftPenalty=Math.min(.18,(driftAgents*.10)+(warningDriftAgents*.04));
     const highChallenges=x.debate.filter(d=>d.severity==="high").length;
     const mediumChallenges=x.debate.filter(d=>d.severity==="medium").length;
     const challengePenalty=Math.min(.35,highChallenges*.20+mediumChallenges*.10+(x.debate.some(d=>d.severity==="unverified")?.03:0));
     const baseScore=scoreSelection({...x,confidence:x.confidence,dataQuality:x.dataQuality,agreement:x.predictiveAgents.length/4});
-    return{...x,predictiveAgreement:x.predictiveAgents.length/4,agreement:x.predictiveAgents.length/4,challengePenalty,score:Math.max(0,baseScore-challengePenalty)};
+    return{...x,predictiveAgreement:x.predictiveAgents.length/4,agreement:x.predictiveAgents.length/4,challengePenalty,driftPenalty,score:Math.max(0,baseScore-challengePenalty-driftPenalty)};
   }).sort((a,b)=>b.score-a.score);
 }
 
