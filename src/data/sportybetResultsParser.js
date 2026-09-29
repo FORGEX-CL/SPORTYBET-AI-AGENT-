@@ -10,7 +10,7 @@ function parseScore(line){
 }
 
 function toIsoDate(value){
-  const match=String(value).match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\s+(\\d{1,2}):(\\d{2})$/);
+  const match=String(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
   if(!match)return null;
   const [,day,month,year,hour,minute]=match;
   return new Date(Date.UTC(Number(year),Number(month)-1,Number(day),Number(hour),Number(minute))).toISOString();
