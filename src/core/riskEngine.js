@@ -9,7 +9,7 @@ const COMPLEX_PATTERNS=[
   {test:n=>n.includes("live"),risk:.10,reason:"Live markets can move rapidly and require time-sensitive source integrity."}
 ];
 
-export function assessSelectionRisk({event={},market={},selection={},signal=null,historicalModel=null,platinumEnsemble=null,explicitRisks=[]}={}){
+export function assessSelectionRisk({event={},market={},selection={},signal=null,historicalModel=null,platinumEnsemble=null,settlement=null,explicitRisks=[]}={}){
   const risks=[...explicitRisks];
   let riskScore=0;
   const marketName=String(market?.name??"").toLowerCase();
@@ -44,6 +44,12 @@ export function assessSelectionRisk({event={},market={},selection={},signal=null
     riskScore+=.12;
     risks.push("Historical model sample is still small.");
   }
+  if(settlement&&settlement.status!=="supported"){
+    riskScore+=Number(settlement.risk)||.25;
+    risks.push(settlement.reason);
+    if(settlement.status==="unsupported")risks.push("Automated result learning is blocked for this market until deterministic settlement support exists.");
+  }
+
   if(platinumEnsemble){
     if(Number(platinumEnsemble.uncertainty)>=.25){
       riskScore+=.14;
