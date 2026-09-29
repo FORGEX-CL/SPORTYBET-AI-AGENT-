@@ -97,9 +97,10 @@ export function updateAgentPerformance(performance={},records=[]){
         if(result==="void_or_push")stat.voidOrPush++;
         else stat[result]++;
         const forecast=forecastByAgent.get(agentId);
+        const hasPredictiveForecast=Boolean(forecast)||a.predictiveAgents?.includes(agentId);
         const forecastConfidence=forecast?.confidence??a.confidenceAtCreation;
         const conf=confidenceBand(forecastConfidence);
-        if(result==="won"||result==="lost")updateCalibration(stat,forecastConfidence,result);
+        if(hasPredictiveForecast&&(result==="won"||result==="lost"))updateCalibration(stat,forecastConfidence,result);
 
         const buckets=[
           ["bySport",sport],
@@ -109,7 +110,9 @@ export function updateAgentPerformance(performance={},records=[]){
           ["byConfidenceBand",conf]
         ];
         for(const [name,key] of buckets){
-          stat[name][key]=updateBucket(stat[name][key]??{},result,forecastConfidence);
+          const bucket=updateBucket(stat[name][key]??{},result,hasPredictiveForecast?forecastConfidence:null);
+          if(!hasPredictiveForecast&&result!=="won"&&result!=="lost")bucket.calibrationSamples=bucket.calibrationSamples??0;
+          stat[name][key]=bucket;
         }
       }
 
