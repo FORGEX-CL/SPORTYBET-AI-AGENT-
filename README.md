@@ -113,3 +113,14 @@ GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` 
 - There is no public signup flow. Only an administrator can authorize an account.
 - Accounts use `role: "admin"` for administrators and `role: "user"` for approved users; the session and admin APIs enforce that distinction.
 - The login page intentionally has no password-recovery shortcut that would expose credentials; account provisioning remains an operator-controlled deployment step.
+
+## Cloud Sign-up AI Agent
+
+- The **SIGN UP AI** bar provides self-service account enrollment without requiring the administrator to be online.
+- The agent checks username availability against the cloud registry and then provisions a new user account automatically.
+- Passwords are submitted through the secure enrollment form, never through the AI chat, never returned by the API, and never stored in GitHub.
+- Supabase Auth stores the credential securely; `public.app_users` stores only the unique username, role, active state and timestamps.
+- New self-service accounts are always created with role `user`. Administrator accounts must be provisioned separately.
+- Cloud provisioning requires `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and the existing `SPORTYBET_AUTH_SECRET` deployment secrets.
+- The Supabase secret key is server-only and must never be exposed in browser code or committed to GitHub.
+- Username availability and signup endpoints include basic rate limiting and reject reserved administrator/system usernames.
