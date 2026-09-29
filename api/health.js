@@ -1,6 +1,7 @@
 import { createSportyBetAdapter } from "../src/data/sportybetAdapter.js";
 import { parseFootballMainPage } from "../src/data/sportybetParser.js";
 import { parseBasketballMainPage } from "../src/data/sportybetSportsParser.js";
+import { requireAuth } from "./auth/_auth.js";
 
 const SOURCES=Object.freeze({
   football:{url:"https://lite.sportybet.com/ng/lite",parser:parseFootballMainPage},
@@ -11,6 +12,7 @@ export default async function handler(req,res){
   res.setHeader("Cache-Control","no-store");
   res.setHeader("X-Source","SportyBet");
   if(req.method!=="GET"){res.status(405).json({status:"error",error:"Method not allowed"});return;}
+  if(!requireAuth(req,res))return;
   const sport=String(req.query?.sport??"football").toLowerCase();
   const source=SOURCES[sport];
   if(!source){res.status(400).json({status:"error",error:"Unsupported SportyBet sport"});return;}
@@ -40,14 +42,6 @@ export default async function handler(req,res){
       checkedAt:new Date().toISOString()
     });
   }catch(error){
-    res.status(502).json({
-      status:"unavailable",
-      source:"SportyBet",
-      sport,
-      sourceUrl:source.url,
-      latencyMs:Date.now()-started,
-      checkedAt:new Date().toISOString(),
-      error:error instanceof Error?error.message:"SportyBet health check failed"
-    });
+    res.status(502).json({status:"unavailable",source:"SportyBet",sport,sourceUrl:source.url,latencyMs:Date.now()-started,checkedAt:new Date().toISOString(),error:error instanceof Error?error.message:"SportyBet health check failed"});
   }
 }
