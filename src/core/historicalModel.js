@@ -104,6 +104,7 @@ export function combineModelSignals(models=[]){
     dataQuality:clamp(valid.reduce((s,x)=>s+(Number(x.dataQuality)||0),0)/valid.length),
     evidence:valid.flatMap(x=>x.evidence??[]),
     modelType:valid.map(x=>x.modelType).join("+"),
-    modelCount:valid.length
+    modelCount:valid.length,
+    historicalModel:valid.some(x=>x?.historicalModel===true)
   };
 }
