@@ -1,4 +1,5 @@
 import { buildTicket, MAX_SELECTIONS_PER_TICKET, MAX_TICKETS } from "./ticketEngine.js";
+import { marginalCorrelationPenalty, portfolioCorrelation } from "./correlationEngine.js";
 
 export const TICKET_PROFILES=Object.freeze([
   {id:"core",label:"Core",target:3},
@@ -18,12 +19,13 @@ const eventKey=s=>String(s.eventId);
 const contextKey=s=>`${s.sport??"unknown"}::${s.league??"unknown"}::${s.marketName??"unknown"}`;
 const leagueKey=s=>`${s.sport??"unknown"}::${s.league??"unknown"}`;
 
-function candidatePriority(selection,usedContexts,usedLeagues){
+function candidatePriority(selection,usedContexts,usedLeagues,chosen=[]){
   const base=Number(selection.score)||0;
   const context=contextKey(selection);
   const penalty=usedContexts.has(context)?0.06:0;
   const leaguePenalty=usedLeagues.has(leagueKey(selection))?0.035:0;
-  return base-penalty-leaguePenalty;
+  const correlationPenalty=marginalCorrelationPenalty(selection,chosen);
+  return base-penalty-leaguePenalty-correlationPenalty;
 }
 
 function selectForTarget(candidates,target,seed=[]){
@@ -33,7 +35,7 @@ function selectForTarget(candidates,target,seed=[]){
   const usedLeagues=new Set(chosen.map(leagueKey));
   const remaining=candidates.filter(s=>!usedEvents.has(eventKey(s)));
   while(chosen.length<target&&remaining.length){
-    remaining.sort((a,b)=>candidatePriority(b,usedContexts,usedLeagues)-candidatePriority(a,usedContexts,usedLeagues));
+    remaining.sort((a,b)=>candidatePriority(b,usedContexts,usedLeagues,chosen)-candidatePriority(a,usedContexts,usedLeagues,chosen));
     const next=remaining.shift();
     chosen.push(next);
     usedEvents.add(eventKey(next));
@@ -88,6 +90,7 @@ export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS,sourceUr
         strategy:profile.id,
         strategyLabel:profile.label,
         score:portfolioScore,
+        correlationScore:portfolioCorrelation(picks),
         selectionProfile:{target,actual:picks.length,uniqueEvents:new Set(picks.map(eventKey)).size,uniqueContexts:new Set(picks.map(contextKey)).size}
       }));
     }catch{}
