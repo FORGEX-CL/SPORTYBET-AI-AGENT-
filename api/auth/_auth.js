@@ -83,20 +83,29 @@ export async function cloudFindUser(username){
   return Array.isArray(rows)?(rows[0]??null):null;
 }
 export async function cloudUsernameAvailable(username){return !(await cloudFindUser(username));}
-export async function cloudCreateUser(username,password){
+export async function cloudCreateUser(username,password,role="user"){
   const u=normalizeUsername(username);
   if(!validUsername(u))throw new Error("Username must be 3–24 characters using letters, numbers or underscore.");
+  const normalizedRole=role==="admin"?"admin":"user";
   if(await cloudFindUser(u))throw new Error("Username is already taken.");
-  const created=await cloudFetch("/auth/v1/admin/users",{method:"POST",body:JSON.stringify({email:syntheticEmail(u),password,email_confirm:true,user_metadata:{username:u}})});
+  const created=await cloudFetch("/auth/v1/admin/users",{method:"POST",body:JSON.stringify({email:syntheticEmail(u),password,email_confirm:true,user_metadata:{username:u,role:normalizedRole}})});
   const userId=created?.id??created?.user?.id;
   if(!userId)throw new Error("Cloud account creation did not return a user ID.");
   try{
-    await cloudFetch("/rest/v1/app_users",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({id:userId,username:u,role:"user",active:true})});
+    await cloudFetch("/rest/v1/app_users",{method:"POST",headers:{"Prefer":"return=minimal"},body:JSON.stringify({id:userId,username:u,role:normalizedRole,active:true})});
   }catch(error){
     try{await cloudFetch("/auth/v1/admin/users/"+encodeURIComponent(userId),{method:"DELETE"});}catch{}
     throw error;
   }
-  return{userId,username:u,role:"user"};
+  return{userId,username:u,role:normalizedRole};
+}
+export async function cloudHasAdmin(){
+  const rows=await cloudFetch("/rest/v1/app_users?select=id&role=eq.admin&limit=1",{method:"GET"});
+  return Array.isArray(rows)&&rows.length>0;
+}
+export async function cloudCreateFirstAdmin(username,password){
+  if(await cloudHasAdmin())throw new Error("An admin account already exists. First-admin bootstrap is closed.");
+  return cloudCreateUser(username,password,"admin");
 }
 export async function cloudLogin(username,password){
   const profile=await cloudFindUser(username);
