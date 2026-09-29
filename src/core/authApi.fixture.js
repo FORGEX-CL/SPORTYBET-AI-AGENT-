@@ -30,6 +30,6 @@ if(logoutStatus!==200||!logoutCookie.includes("Max-Age=0"))throw new Error("Logo
 
 console.log("Authentication API fixture passed");
 
-const { requireAdmin } = await import("../api/auth/_auth.js");
+const { requireAdmin } = await import("../../api/auth/_auth.js");
 let adminResponse=null;const adminRes={status(code){adminResponse=code;return this;},json(){},setHeader(){}};
 const originalUsers=process.env.AUTH_USERS_JSON;try{const sessionToken=createSessionToken("test-user",Math.floor(Date.now()/1000),"admin");requireAdmin({headers:{cookie:"sportybet_ai_session="+sessionToken}},adminRes);if(adminResponse===403)throw new Error("Admin was denied");}finally{process.env.AUTH_USERS_JSON=originalUsers;}
