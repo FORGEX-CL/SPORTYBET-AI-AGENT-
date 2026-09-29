@@ -1,4 +1,5 @@
 import "../src/core/auth.fixture.js";
+import "../src/core/authApi.fixture.js";
 import "../src/data/sportybetParser.fixture.js";
 import "../src/data/sportybetSportsParser.fixture.js";
 import "../src/data/sportybetWebSource.fixture.js";
