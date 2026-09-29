@@ -8,6 +8,6 @@ let payload=null,statusCode=null;
 const req={method:"GET"};
 const res={setHeader(){},status(code){statusCode=code;return this;},json(data){payload=data;}};
 await handler(req,res);
-if(statusCode!==200||payload?.status!=="ok"||payload?.parsedFootballEvents!==1)throw new Error("Health endpoint fixture failed");
+if(statusCode!==200||payload?.status!=="ok"||payload?.parsedFootballEvents!==1||payload?.eventsWithMarkets!==1||payload?.pricedSelections!==3)throw new Error("Health endpoint fixture failed");
 globalThis.fetch=originalFetch;
 console.log("SportyBet health endpoint fixture passed");
