@@ -13,13 +13,17 @@ export default async function handler(req,res){
     const response=await adapter.fetchPublicPage(SOURCE_URL);
     const html=await response.text();
     const events=parseFootballMainPage(html);
-    const ok=response.ok&&events.length>0;
+    const eventsWithMarkets=events.filter(e=>Array.isArray(e.markets)&&e.markets.length>0).length;
+    const pricedSelections=events.reduce((count,event)=>count+event.markets.reduce((n,market)=>n+market.selections.filter(selection=>Number.isFinite(Number(selection.odds))&&Number(selection.odds)>1).length,0),0);
+    const ok=response.ok&&events.length>0&&eventsWithMarkets>0&&pricedSelections>0;
     res.status(ok?200:502).json({
       status:ok?"ok":"degraded",
       source:"SportyBet",
       sourceUrl:SOURCE_URL,
       httpStatus:response.status,
       parsedFootballEvents:events.length,
+      eventsWithMarkets,
+      pricedSelections,
       latencyMs:Date.now()-started,
       checkedAt:new Date().toISOString()
     });
