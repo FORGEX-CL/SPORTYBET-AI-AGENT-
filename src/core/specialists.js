@@ -105,7 +105,7 @@ export function marketAnalysis(event,market,selection){
   };
 }
 
-export function oddsAnalysis(event,market,selection,modelProbability=null){
+export function oddsAnalysis(event,market,selection,modelProbability=null,oddsMovement=null){
   const implied=impliedProbability(selection.odds);
   const model=typeof modelProbability==="number"?modelProbability:(modelProbability?.modelProbability??null);
   const robust=typeof modelProbability==="object"?(modelProbability.robustProbability??model):model;
@@ -122,6 +122,7 @@ export function oddsAnalysis(event,market,selection,modelProbability=null){
     value,
     expectedValue:value,
     rawExpectedValue:model==null?null:(model*Number(selection.odds))-1,
+    oddsMovement,
     confidence:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.confidence??.5)||0)),
     dataQuality:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.dataQuality??.6)||0)),
     evidence:modelProbability?.evidence??[],
@@ -141,6 +142,7 @@ export function riskAnalysis(event,market,selection,risks=[],context={}){
     historicalModel:context.historicalModel,
     platinumEnsemble:context.platinumEnsemble,
     settlement:context.settlement,
+    oddsMovement:context.oddsMovement,
     explicitRisks:risks
   });
   return{
