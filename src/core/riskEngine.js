@@ -30,8 +30,8 @@ export function assessSelectionRisk({event={},market={},selection={},signal=null
     riskScore+=.16;
     risks.push("Long odds create high outcome variance and require unusually strong evidence.");
   }
-  if(historicalModel&&Number.isFinite(Number(signal?.fairProbability))){
-    const edge=Math.abs(Number(historicalModel.modelProbability)-Number(signal.fairProbability));
+  if(historicalModel&&Number.isFinite(Number(signal?.modelProbability))){
+    const edge=Math.abs(Number(historicalModel.modelProbability)-Number(signal.modelProbability));
     if(edge>=.20){
       riskScore+=.20;
       risks.push("Historical model and SportyBet market fair probability diverge by at least 20 percentage points.");
