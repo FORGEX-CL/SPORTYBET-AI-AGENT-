@@ -2,6 +2,7 @@ import { createSportyBetAdapter } from "../src/data/sportybetAdapter.js";
 import { normalizeSportyBetFeed } from "../src/core/feedPipeline.js";
 import { parseFootballMainPage } from "../src/data/sportybetParser.js";
 import { parseSportyBetFootballPage } from "../src/data/sportybetParser.js";
+import { requireAuth } from "./auth/_auth.js";
 
 const LIST_URL="https://lite.sportybet.com/ng/lite";
 const MAX_EVENTS=50;
@@ -18,6 +19,7 @@ export default async function handler(req,res){
     res.status(405).json({error:"Method not allowed"});
     return;
   }
+  if(!requireAuth(req,res))return;
 
   try{
     const adapter=createSportyBetAdapter();
