@@ -69,3 +69,10 @@ npm run dev
 - Historical evidence includes recent form, home/away splits, goals scored/conceded, clean-sheet rate, both-teams-to-score rate and over-2.5 rate when enough verified SportyBet results have been accumulated.
 - The first installation starts with no historical sample; the system does not invent missing form or statistics.
 - Verified football event enrichment now supports up to 50 event detail pages per feed run.
+## Agent intelligence hardening
+
+The analysis layer now separates SportyBet market-derived consensus from independent historical evidence. A football historical-form model (sportybet-historical-form-v1) is built only from stored, settled SportyBet results and is withheld when the available team sample is too small. The Odds Agent can blend that model with SportyBet market pricing, while preserving provenance.
+
+The Head Analyst now requires at least one independent evidence source before approving a selection. Market-only confidence cannot approve a bet. Historical-model provenance, model confidence, data quality, challenge penalties, and SportyBet market consensus remain visible to the decision layer.
+
+The observed football catalogue is also aligned with currently exposed SportyBet markets such as Home O/U, Away O/U, 1st Half O/U, Corners O/U, 1X2 - Never Down, GG/NG, and goal-streak markets. SportyBet remains the source of truth for event IDs, markets, selections, and odds.
