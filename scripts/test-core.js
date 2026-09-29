@@ -18,3 +18,4 @@ const result=runCoreFixtures();
 console.log(JSON.stringify(result,null,2));
 
 import "../src/core/sportybetHistory.fixture.js";
+import "../src/core/historicalModel.fixture.js";
