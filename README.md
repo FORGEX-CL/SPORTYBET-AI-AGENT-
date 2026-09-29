@@ -81,7 +81,7 @@ The Risk Agent now applies market-aware failure-mode analysis for early-goals, 1
 
 GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` and on pull requests. Local execution has not been represented as passing unless the commands actually run successfully.
 
-### Platinum intelligence layer
+\n- Rolling model-drift detection compares recent versus baseline Brier/log-loss performance and downweights agents whose recent forecasting quality deteriorates.\n- Settlement coverage is a hard approval gate: complex or unsupported SportyBet markets can be displayed/analyzed, but they are not eligible for automatically learned tickets until deterministic settlement rules exist.\n- Three-way Handicap and Asian Handicap settlement are modeled separately; quarter-line Asian Handicap remains fail-closed until half-win/half-loss settlement is implemented.\n\n### Platinum intelligence layer
 
 - Platinum ensemble (`sportybet-platinum-ensemble-v1`) combines SportyBet market consensus with independent model evidence, then stress-tests probability toward market consensus and neutral probability before calculating robust value.
 - Win, push and loss probabilities are kept separate where the market supports a push state; expected value uses settlement-aware profit math instead of binary-only probability.
