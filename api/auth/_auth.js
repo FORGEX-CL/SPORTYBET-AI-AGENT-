@@ -1,4 +1,4 @@
-import { createHash, randomBytes, scrypt as nodeScrypt, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, scrypt as nodeScrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 const scrypt=promisify(nodeScrypt);
 
@@ -41,7 +41,9 @@ export async function verifyPassword(password,encoded){
 function b64(value){return Buffer.from(value).toString("base64url");}
 function unb64(value){return Buffer.from(value,"base64url").toString("utf8");}
 function secret(){const value=String(process.env.SPORTYBET_AUTH_SECRET??"");if(value.length<32)throw new Error("SPORTYBET_AUTH_SECRET is not configured");return value;}
-function sign(payload){return createHash("sha256").update(secret()+"."+payload).digest("base64url");}
+function sign(payload){return createHmac("sha256",secret()).update(payload).digest("base64url");}
+export function safeEqualText(left,right){const a=Buffer.from(String(left??"")),b=Buffer.from(String(right??""));return a.length===b.length&&timingSafeEqual(a,b);}
+export function getClientIp(req){return String(req?.headers?.["x-forwarded-for"]??req?.headers?.["x-real-ip"]??"unknown").split(",")[0].trim().slice(0,128)||"unknown";}
 export function createSessionToken(username,now=Math.floor(Date.now()/1000),role="user"){
   const payload=b64(JSON.stringify({u:normalizeUsername(username),r:role==="admin"?"admin":"user",iat:now,exp:now+SESSION_TTL_SECONDS}));
   return payload+"."+sign(payload);
@@ -110,7 +112,14 @@ export async function cloudCreateFirstAdmin(username,password){
 export async function cloudLogin(username,password){
   const profile=await cloudFindUser(username);
   if(!profile||!profile.active)return null;
-  const token=await cloudFetch("/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":CLOUD_AUTH_KEY,"Authorization":"Bearer "+CLOUD_AUTH_KEY},body:JSON.stringify({email:syntheticEmail(profile.username),password})});
+  const response=await fetch(CLOUD_URL+"/auth/v1/token?grant_type=password",{
+    method:"POST",
+    headers:{"apikey":CLOUD_AUTH_KEY,"Authorization":"Bearer "+CLOUD_AUTH_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({email:syntheticEmail(profile.username),password})
+  });
+  const token=await response.json().catch(()=>null);
+  if(response.status===400||response.status===401)return null;
+  if(!response.ok)throw new Error(token?.msg||token?.message||token?.error_description||token?.error||"Cloud authentication request failed: "+response.status);
   if(!token?.user?.id)return null;
   try{await cloudFetch("/rest/v1/app_users?username=eq."+encodeURIComponent(profile.username),{method:"PATCH",headers:{"Prefer":"return=minimal"},body:JSON.stringify({last_login_at:new Date().toISOString()})});}catch{}
   return profile;
