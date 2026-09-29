@@ -4,7 +4,8 @@ import { buildChallengeRound } from "./debate.js";
 import { runHeadAnalyst } from "./headAnalyst.js";
 import { applyHistoricalFeedback, feedbackForReport } from "./learningFeedback.js";
 import { buildSportyBetMarketSignals, getSportyBetMarketSignal } from "./sourceSignalEngine.js";
-import { buildHistoricalModel, combineModelSignals } from "./historicalModel.js";
+import { buildHistoricalModel } from "./historicalModel.js";
+import { buildPlatinumEnsemble } from "./platinumEnsemble.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={}}={}){
   const markets=analyzeEventMarkets(event);
@@ -22,14 +23,22 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
       const historicalModel=buildHistoricalModel(event,rawMarket,selection,historical);
       const statisticsContext={...(context.statistics??{}),evidence:[...(context.statistics?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.statistics?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.statistics?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
       const footballContext={...(context.football??{}),evidence:[...(context.football?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.football?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.football?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
-      const modelInput=suppliedModel??combineModelSignals([historicalModel,signal])??signal;
+      const platinumEnsemble=buildPlatinumEnsemble({
+        marketProbability:signal?.modelProbability??signal?.fairProbability??null,
+        marketConfidence:signal?.confidence??0,
+        independentModels:[...(historicalModel?[historicalModel]:[]),...(suppliedModel&&typeof suppliedModel==="object"?[suppliedModel]:[])],
+        dataQuality:Math.max(Number(signal?.dataQuality)||0,Number(historicalModel?.dataQuality)||0),
+        sourceAgreement:signal?.crossMarketAgreement??0,
+        odds:selection.odds
+      });
+      const modelInput=platinumEnsemble??historicalModel??suppliedModel??signal;
       const reportsForSelection=[
         statisticsAnalysis(event,rawMarket,selection,{...statisticsContext,marketSignal:signal}),
         footballAnalysis(event,rawMarket,selection,{...footballContext,marketSignal:signal}),
         multiSportAnalysis(event,rawMarket,selection,{...(context.multiSport??{}),marketSignal:signal}),
         marketAnalysis(event,rawMarket,selection),
         oddsAnalysis(event,rawMarket,selection,modelInput),
-        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel})
+        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel,platinumEnsemble})
       ].map(report=>{
         const feedback=feedbackForReport(agentPerformance,report);
         const adjusted=applyHistoricalFeedback(report.confidence,feedback);
