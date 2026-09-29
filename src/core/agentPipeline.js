@@ -4,6 +4,7 @@ import { buildChallengeRound } from "./debate.js";
 import { runHeadAnalyst } from "./headAnalyst.js";
 import { applyHistoricalFeedback, feedbackForReport } from "./learningFeedback.js";
 import { buildSportyBetMarketSignals, getSportyBetMarketSignal } from "./sourceSignalEngine.js";
+import { buildHistoricalModel, combineModelSignals } from "./historicalModel.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={}}={}){
   const markets=analyzeEventMarkets(event);
@@ -20,7 +21,8 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
       const statisticsContext={...(context.statistics??{}),evidence:[...(context.statistics?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.statistics?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.statistics?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null};
       const footballContext={...(context.football??{}),evidence:[...(context.football?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.football?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.football?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null};
       const suppliedModel=modelProbabilities[selectionKey];
-      const modelInput=suppliedModel??signal;
+      const historicalModel=buildHistoricalModel(event,rawMarket,selection,historical);
+      const modelInput=suppliedModel??combineModelSignals([historicalModel,signal])??signal;
       const reportsForSelection=[
         statisticsAnalysis(event,rawMarket,selection,{...statisticsContext,marketSignal:signal}),
         footballAnalysis(event,rawMarket,selection,{...footballContext,marketSignal:signal}),
