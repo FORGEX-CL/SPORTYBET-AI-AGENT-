@@ -17,5 +17,5 @@ let payload=null,statusCode=null;
 const req={method:"GET",headers:{cookie:`sportybet_ai_session=${session}`}};
 const res={setHeader(){},status(code){statusCode=code;return this;},json(data){payload=data;}};
 await createBasketballHandler({fetcher:mockFetch})(req,res);
-if(statusCode!==200||payload?.source!=="SportyBet"||payload?.eventCount!==1||payload?.events?.[0]?.sport!=="basketball")throw new Error("SportyBet basketball API fixture failed");
+if(statusCode!==200||payload?.source!=="SportyBet"||payload?.eventCount!==1||payload?.events?.[0]?.sport!=="basketball")throw new Error("SportyBet basketball API fixture failed: "+JSON.stringify({statusCode,payload}));
 console.log("SportyBet basketball API fixture passed");
