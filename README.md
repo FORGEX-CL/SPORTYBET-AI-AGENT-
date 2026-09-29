@@ -33,6 +33,8 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Official SportyBet Results ingestion for football settlement, including event IDs and final scores.
 - Prediction settlement, error classification and learning summary.
 - Parser, feed, analysis, debate and learning regression fixtures via `npm run test:core`.
+- Ticket-aware AI Agent Room with specialist-agent, Head Analyst and selection-level regression fixtures.
+- Core Verification GitHub Action runs the fixture suite and production build on pushes to `main` and pull requests.
 
 ## Integrity
 
