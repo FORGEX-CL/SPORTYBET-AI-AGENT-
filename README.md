@@ -86,7 +86,7 @@ The Risk Agent now applies market-aware failure-mode analysis for early-goals, 1
 
 GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` and on pull requests. Local execution has not been represented as passing unless the commands actually run successfully.
 
-\n- Rolling model-drift detection compares recent versus baseline Brier/log-loss performance and downweights agents whose recent forecasting quality deteriorates.\n- Settlement coverage is a hard approval gate: complex or unsupported SportyBet markets can be displayed/analyzed, but they are not eligible for automatically learned tickets until deterministic settlement rules exist.\n- Three-way Handicap and Asian Handicap settlement are modeled separately; quarter-line Asian Handicap remains fail-closed until half-win/half-loss settlement is implemented.\n\n### Platinum intelligence layer
+- Rolling model-drift detection compares recent versus baseline Brier/log-loss performance and downweights agents whose recent forecasting quality deteriorates.- Settlement coverage is a hard approval gate: complex or unsupported SportyBet markets can be displayed/analyzed, but they are not eligible for automatically learned tickets until deterministic settlement rules exist.- Three-way Handicap and Asian Handicap settlement are modeled separately; quarter-line Asian Handicap remains fail-closed until half-win/half-loss settlement is implemented.\n\n### Platinum intelligence layer
 
 - Platinum ensemble (`sportybet-platinum-ensemble-v1`) combines SportyBet market consensus with independent model evidence, then stress-tests probability toward market consensus and neutral probability before calculating robust value.
 - Win, push and loss probabilities are kept separate where the market supports a push state; expected value uses settlement-aware profit math instead of binary-only probability.
@@ -109,10 +109,12 @@ GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` 
 - Sessions use signed, HttpOnly, Secure, SameSite cookies with an 8-hour lifetime.
 - Usernames are normalized and must be unique within the configured AUTH_USERS_JSON registry.
 - Never commit usernames/passwords, password hashes, session secrets, or .env files to GitHub. GitHub stores the application code; cloud deployment secrets or the future user database stores authentication data. Never share account credentials with another person.
-- Provision an account by generating a hash with `npm run auth:hash`, then placing the generated username/hash pair in AUTH_USERS_JSON and setting SPORTYBET_AUTH_SECRET in the deployment environment.
-- There is no public signup flow. Only an administrator can authorize an account.
-- Accounts use `role: "admin"` for administrators and `role: "user"` for approved users; the session and admin APIs enforce that distinction.
-- The login page intentionally has no password-recovery shortcut that would expose credentials; account provisioning remains an operator-controlled deployment step.
+- Local fallback deployments can provision accounts with AUTH_USERS_JSON; production cloud deployments use Supabase Auth plus the server-side app_users registry.
+- The SIGN UP AI flow is intentionally self-service: new accounts are created only with `role: "user"`.
+- The first administrator is provisioned separately through the one-time `admin-setup.html` bootstrap flow; the bootstrap secret must be removed immediately after successful setup.
+- Accounts use `role: "admin"` for administrators and `role: "user"` for regular users; the signed application session and admin APIs enforce that distinction.
+- Login failures are rate-limited per client IP, and wrong cloud credentials return the same generic 401 as wrong local credentials.
+- The login page intentionally has no password-recovery shortcut that would expose credentials; credential recovery/provisioning must be handled through the deployment's secure account-management process.
 
 ## Cloud Sign-up AI Agent
 
