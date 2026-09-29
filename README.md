@@ -71,7 +71,7 @@ npm run dev
 - Verified football event enrichment now supports up to 50 event detail pages per feed run.
 ## Agent intelligence hardening
 
-The analysis layer now separates SportyBet market-derived consensus from independent historical evidence. A football historical-form model (sportybet-historical-form-v1) is built only from stored, settled SportyBet results and is withheld when the available team sample is too small. The Odds Agent can blend that model with SportyBet market pricing, while preserving provenance. Model arbitration is calibration-weighted, and the Head Analyst retains per-agent forecast attribution for future learning.
+The analysis layer now separates SportyBet market-derived consensus from independent historical evidence. A football smoothed Poisson historical model (sportybet-historical-poisson-v2) is built only from stored, settled SportyBet results and is withheld when the available team sample is too small. The Odds Agent can blend that model with SportyBet market pricing, while preserving provenance. Model arbitration is calibration-weighted, and the Head Analyst retains per-agent forecast attribution for future learning.
 
 The Head Analyst now requires at least one independent evidence source before approving a selection. Agent arbitration weights historical calibration, data quality and evidence provenance rather than treating all specialist confidence as equally reliable. Market-only confidence cannot approve a bet. Historical-model provenance, model confidence, data quality, challenge penalties, and SportyBet market consensus remain visible to the decision layer.
 
