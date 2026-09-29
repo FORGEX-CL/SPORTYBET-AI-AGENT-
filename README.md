@@ -80,3 +80,14 @@ The Risk Agent now applies market-aware failure-mode analysis for early-goals, 1
 ## Verification
 
 GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` and on pull requests. Local execution has not been represented as passing unless the commands actually run successfully.
+
+### Platinum intelligence layer
+
+- Platinum ensemble (`sportybet-platinum-ensemble-v1`) combines SportyBet market consensus with independent model evidence, then stress-tests probability toward market consensus and neutral probability before calculating robust value.
+- Win, push and loss probabilities are kept separate where the market supports a push state; expected value uses settlement-aware profit math instead of binary-only probability.
+- Football historical Poisson score distributions are computed once per event and reused across that event's markets and selections, reducing repeated numerical work as market depth grows.
+- Head Analyst arbitration is weighted by agent historical calibration, data quality and evidence provenance; each predictive agent retains its own forecast for later learning.
+- Debate now runs as challenge → rebuttal → resolution, with unresolved high-severity risk blocking approval.
+- Ticket construction applies pairwise dependency penalties and records portfolio correlation, preventing raw confidence from being the only ticket objective.
+- Historical evidence has a temporal leakage guard: results after the analyzed event start time are excluded.
+- CI verification runs the full fixture suite and production build on GitHub Actions.
