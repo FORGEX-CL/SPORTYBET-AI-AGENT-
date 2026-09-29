@@ -1,0 +1,12 @@
+import { hashPassword, verifyPassword, createSessionToken, verifySessionToken } from "../api/auth/_auth.js";
+process.env.SPORTYBET_AUTH_SECRET="test-secret-that-is-long-enough-123456";
+const password="correct-horse-battery-staple";
+const hash=await hashPassword(password);
+if(!hash.startsWith("scrypt$"))throw new Error("Auth hash format failed");
+if(!(await verifyPassword(password,hash)))throw new Error("Password verification failed");
+if(await verifyPassword("wrong-password",hash))throw new Error("Wrong password accepted");
+const token=createSessionToken("DemoUser",1700000000);
+const session=verifySessionToken(token,1700000100);
+if(session?.username!=="demouser")throw new Error("Session verification failed");
+if(verifySessionToken(token,1700000000+60*60*9))throw new Error("Expired session accepted");
+console.log("Authentication fixture passed");
