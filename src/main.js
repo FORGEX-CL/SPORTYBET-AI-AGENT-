@@ -8,6 +8,7 @@ import { settleFootballSelection } from "./data/sportybetResultsParser.js";
 import { buildHistoricalEvidenceByEvent } from "./core/sportybetHistory.js";
 import { compareTicketToFeed } from "./core/ticketDelta.js";
 import { recordSportyBetOddsSnapshot, buildOddsMovementBySelection } from "./core/oddsHistory.js";
+import { buildAiReply } from "./core/aiAgentRoom.js";
 
 // AI side-panel integration point\nconst emptyFeed=normalizeSportyBetFeed([]);
 const initialLedger=loadLearningLedger();
@@ -21,50 +22,6 @@ function ticketCopyText(ticket){return[`SPORTYBET AI AGENT · ${ticket.strategyL
 async function copyTicket(ticket){const text=ticketCopyText(ticket);try{await navigator.clipboard.writeText(text);state.error="Ticket copied to clipboard.";}catch{const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();state.error="Ticket copied to clipboard.";}render();}
 function bindTicketButtons(){document.querySelectorAll("[data-ticket-index]").forEach(button=>button.addEventListener("click",()=>{const index=Number(button.getAttribute("data-ticket-index"));state.selectedTicket=state.analysis.tickets?.[index]??null;render();}));document.querySelector("#copy-ticket")?.addEventListener("click",()=>copyTicket(state.selectedTicket));document.querySelector("#ask-ticket-ai")?.addEventListener("click",()=>{document.querySelector("#ai-drawer")?.classList.add("open");const input=document.querySelector("#ai-input");if(input){input.value="Explain this ticket selection by selection";input.focus();}});document.querySelector("#close-ticket")?.addEventListener("click",()=>{state.selectedTicket=null;render();});document.querySelector("#recheck-ticket")?.addEventListener("click",()=>loadFeed({preserveTicketId:state.selectedTicket?.ticketId??null}));}
 
-function agentEvidence(agentId){
-  const reports=(state.analysis.reports??[]).filter(r=>r.agentId===agentId);
-  const accepted=(state.analysis.decision?.accepted??[]).filter(x=>reports.some(r=>r.eventId===x.eventId&&r.marketId===x.marketId&&r.selectionId===x.selectionId));
-  return {reports,accepted};
-}
-function agentAnswer(agentId){
-  const role=AGENT_ROLES.find(a=>a.id===agentId);
-  const {reports,accepted}=agentEvidence(agentId);
-  if(!state.feed.eventCount)return role.name+": no verified SportyBet feed is loaded yet.";
-  if(agentId==="head")return `Head Analyst: ${accepted.length} selection(s) survived the current evidence and challenge gates. ${state.analysis.decision?.reasoning??"No decision summary available."}`;
-  if(agentId==="risk")return `Risk / Contrarian Agent: ${state.analysis.debate?.length??0} challenge message(s) are recorded. I challenge failure modes and do not treat market availability alone as evidence.`;
-  if(agentId==="odds")return `Odds & Value Agent: ${reports.length} priced selection report(s) are recorded; ${reports.filter(r=>Number(r.value)>0).length} have a positive value proxy in the current model.`;
-  return role.name+`: ${reports.length} report(s) recorded. ${accepted.length} corresponding selection(s) are currently accepted by the decision layer.`;
-}
-function ticketSelectionAnswer(ticket,index){
-  const selection=ticket?.selections?.[index];
-  if(!selection)return`This ticket has ${ticket?.selections?.length??0} selections. Ask about selection 1, selection 2, etc.`;
-  const reports=(state.analysis.reports??[]).filter(r=>r.eventId===selection.eventId&&r.marketId===selection.marketId&&r.selectionId===selection.selectionId);
-  const challenges=(state.analysis.debate??[]).filter(d=>String(d.message??"").toLowerCase().includes(String(selection.selection).toLowerCase()));
-  const accepted=(state.analysis.decision?.accepted??[]).some(x=>x.eventId===selection.eventId&&x.marketId===selection.marketId&&x.selectionId===selection.selectionId);
-  const odds=Number(selection.odds).toFixed(2);
-  return`Selection ${index+1}: ${selection.selection}. Market: ${selection.marketName??"unknown"}. Odds at snapshot: ${odds}. Specialist reports linked: ${reports.length}. Related challenge messages: ${challenges.length}. Decision-layer status: ${accepted?"accepted":"not accepted"}. Current ticket data should be rechecked before any use.`;
-}
-function aiReply(q){
-  const raw=String(q||"").trim(),s=raw.toLowerCase();
-  if(!state.feed.eventCount)return"No verified SportyBet feed is loaded. Refresh the source first.";
-  if(state.selectedTicket){
-    const match=s.match(/(?:selection|pick|leg)\\s*(\\d+)/);
-    if(match)return ticketSelectionAnswer(state.selectedTicket,Math.max(0,Number(match[1])-1));
-    if(s.includes("this ticket")||s.includes("each selection")||s.includes("selection by selection")){
-      return state.selectedTicket.selections.map((_,i)=>ticketSelectionAnswer(state.selectedTicket,i)).join(" ");
-    }
-  }
-  const agentMatch=AGENT_ROLES.find(a=>s.includes(a.name.toLowerCase())||s.includes(a.id.toLowerCase()));
-  if(agentMatch)return agentAnswer(agentMatch.id);
-  if(s.includes("who are")||s.includes("agents"))return"The room has 7 agents: Statistics, Football, Multi-Sport, SportyBet Market Intelligence, Odds & Value, Risk / Contrarian, and Head Analyst.";
-  if(s.includes("why")&&s.includes("ticket"))return"Open a ticket and ask about a selection number for a selection-level explanation. The decision layer records evidence and challenge context rather than inventing a reason.";
-  if(s.includes("risk"))return agentAnswer("risk");
-  if(s.includes("odds"))return agentAnswer("odds");
-  if(s.includes("head analyst")||s.includes("decision"))return agentAnswer("head");
-  if(s.includes("ticket"))return"Current candidates: "+(state.analysis.tickets?.length??0)+". Open a candidate for exact selections and revalidation.";
-  if(s.includes("source")||s.includes("sportybet"))return`Current verified feed: ${state.feed.eventCount} events and ${state.feed.marketCount} markets. Source captured at ${state.feed.capturedAt??"unknown"}.`;
-  return"I can explain the current SportyBet feed, any specialist agent, risk challenges, odds evidence, Head Analyst decisions, or a specific ticket selection.";
-}
 function stagedPlan(){
   const t=state.analysis.tickets??[];
   if(!t.length)return["Refresh the source feed and run analysis first."];
@@ -89,7 +46,7 @@ function bindAi(){
   document.querySelector("#close-ai")?.addEventListener("click",()=>document.querySelector("#ai-drawer")?.classList.remove("open"));
   document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{const i=document.querySelector("#ai-input");i.value=b.dataset.q;i.focus()}));
   document.querySelector("#show-plan")?.addEventListener("click",()=>document.querySelector("#plan-card")?.classList.toggle("visible"));document.querySelectorAll("#rollover-stake,#rollover-days,#rollover-odds").forEach(i=>i.addEventListener("input",()=>{const t=document.querySelector("#rollover-table");if(t)t.innerHTML=renderRolloverRows()}));
-  document.querySelector("#ai-form")?.addEventListener("submit",e=>{e.preventDefault();const i=document.querySelector("#ai-input"),q=i.value.trim();if(!q)return;const chat=document.querySelector("#ai-chat");chat.insertAdjacentHTML("beforeend",'<div class="ai-msg user-msg"><p>'+escapeHtml(q)+'</p></div><div class="ai-msg agent-msg"><b>AI Agents</b><p>'+escapeHtml(aiReply(q))+'</p></div>');i.value="";chat.scrollTop=chat.scrollHeight});
+  document.querySelector("#ai-form")?.addEventListener("submit",e=>{e.preventDefault();const i=document.querySelector("#ai-input"),q=i.value.trim();if(!q)return;const chat=document.querySelector("#ai-chat");chat.insertAdjacentHTML("beforeend",'<div class="ai-msg user-msg"><p>'+escapeHtml(q)+'</p></div><div class="ai-msg agent-msg"><b>AI Agents</b><p>'+escapeHtml(buildAiReply(state,q))+'</p></div>');i.value="";chat.scrollTop=chat.scrollHeight});
 }
 function render(){
   const fresh=requireFreshFeed(state.feed),agents=renderAgentStatus();
