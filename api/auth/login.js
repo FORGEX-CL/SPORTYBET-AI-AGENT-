@@ -10,8 +10,8 @@ export default async function handler(req,res){
     const user=findUser(username);
     const valid=user?await verifyPassword(password,user.passwordHash):false;
     if(!valid){res.status(401).json({authenticated:false,error:"Invalid username or password"});return;}
-    res.setHeader("Set-Cookie",sessionCookie(createSessionToken(user.username)));
-    res.status(200).json({authenticated:true,username:user.username});
+    res.setHeader("Set-Cookie",sessionCookie(createSessionToken(user.username, Math.floor(Date.now()/1000), user.role)));
+    res.status(200).json({authenticated:true,username:user.username,role:user.role});
   }catch(error){
     const message=error instanceof Error?error.message:"Authentication service unavailable";
     res.status(message.includes("not configured")?503:500).json({authenticated:false,error:message});
