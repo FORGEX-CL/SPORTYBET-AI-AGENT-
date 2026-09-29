@@ -108,6 +108,8 @@ GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` 
 - Passwords are never stored in plaintext; the server verifies salted scrypt password hashes from the AUTH_USERS_JSON deployment secret.
 - Sessions use signed, HttpOnly, Secure, SameSite cookies with an 8-hour lifetime.
 - Usernames are normalized and must be unique within the configured AUTH_USERS_JSON registry.
-- Never commit usernames/passwords, password hashes, session secrets, or .env files to GitHub. Never share account credentials with another person.
+- Never commit usernames/passwords, password hashes, session secrets, or .env files to GitHub. GitHub stores the application code; cloud deployment secrets or the future user database stores authentication data. Never share account credentials with another person.
 - Provision an account by generating a hash with `npm run auth:hash`, then placing the generated username/hash pair in AUTH_USERS_JSON and setting SPORTYBET_AUTH_SECRET in the deployment environment.
+- There is no public signup flow. Only an administrator can authorize an account.
+- Accounts use `role: "admin"` for administrators and `role: "user"` for approved users; the session and admin APIs enforce that distinction.
 - The login page intentionally has no password-recovery shortcut that would expose credentials; account provisioning remains an operator-controlled deployment step.
