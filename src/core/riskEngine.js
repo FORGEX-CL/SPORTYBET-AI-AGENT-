@@ -9,7 +9,7 @@ const COMPLEX_PATTERNS=[
   {test:n=>n.includes("live"),risk:.10,reason:"Live markets can move rapidly and require time-sensitive source integrity."}
 ];
 
-export function assessSelectionRisk({event={},market={},selection={},signal=null,historicalModel=null,explicitRisks=[]}={}){
+export function assessSelectionRisk({event={},market={},selection={},signal=null,historicalModel=null,platinumEnsemble=null,explicitRisks=[]}={}){
   const risks=[...explicitRisks];
   let riskScore=0;
   const marketName=String(market?.name??"").toLowerCase();
@@ -43,6 +43,20 @@ export function assessSelectionRisk({event={},market={},selection={},signal=null
   if(historicalModel&&Number(historicalModel.sample)<3){
     riskScore+=.12;
     risks.push("Historical model sample is still small.");
+  }
+  if(platinumEnsemble){
+    if(Number(platinumEnsemble.uncertainty)>=.25){
+      riskScore+=.14;
+      risks.push("Platinum ensemble uncertainty is elevated.");
+    }
+    if(Number(platinumEnsemble.robustness)<.55){
+      riskScore+=.16;
+      risks.push("Platinum ensemble is not robust across its stress scenarios.");
+    }
+    if(Number(platinumEnsemble.downsideExpectedValue)<-.10){
+      riskScore+=.12;
+      risks.push("Stress-tested downside value is materially negative.");
+    }
   }
 
   for(const pattern of COMPLEX_PATTERNS){
