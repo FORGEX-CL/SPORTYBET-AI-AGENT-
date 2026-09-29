@@ -4,7 +4,7 @@ const state={
   feed:{eventCount:2,marketCount:4,capturedAt:"2026-09-29T00:00:00.000Z"},
   analysis:{
     reports:[
-      {agentId:"odds",eventId:"e1",marketId:"m1",selectionId:"s1",value:.12},
+      {agentId:"odds",eventId:"e1",marketId:"m1",selectionId:"s1",odds:2.10,value:.12},
       {agentId:"football",eventId:"e1",marketId:"m1",selectionId:"s1"}
     ],
     debate:[{eventId:"e1",marketId:"m1",selectionId:"s1",message:"price risk"}],
