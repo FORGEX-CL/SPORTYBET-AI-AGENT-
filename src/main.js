@@ -76,7 +76,33 @@ ${renderSelectedTicket(state.selectedTicket)}
 
 async function syncResults(){const snapshot=await fetchSportyBetResultsApi();state.ledger=recordSportyBetResults(state.ledger,snapshot.results??[],snapshot.capturedAt??null);const pending=state.ledger.predictions.filter(p=>p.status!=="won"&&p.status!=="lost");const selectionResults=[];for(const prediction of pending){for(const selection of prediction.selections){const result=snapshot.results.find(r=>String(r.eventId)===String(selection.eventId));if(!result)continue;const settled=settleFootballSelection(result,{marketName:selection.marketName,selectionName:selection.selection});selectionResults.push({eventId:selection.eventId,marketId:selection.marketId,selectionId:selection.selectionId,result:settled,settlementSource:"SportyBet"});}}if(selectionResults.length)state.ledger=settlePendingFromSportyBetResults(state.ledger,selectionResults);state.learning=learningSummary(state.ledger);safeSaveLearning();state.lastResultSync=String(snapshot.resultCount)+" SportyBet results · "+String(state.ledger.resultHistory?.length??0)+" stored";return snapshot;}
 async function loadFeed({preserveTicketId=null}={}){try{state.sourceHealth=await fetchSportyBetHealthApi(state.selectedSport);}catch{state.sourceHealth={status:"unavailable",parsedEvents:0,parsedFootballEvents:0,eventsWithMarkets:0,pricedSelections:0,checkedAt:new Date().toISOString(),latencyMs:null};}state.loading=true;state.error="";state.detailFailures=0;state.resultFailures=0;state.selectedTicket=preserveTicketId?state.selectedTicket:null;render();try{const snapshot=state.selectedSport==="basketball"?await fetchSportyBetBasketballApi():await fetchSportyBetFootballApi();state.detailFailures=snapshot.detailFailures?.length??0;state.feed=normalizeSportyBetFeed(snapshot.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});const oddsHistory=recordSportyBetOddsSnapshot(state.ledger.oddsHistory??{},state.feed.events,state.feed.capturedAt);state.ledger=recordSportyBetOddsHistory(state.ledger,oddsHistory);if(state.selectedSport==="football"){try{await syncResults();}catch{state.resultFailures=1;state.lastResultSync="RESULT SOURCE UNAVAILABLE";}}else{state.lastResultSync="BASKETBALL SETTLEMENT OFF";}const oddsMovementBySelection=buildOddsMovementBySelection(state.ledger.oddsHistory??{});const historicalEvidence=buildHistoricalEvidenceByEvent(state.feed.events,state.ledger.resultHistory??[]);const evidenceByEvent=Object.fromEntries(Object.entries(historicalEvidence).map(([eventId,historical])=>[eventId,{__historical:historical}]));state.analysis=analyzeSportyBetFeed(state.feed,{evidenceByEvent,agentPerformance:state.ledger.performance,oddsMovementBySelection});state.ledger=registerTickets(state.ledger,state.analysis.tickets??[]);if(preserveTicketId){const replacement=state.analysis.tickets?.find(t=>t.ticketId===preserveTicketId);state.selectedTicket=replacement??state.selectedTicket;}safeSaveLearning();}catch(error){state.feed=normalizeSportyBetFeed([]);state.analysis=analyzeSportyBetFeed(state.feed,{agentPerformance:state.ledger.performance});state.error=error instanceof Error?error.message:"SportyBet feed could not be loaded";}finally{state.loading=false;render();}}
-async function bootstrap(){await checkSession();if(!authState.authenticated){renderLogin();return;}render();await loadFeed();}
+async function bootstrap(){
+  // Render something immediately. Never leave the user staring at a blank page
+  // while the authentication endpoint is being reached.
+  try{
+    renderLogin();
+  }catch(error){
+    const app=document.querySelector("#app");
+    if(app){
+      const message=error instanceof Error?error.message:"Unknown startup error";
+      app.innerHTML="<main style=\"min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;background:#f4f5f7\"><section style=\"max-width:520px;background:#fff;border:1px solid #ddd;border-top:4px solid #e30613;border-radius:8px;padding:24px\"><h2 style=\"margin:0 0 10px\">SPORTYBET AI AGENT</h2><p style=\"color:#666;line-height:1.5\">The application started, but the login screen could not be rendered.</p><small>"+escapeHtml(message)+"</small></section></main>";
+    }
+    return;
+  }
+
+  try{
+    await checkSession();
+    if(!authState.authenticated){
+      renderLogin();
+      return;
+    }
+    render();
+    await loadFeed();
+  }catch(error){
+    authState={status:"error",authenticated:false,username:null,role:null,error:error instanceof Error?error.message:"Application startup failed"};
+    renderLogin();
+  }
+}
 
 let authState={status:"checking",authenticated:false,username:null,role:null,error:""};
 function renderLogin(){
@@ -109,8 +135,25 @@ function renderLogin(){
   });
 }
 async function checkSession(){
-  try{const response=await fetch("/api/auth/me",{headers:{Accept:"application/json"},cache:"no-store"});const payload=await response.json().catch(()=>({}));authState=payload.authenticated?{status:"authenticated",authenticated:true,username:payload.username,role:payload.role,error:""}:{status:"signed-out",authenticated:false,username:null,role:null,error:""};}
-  catch{authState={status:"unavailable",authenticated:false,username:null,role:null,error:"Authentication service unavailable"};}
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),7000);
+  try{
+    const response=await fetch("/api/auth/me",{headers:{Accept:"application/json"},cache:"no-store",signal:controller.signal});
+    const payload=await response.json().catch(()=>({}));
+    authState=payload.authenticated
+      ? {status:"authenticated",authenticated:true,username:payload.username,role:payload.role,error:""}
+      : {status:"signed-out",authenticated:false,username:null,role:null,error:""};
+  }catch(error){
+    authState={
+      status:"unavailable",
+      authenticated:false,
+      username:null,
+      role:null,
+      error:error?.name==="AbortError"?"Authentication check timed out.":"Authentication service unavailable"
+    };
+  }finally{
+    clearTimeout(timer);
+  }
 }
 async function logout(){
   try{await fetch("/api/auth/logout",{method:"POST"});}catch{}
