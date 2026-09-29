@@ -29,7 +29,7 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
         multiSportAnalysis(event,rawMarket,selection,{...(context.multiSport??{}),marketSignal:signal}),
         marketAnalysis(event,rawMarket,selection),
         oddsAnalysis(event,rawMarket,selection,modelInput),
-        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal})
+        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel})
       ].map(report=>{
         const feedback=feedbackForReport(agentPerformance,report);
         const adjusted=applyHistoricalFeedback(report.confidence,feedback);
