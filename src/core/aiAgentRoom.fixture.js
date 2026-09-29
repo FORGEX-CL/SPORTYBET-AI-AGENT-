@@ -20,6 +20,8 @@ const a=buildAiReply(state,"Explain selection 1");
 if(!a.includes("Selection 1: Home")||!a.includes("2.10"))throw new Error("AI ticket explanation fixture failed");
 const b=buildAiReply(state,"What did the Odds Agent find?");
 if(!b.includes("1 priced report(s)"))throw new Error("Odds agent fixture failed");
+const d=buildAiReply(state,"Show agent disagreement");
+if(!d.includes("Debate monitor")||!d.includes("disagreement index"))throw new Error("AI disagreement fixture failed");
 const c=buildAiReply(state,"What is the source status?");
 if(!c.includes("2 events")||!c.includes("4 markets"))throw new Error("Source status fixture failed");
 console.log("ai-agent-room fixtures: ok");
