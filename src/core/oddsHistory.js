@@ -30,8 +30,12 @@ export function recordSportyBetOddsSnapshot(history={},events=[],capturedAt=null
           marketId:String(market.marketId),
           selectionId:String(selection.selectionId),
           marketName:market.name??"",
+          selectionName:selection.name??"",
           sport:event.sport??"",
-          league:event.league??""
+          league:event.league??"",
+          home:event.home??"",
+          away:event.away??"",
+          startTime:event.startTime??null
         };
         entry.points=[...entry.points,[Number.isFinite(at)?at:Date.now(),Number(selection.odds)]].slice(-MAX_POINTS_PER_KEY);
         next[key]=entry;
