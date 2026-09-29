@@ -4,7 +4,8 @@ const clamp=x=>Math.max(0,Math.min(1,Number(x)||0));
 const DEFAULT_PRIOR=.5;
 
 function settledCount(stat={}){
-  return Number(stat.won||0)+Number(stat.lost||0);
+  const safe=stat??{};
+  return Number(safe.won||0)+Number(safe.lost||0);
 }
 
 function smoothedWinRate(stat={},priorStrength=4){
