@@ -15,7 +15,8 @@ export function aggregateSelectionReports(reports=[],debate=[]){
       if(clamp(r.dataQuality)>0&&clamp(r.confidence)>0){
         item.predictiveAgents.push(r.agentId);
         item.predictiveConfidence+=clamp(r.confidence);
-        item.predictiveDataQuality+=clamp(r.dataQuality);\n        item.independentEvidence+=Number(r.independentEvidence)||0;
+        item.predictiveDataQuality+=clamp(r.dataQuality);
+        item.independentEvidence+=Number(r.independentEvidence)||0;
       }
       item.value=Math.max(item.value,Number(r.value)||0);
     }
