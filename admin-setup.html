@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SportyBet AI Agent · Admin Setup</title>
+<style>
+body{margin:0;background:#f5f5f5;font:15px Arial,sans-serif;color:#171717;display:grid;place-items:center;min-height:100vh}
+.card{width:min(420px,calc(100% - 32px));background:#fff;border-radius:14px;padding:28px;box-shadow:0 10px 35px #0001}
+h1{margin:0 0 8px;font-size:24px}p{color:#666}.label{font-size:11px;font-weight:700;letter-spacing:.12em;color:#e30613}
+label{display:block;font-size:12px;font-weight:700;margin:16px 0 6px}input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccc;border-radius:8px}
+button{width:100%;margin-top:20px;padding:13px;border:0;border-radius:8px;background:#e30613;color:#fff;font-weight:800;cursor:pointer}
+#status{margin-top:16px;padding:10px;border-radius:8px;background:#f2f2f2;white-space:pre-wrap}
+small{display:block;margin-top:14px;color:#777;line-height:1.4}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="label">PRIVATE ADMIN SETUP</div>
+<h1>SPORTYBET AI AGENT</h1>
+<p>Create the first cloud administrator. This page is intended for one-time setup only.</p>
+<form id="form">
+<label>ADMIN USERNAME</label><input id="username" value="jerri09" autocomplete="username" required>
+<label>BOOTSTRAP SECRET</label><input id="secret" type="password" autocomplete="off" required>
+<label>ADMIN PASSWORD</label><input id="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required>
+<button id="submit">CREATE ADMIN</button>
+</form>
+<div id="status"></div>
+<small>The password is submitted only over HTTPS to the server. Never put it in GitHub or AI chat. After successful setup, remove ADMIN_BOOTSTRAP_SECRET from the deployment environment.</small>
+</main>
+<script>
+document.querySelector("#form").addEventListener("submit",async e=>{
+ e.preventDefault();const b=document.querySelector("#submit"),s=document.querySelector("#status");b.disabled=true;b.textContent="CREATING…";
+ try{
+  const r=await fetch("/api/auth/bootstrap-admin",{method:"POST",headers:{"Content-Type":"application/json","X-Admin-Bootstrap-Secret":document.querySelector("#secret").value},body:JSON.stringify({username:document.querySelector("#username").value,password:document.querySelector("#password").value})});
+  const p=await r.json().catch(()=>({}));if(!r.ok)throw new Error(p.error||"Admin setup failed");
+  s.textContent="✓ "+p.message;b.textContent="ADMIN CREATED";
+ }catch(err){s.textContent="✕ "+(err.message||"Admin setup failed");b.disabled=false;b.textContent="CREATE ADMIN";}
+});
+</script>
+</body>
+</html>
