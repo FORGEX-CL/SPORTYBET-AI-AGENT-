@@ -34,16 +34,20 @@ export function statisticsAnalysis(event,market,selection,stats={}){
   const derived=signalEvidence(signal,"Source statistics");
   const externalEvidence=stats.evidence??[];
   const historicalSupport=Number(stats.dataQuality)>0?{confidence:Number(stats.confidence)||0,dataQuality:Number(stats.dataQuality)||0,formSignal:stats.formSignal??null,goalSignal:stats.goalSignal??null}:null;
+  const historicalModel=stats.historicalModel;
+  const modelEdge=historicalModel&&Number.isFinite(Number(selection.odds))?Math.abs(Number(historicalModel.modelProbability)-Number(impliedProbability(selection.odds))):0;
+  const modelConfidence=historicalModel?Math.min(1,Number(historicalModel.confidence||0)+modelEdge*.35):0;
   return{
     ...base(event,market,selection),
     agentId:"statistics",
     evidence:[...externalEvidence,...derived.evidence],
-    confidence:Math.max(Number(stats.confidence)||0,derived.confidence*.82),
+    confidence:Math.max(Number(stats.confidence)||0,derived.confidence*.82,modelConfidence),
     dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality,historicalSupport?.dataQuality??0),
     historicalSupport,
     independentEvidence:historicalSupport?1:0,
     sportEvaluation:evaluateSportEvidence(event.sport,{evidenceCount:(externalEvidence.length+derived.evidence.length),dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality),marketName:market.name}),
-    analysisBasis:derived.modelType??"no-source-model"
+    analysisBasis:historicalModel?.modelType??derived.modelType??"no-source-model",
+    modelProbability:historicalModel?.modelProbability??null
   };
 }
 
@@ -52,17 +56,21 @@ export function footballAnalysis(event,market,selection,context={}){
   const derived=signalEvidence(signal,"Football market consistency");
   const externalEvidence=context.evidence??[];
   const consistency=Number(signal?.crossMarketAgreement)||0;
+  const historicalModel=context.historicalModel;
+  const modelEdge=historicalModel&&Number.isFinite(Number(selection.odds))?Math.abs(Number(historicalModel.modelProbability)-Number(impliedProbability(selection.odds))):0;
+  const historicalModelConfidence=historicalModel?Math.min(1,Number(historicalModel.confidence||0)+modelEdge*.25):0;
   const historicalSupport={dataQuality:Number(context.dataQuality)||0,formSignal:context.formSignal??null,goalSignal:context.goalSignal??null};
   return{
     ...base(event,market,selection),
     agentId:"football",
     evidence:[...externalEvidence,...derived.evidence],
-    confidence:Math.max(Number(context.confidence)||0,Math.min(1,derived.confidence*.75+consistency*.20)),
+    confidence:Math.max(Number(context.confidence)||0,Math.min(1,derived.confidence*.75+consistency*.20),historicalModelConfidence),
     dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),
     historicalSupport,
     independentEvidence:Number(context.dataQuality)>0?1:0,
     crossMarketAgreement:consistency,
-    analysisBasis:derived.modelType??"no-source-model"
+    analysisBasis:historicalModel?.modelType??derived.modelType??"no-source-model",
+    modelProbability:historicalModel?.modelProbability??null
   };
 }
 
@@ -70,13 +78,15 @@ export function multiSportAnalysis(event,market,selection,context={}){
   const signal=context.marketSignal;
   const derived=signalEvidence(signal,"Multi-sport market structure");
   const externalEvidence=context.evidence??[];
+  const sportEvaluation=evaluateSportEvidence(event.sport,{evidenceCount:externalEvidence.length+derived.evidence.length,dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),marketName:market.name});
+  const sportConfidence=sportEvaluation.preferredMarket?sportEvaluation.score:Math.min(.78,sportEvaluation.score);
   return{
     ...base(event,market,selection),
     agentId:"multiSport",
     evidence:[...externalEvidence,...derived.evidence],
-    confidence:Math.max(Number(context.confidence)||0,derived.confidence*.78),
+    confidence:Math.max(Number(context.confidence)||0,derived.confidence*.78,sportConfidence),
     dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),
-    sportEvaluation:evaluateSportEvidence(event.sport,{evidenceCount:(externalEvidence.length+derived.evidence.length),dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),marketName:market.name}),
+    sportEvaluation,
     analysisBasis:derived.modelType??"no-source-model"
   };
 }
