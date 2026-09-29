@@ -1,2 +1,165 @@
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eef2f6;background:#090b0f;font-synthesis:none}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#18212a 0,transparent 34%),#090b0f}.topbar{height:76px;border-bottom:1px solid #20262d;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;background:#0b0e12cc;backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}.eyebrow,.label,.count,.ticket-id{font-size:10px;letter-spacing:.16em;color:#7f8a96;font-weight:700}.topbar h1{font-size:18px;letter-spacing:.05em;margin:3px 0 0}.topbar h1 span{color:#aab4bf}.source{font-size:12px;color:#aab4bf}.source i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e1a53b;margin-right:7px}.source i.live{background:#7fd69a}.source i.live+.source-text{color:#d9e7dc}main{width:min(1180px,90vw);margin:0 auto;padding:56px 0 80px}.hero{display:grid;grid-template-columns:1.7fr 1fr;gap:28px;align-items:end;padding-bottom:54px}.hero h2{font-size:clamp(32px,5vw,64px);line-height:.98;max-width:760px;margin:10px 0 18px;letter-spacing:-.045em}.muted{color:#89939e;line-height:1.7;max-width:700px}.scan-card,.agent,.ticket,.architecture{border:1px solid #222a32;background:#0d1116;border-radius:14px}.scan-card{padding:22px;display:flex;flex-direction:column;gap:9px}.scan-card strong{font-size:19px}.scan-card span{font-size:12px;color:#707b87;line-height:1.5}.refresh{margin-top:6px;border:1px solid #303b46;background:#151c23;color:#d9e1e8;border-radius:8px;padding:10px 12px;font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer}.refresh:disabled{opacity:.5;cursor:wait}.decision-line{margin-top:6px;padding-top:12px;border-top:1px solid #202a32;display:flex;justify-content:space-between;gap:12px;font-size:10px;letter-spacing:.08em}.decision-line span{color:#626d78}.decision-line b{color:#c6d0d8;font-size:10px}.feed-error{font-size:11px;color:#d89595;line-height:1.4}.section-head{display:flex;justify-content:space-between;align-items:end;margin:36px 0 15px}.section-head h3{margin:5px 0 0;font-size:25px}.agents{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.agent{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:17px}.agent-num{font-size:11px;color:#626d78}.agent h4,.ticket h4{margin:0 0 6px;font-size:15px}.agent p{margin:0;color:#75808b;font-size:12px;line-height:1.45}.agent-state{font-size:9px;letter-spacing:.12em;color:#626d78}.tickets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.ticket{padding:20px}.ticket h4{font-size:30px;margin:10px 0}.ticket h4 small{font-size:9px;color:#626d78;letter-spacing:.1em}.ticket-meta{display:flex;flex-direction:column;gap:5px;color:#7b8691;font-size:11px;min-height:38px}.ticket button{width:100%;margin-top:18px;border:1px solid #252e37;background:#141a20;color:#4f5964;border-radius:8px;padding:10px;font-size:10px;font-weight:700}.architecture{padding:22px}.flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#c1c9d1;font-size:12px}.flow span{padding:9px 11px;border:1px solid #252e37;border-radius:7px;background:#10151a}.flow b{color:#555f69}footer{border-top:1px solid #20262d;padding:22px 5vw;color:#59636e;font-size:10px;text-align:center}@media(max-width:760px){.topbar{padding:0 5vw}.source{display:none}.hero{grid-template-columns:1fr}.agents,.tickets{grid-template-columns:1fr}main{padding-top:35px}.hero h2{font-size:42px}.agent{grid-template-columns:34px 1fr}.agent-state{display:none}.section-head{align-items:start;gap:15px}.count{font-size:8px;text-align:right}}
-.ticket-detail{margin-top:22px;border:1px solid #222a32;background:#0d1116;border-radius:14px;padding:22px}.ticket-detail-meta{display:flex;gap:18px;flex-wrap:wrap;color:#7b8691;font-size:11px;margin:0 0 15px}.ticket-detail-meta b{color:#dce4eb}.selection-list{display:flex;flex-direction:column;gap:8px}.selection-row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;border:1px solid #202832;background:#0f141a;border-radius:9px;padding:11px}.selection-index{font-size:10px;color:#626d78}.selection-row strong{display:block;font-size:12px;margin-bottom:4px}.selection-row span{display:block;color:#697581;font-size:10px;line-height:1.4}.selection-odds{font-size:13px;font-weight:800;color:#d9e1e7}.ticket-source-note{font-size:10px;line-height:1.5;color:#65717c;margin:15px 0 0}@media(max-width:760px){.selection-row{grid-template-columns:28px 1fr auto}.ticket-detail{padding:17px}}.ticket-status{font-size:9px;letter-spacing:.08em;padding:5px 7px;border:1px solid #27323c;border-radius:6px}.ticket-status.ok{color:#8ccda0}.ticket-status.warn{color:#ddb07c}.ticket-status.muted{color:#737e89}.ticket-revalidation{font-size:11px;line-height:1.5;color:#7b8691;border:1px solid #202932;background:#0f1419;border-radius:8px;padding:10px 12px;margin:0 0 15px}.ticket-revalidation b{color:#dbe2e8}.selection-row.changed{border-color:#4a3a27}.selection-row.same{border-color:#202832}.selection-state{font-size:8px;letter-spacing:.08em;color:#7b8691;display:block;text-align:right;margin-top:3px}.ticket-actions{display:flex;gap:8px}.ticket-actions .refresh{margin-top:0}.ticket-actions{flex-wrap:wrap}
+:root{
+  --sporty-red:#e30613;
+  --sporty-red-dark:#c9000b;
+  --sporty-green:#16a34a;
+  --sporty-green-dark:#0d8a3b;
+  --sporty-yellow:#ffd400;
+  --ink:#171717;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --surface:#ffffff;
+  --surface-soft:#f5f6f8;
+  --header:#e30613;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--ink);
+  background:#f4f5f7;
+  font-synthesis:none;
+}
+*{box-sizing:border-box}
+html,body,#app{margin:0;min-height:100%;width:100%}
+body{background:#f4f5f7;color:var(--ink)}
+button,input{font:inherit}
+button{cursor:pointer}
+
+/* SportyBet-style shell: red brand bar, compact navigation, white data surface. */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  min-height:64px;
+  padding:0 4vw;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  background:var(--header);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.16);
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{
+  width:38px;height:38px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#fff;color:var(--sporty-red);
+  font-weight:900;font-size:25px;line-height:1;
+  font-style:italic;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.brand-copy{min-width:0}
+.brand-copy h1{font-size:20px;line-height:1;margin:0;font-weight:900;letter-spacing:-.03em}
+.brand-copy h1 span{color:#fff}
+.eyebrow{font-size:8px;letter-spacing:.16em;opacity:.82;margin-bottom:4px;font-weight:800}
+.source{
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:700;white-space:nowrap
+}
+.source i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffd400}
+.source i.live{background:#6ee7a1}
+
+main{width:min(1240px,94vw);margin:0 auto;padding:18px 0 60px}
+.hero{
+  display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.75fr);
+  gap:14px;align-items:stretch;margin-bottom:14px
+}
+.hero>div:first-child{
+  background:linear-gradient(135deg,#fff 0%,#fff 72%,#fff7f7 100%);
+  border:1px solid var(--line);border-top:3px solid var(--sporty-red);
+  border-radius:4px;padding:28px
+}
+.label,.count,.ticket-id{
+  font-size:9px;letter-spacing:.13em;color:#737b86;font-weight:800
+}
+.hero h2{font-size:clamp(28px,4.3vw,52px);line-height:1.02;max-width:780px;margin:8px 0 12px;letter-spacing:-.045em}
+.muted{color:#68707b;line-height:1.55;max-width:700px;margin:0}
+.scan-card,.agent,.ticket,.architecture,.ticket-detail{
+  border:1px solid var(--line);background:var(--surface);border-radius:4px;
+  box-shadow:0 1px 2px rgba(0,0,0,.035)
+}
+.scan-card{padding:18px;display:flex;flex-direction:column;gap:7px;border-top:3px solid var(--sporty-green)}
+.scan-card strong{font-size:17px}
+.scan-card>span{font-size:11px;color:#737b86;line-height:1.4}
+.refresh{
+  margin-top:6px;border:0;border-radius:3px;
+  background:var(--sporty-red);color:#fff;
+  padding:11px 13px;font-size:10px;font-weight:900;letter-spacing:.07em
+}
+.refresh:hover{background:var(--sporty-red-dark)}
+.refresh:disabled{opacity:.55;cursor:wait}
+.decision-line{
+  margin-top:4px;padding-top:9px;border-top:1px solid #edf0f2;
+  display:flex;justify-content:space-between;gap:12px;font-size:9px
+}
+.decision-line span{color:#8a929d;letter-spacing:.08em}
+.decision-line b{color:#333;font-size:9px}
+.feed-error{font-size:10px;color:#b42318;line-height:1.4}
+
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:22px 0 9px}
+.section-head h3{margin:4px 0 0;font-size:20px}
+.agents{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.agent{
+  display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:13px
+}
+.agent-num{font-size:10px;color:#9aa1aa;font-weight:800}
+.agent h4,.ticket h4{margin:0 0 4px;font-size:13px}
+.agent p{margin:0;color:#747c87;font-size:11px;line-height:1.4}
+.agent-state{font-size:8px;letter-spacing:.1em;color:var(--sporty-green-dark);font-weight:900}
+
+.tickets{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.ticket{padding:16px;border-top:2px solid #eef0f2}
+.ticket:nth-child(-n+3){border-top-color:var(--sporty-red)}
+.ticket h4{font-size:27px;margin:9px 0;color:#151515}
+.ticket h4 small{font-size:8px;color:#7a828c;letter-spacing:.08em}
+.ticket-meta{display:flex;flex-direction:column;gap:4px;color:#747c87;font-size:10px;min-height:32px}
+.ticket button{
+  width:100%;margin-top:13px;border:1px solid #d8dde2;background:#fff;
+  color:var(--sporty-red);border-radius:3px;padding:9px;font-size:9px;font-weight:900
+}
+.ticket button:not(:disabled):hover{background:#fff2f3}
+.ticket button:disabled{color:#9aa1aa;background:#f7f8f9;cursor:not-allowed}
+
+.ticket-detail{margin-top:14px;padding:17px;border-top:3px solid var(--sporty-green)}
+.ticket-detail-meta{display:flex;gap:16px;flex-wrap:wrap;color:#747c87;font-size:10px;margin:0 0 12px}
+.ticket-detail-meta b{color:#222}
+.ticket-status{font-size:8px;letter-spacing:.08em;padding:4px 6px;border-radius:3px}
+.ticket-status.ok{color:#087a35;background:#eaf8ef;border:1px solid #c8edd5}
+.ticket-status.warn{color:#a15b00;background:#fff6e6;border:1px solid #f1dbb5}
+.ticket-status.muted{color:#68707b;background:#f3f4f6;border:1px solid #e5e7eb}
+.ticket-revalidation{font-size:10px;line-height:1.5;color:#6d7580;border:1px solid #e7eaed;background:#fafafa;border-radius:3px;padding:9px 10px;margin:0 0 12px}
+.ticket-revalidation b{color:#222}
+.selection-list{display:flex;flex-direction:column;gap:5px}
+.selection-row{
+  display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;
+  border:1px solid #e6e9ec;background:#fff;border-radius:3px;padding:9px
+}
+.selection-row.changed{border-color:#f0c98b;background:#fffaf1}
+.selection-index{font-size:9px;color:#9aa1aa}
+.selection-row strong{display:block;font-size:11px;margin-bottom:3px}
+.selection-row span{display:block;color:#7a828c;font-size:9px;line-height:1.35}
+.selection-odds{font-size:12px;font-weight:900;color:var(--sporty-green-dark)}
+.selection-state{font-size:7px!important;letter-spacing:.08em;text-align:right;margin-top:3px}
+.ticket-source-note{font-size:9px;line-height:1.5;color:#7a828c;margin:12px 0 0}
+.ticket-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ticket-actions .refresh{margin-top:0;padding:8px 10px}
+.ticket-actions .refresh:first-child{background:var(--sporty-green)}
+.ticket-actions .refresh:first-child:hover{background:var(--sporty-green-dark)}
+
+.architecture{padding:17px;margin-top:14px}
+.flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:#424951;font-size:10px}
+.flow span{padding:7px 9px;border:1px solid #e1e5e8;border-radius:3px;background:#fafafa}
+.flow b{color:var(--sporty-red)}
+footer{border-top:1px solid #dddfe3;background:#fff;padding:18px 5vw;color:#777f89;font-size:9px;text-align:center}
+
+/* Compact mobile layout */
+@media(max-width:760px){
+  .topbar{padding:0 3vw;min-height:58px}
+  .brand-mark{width:34px;height:34px;font-size:22px}
+  .brand-copy h1{font-size:17px}
+  .eyebrow{display:none}
+  .source{font-size:9px}
+  main{width:96vw;padding-top:10px}
+  .hero{grid-template-columns:1fr;gap:8px}
+  .hero>div:first-child{padding:19px}
+  .hero h2{font-size:34px}
+  .agents,.tickets{grid-template-columns:1fr}
+  .section-head{align-items:start;gap:10px}
+  .count{font-size:7px;text-align:right}
+  .agent{grid-template-columns:28px 1fr}
+  .agent-state{display:none}
+  .ticket-detail{padding:13px}
+  .selection-row{grid-template-columns:24px 1fr auto}
+}
