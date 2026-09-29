@@ -26,3 +26,5 @@ import "../src/core/platinumEnsemble.fixture.js";
 import "../src/core/correlationEngine.fixture.js";
 
 import "../src/core/settlementCatalogue.fixture.js";
+
+import "../src/core/modelDrift.fixture.js";
