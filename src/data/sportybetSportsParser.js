@@ -37,7 +37,7 @@ export function parseBasketballMainRows(text=""){
   let league="";
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    if(isDateLine(line))continue;
+    if(isDateLine(line)||/^(Points|Over|Under)$/i.test(line))continue;
     if(/\b(\d{1,2}:\d{2})\s+ID\s+(\d+)\b/i.test(line)){
       const match=line.match(/\b(\d{1,2}:\d{2})\s+ID\s+(\d+)\b/i);
       const startTime=match[1],sourceEventId=match[2];
