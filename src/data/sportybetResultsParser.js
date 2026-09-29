@@ -137,11 +137,24 @@ function compareAdjusted(home,away,side){
 
 function resultForHandicap(result,selectionName){
   const parsed=parseAdjustedSelection(selectionName);
-  if(!parsed)return"unknown";
-  if(parsed.type==="pair")return compareAdjusted(result.finalScore.home+parsed.home,result.finalScore.away+parsed.away,parsed.side);
+  if(!parsed||parsed.type!=="pair")return"unknown";
+  const adjustedHome=result.finalScore.home+parsed.home;
+  const adjustedAway=result.finalScore.away+parsed.away;
+  if(adjustedHome>adjustedAway)return parsed.side==="home"?"won":"lost";
+  if(adjustedAway>adjustedHome)return parsed.side==="away"?"won":"lost";
+  return parsed.side==="draw"?"won":"lost";
+}
+
+function resultForAsianHandicap(result,selectionName){
+  const parsed=parseAdjustedSelection(selectionName);
+  if(!parsed||parsed.type!=="single"||!["home","away"].includes(parsed.side))return"unknown";
+  const fractional=Math.abs((parsed.line%1));
+  if(Math.abs(fractional-.25)<1e-9||Math.abs(fractional-.75)<1e-9)return"unknown";
   const adjustedHome=parsed.side==="home"?result.finalScore.home+parsed.line:result.finalScore.home;
   const adjustedAway=parsed.side==="away"?result.finalScore.away+parsed.line:result.finalScore.away;
-  return compareAdjusted(adjustedHome,adjustedAway,parsed.side);
+  if(adjustedHome>adjustedAway)return parsed.side==="home"?"won":"lost";
+  if(adjustedAway>adjustedHome)return parsed.side==="away"?"won":"lost";
+  return"void_or_push";
 }
 
 function resultForCorrectScore(result,name){
@@ -172,7 +185,8 @@ export function settleFootballSelection(result,{marketName="",selectionName=""}=
   if(market==="1x2"||market.includes("match winner"))return resultFor1X2(result,selectionName);
   if(market.includes("double chance"))return resultForDoubleChance(result,selectionName);
   if(market==="draw no bet")return resultForDrawNoBet(result,selectionName);
-  if(market.includes("asian handicap")||market==="handicap"||market.startsWith("handicap "))return resultForHandicap(result,selectionName);
+  if(market.includes("asian handicap"))return resultForAsianHandicap(result,selectionName);
+  if(market==="handicap"||market.startsWith("handicap "))return resultForHandicap(result,selectionName);
   if(market.includes("over/under")||market.includes("total goals")||market.includes("total points"))return resultForTotals(result,selectionName);
   if(market.includes("both teams to score"))return resultForBothTeams(result,selectionName);
   if(market.startsWith("gg/ng 2"))return resultForGG2Plus(result,selectionName);
