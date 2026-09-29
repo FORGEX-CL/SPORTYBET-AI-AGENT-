@@ -8,7 +8,7 @@ import { buildHistoricalModel, buildHistoricalModelContext } from "./historicalM
 import { buildPlatinumEnsemble } from "./platinumEnsemble.js";
 import { settlementSupport } from "./settlementCatalogue.js";
 
-export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={}}={}){
+export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={},oddsMovementBySelection={}}={}){
   const markets=analyzeEventMarkets(event);
   const signals=buildSportyBetMarketSignals(event);
   const historical=evidence.__historical??{};
@@ -21,6 +21,7 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
       const settlement=settlementSupport(rawMarket.name,selection.name);
       const selectionKey=selection.selectionId;
       const context=evidence[selectionKey]??{};
+      const oddsMovement=oddsMovementBySelection[`${event.eventId}:${rawMarket.marketId}:${selection.selectionId}`]??null;
       const historicalEvidence=Array.isArray(historical.evidence)?historical.evidence:[];
       const suppliedModel=modelProbabilities[selectionKey];
       const historicalModel=buildHistoricalModel(event,rawMarket,selection,historical,historicalModelContext);
@@ -40,8 +41,8 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
         footballAnalysis(event,rawMarket,selection,{...footballContext,marketSignal:signal}),
         multiSportAnalysis(event,rawMarket,selection,{...(context.multiSport??{}),marketSignal:signal}),
         marketAnalysis(event,rawMarket,selection),
-        oddsAnalysis(event,rawMarket,selection,modelInput),
-        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel,platinumEnsemble,settlement})
+        oddsAnalysis(event,rawMarket,selection,modelInput,oddsMovement),
+        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel,platinumEnsemble,settlement,oddsMovement})
       ].map(report=>{
         const feedback=feedbackForReport(agentPerformance,report);
         const adjusted=applyHistoricalFeedback(report.confidence,feedback);
