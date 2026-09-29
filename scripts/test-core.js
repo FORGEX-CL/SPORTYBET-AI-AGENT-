@@ -21,3 +21,6 @@ import "../src/core/sportybetHistory.fixture.js";
 import "../src/core/historicalModel.fixture.js";
 import "../src/core/agentCalibration.fixture.js";
 import "../src/core/riskEngine.fixture.js";
+
+import "../src/core/platinumEnsemble.fixture.js";
+import "../src/core/correlationEngine.fixture.js";
