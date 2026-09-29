@@ -21,7 +21,7 @@ function marketSignals(event){
       signals.set(key,{
         key,eventId:event.eventId,marketId:market.marketId,marketName:market.name,selectionId:selection.selectionId,
         selection:selection.name,odds:Number(selection.odds),impliedProbability:1/Number(selection.odds),
-        fairProbability:probability,overround,marketDepth:selections.length,sourceFamilies:1,
+        fairProbability:probability,modelProbability:probability,pushProbability:0,overround,marketDepth:selections.length,sourceFamilies:1,
         confidence:clamp(.55+(Math.min(4,selections.length)/4)*.15-(Math.min(.25,overround)*.4)),
         dataQuality:clamp(.62+(Math.min(4,selections.length)/4)*.12-(Math.min(.25,overround)*.2)),
         evidence:[
@@ -88,17 +88,23 @@ function applyCrossMarketConsensus(event,signals){
       const draw=findSelection(event,(m,s)=>String(m.name).toLowerCase()==="1x2"&&["draw","x"].includes(String(s.name).toLowerCase()));
       const sideP=side?selectionSignal(signals,event,side.market,side.selection)?.fairProbability:null;
       const drawP=draw?selectionSignal(signals,event,draw.market,draw.selection)?.fairProbability:null;
-      if(sideP!=null&&drawP!=null)addConsensus(base,sideP/Math.max(.01,1-drawP),"1X2 conditional probability");
+      if(sideP!=null&&drawP!=null){
+        addConsensus(base,sideP/Math.max(.01,1-drawP),"1X2 conditional probability");
+        base.modelProbability=clamp(sideP);
+        base.pushProbability=clamp(drawP);
+      }
     }
 
     base.consensusProbability=clamp(base.consensus.reduce((sum,x)=>sum+x.probability,0)/base.consensus.length);
-    base.modelProbability=base.consensusProbability;
+    if(market!=="draw no bet"||!Number.isFinite(Number(base.modelProbability)))base.modelProbability=base.consensusProbability;
     base.sourceFamilies=base.consensus.length;
     base.consensusSpread=base.consensus.length>1?Math.max(...base.consensus.map(x=>x.probability))-Math.min(...base.consensus.map(x=>x.probability)):0;
     base.crossMarketAgreement=clamp(1-(base.consensusSpread*.9));
     base.confidence=clamp(base.confidence+(Math.min(base.sourceFamilies-1,2)*.08)+(base.crossMarketAgreement*.08));
     base.dataQuality=clamp(base.dataQuality+(Math.min(base.sourceFamilies-1,2)*.08));
-    base.expectedValue=(base.modelProbability*base.odds)-1;
+    const push=clamp(base.pushProbability||0);
+    base.lossProbability=clamp(1-base.modelProbability-push);
+    base.expectedValue=(base.modelProbability*(base.odds-1))-base.lossProbability;
     base.evidence.push("Cross-market consensus sources: "+base.consensus.map(x=>x.label).join(", ")+".");
     base.evidence.push("Market-consensus probability: "+(base.modelProbability*100).toFixed(1)+"%; expected value proxy: "+(base.expectedValue*100).toFixed(1)+"%.");
     base.evidenceCount=base.evidence.length;
