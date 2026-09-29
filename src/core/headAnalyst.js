@@ -9,7 +9,7 @@ export function aggregateSelectionReports(reports=[],debate=[]){
   const byKey=new Map();
   for(const r of reports){
     const key=`${r.eventId}:${r.marketId}:${r.selectionId}`;
-    const item=byKey.get(key)||{...r,agents:[],predictiveAgents:[],agreement:0,risk:0,value:0,confidence:0,predictiveConfidence:0,predictiveConfidenceWeight:0,dataQuality:0,predictiveDataQuality:0,independentEvidence:0,debate:[]};
+    const item=byKey.get(key)||{...r,agents:[],predictiveAgents:[],agreement:0,risk:0,value:0,confidence:0,predictiveConfidence:0,predictiveConfidenceWeight:0,dataQuality:0,predictiveDataQuality:0,independentEvidence:0,agentForecasts:[],debate:[] };
     item.agents.push(r.agentId);
     if(PREDICTIVE_AGENTS.has(r.agentId)){
       if(clamp(r.dataQuality)>0&&clamp(r.confidence)>0){
@@ -22,6 +22,7 @@ export function aggregateSelectionReports(reports=[],debate=[]){
         item.predictiveConfidenceWeight+=agentWeight;
         item.predictiveDataQuality+=clamp(r.dataQuality)*agentWeight;
         item.independentEvidence+=Number(r.independentEvidence)||0;
+        item.agentForecasts.push({agentId:r.agentId,confidence:clamp(r.confidence),dataQuality:clamp(r.dataQuality),modelProbability:Number.isFinite(Number(r.modelProbability))?Number(r.modelProbability):null,independentEvidence:Number(r.independentEvidence)||0,score:Number(r.score)||0,historicalFeedback:r.historicalFeedback??null});
       }
       item.value=Math.max(item.value,Number(r.value)||0);
     }
