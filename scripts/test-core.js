@@ -30,3 +30,5 @@ import "../src/core/settlementCatalogue.fixture.js";
 import "../src/core/modelDrift.fixture.js";
 
 import "../src/core/oddsHistory.fixture.js";
+
+import "../src/core/walkForwardBacktest.fixture.js";
