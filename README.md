@@ -91,3 +91,8 @@ GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` 
 - Ticket construction applies pairwise dependency penalties and records portfolio correlation, preventing raw confidence from being the only ticket objective.
 - Historical evidence has a temporal leakage guard: results after the analyzed event start time are excluded.
 - CI verification runs the full fixture suite and production build on GitHub Actions.
+
+- Bounded SportyBet odds-history snapshots retain recent price movement per event/market/selection and expose shortening, drift and volatility without treating movement as proof.
+- Leakage-safe walk-forward backtesting replays the historical Poisson model against stored SportyBet results using only pre-kickoff information and reports Brier score, log loss, win rate and expected-value diagnostics.
+- Recent agent drift is compared with baseline forecasting quality; degrading agents are downweighted and penalized by the Head Analyst.
+- DNB and total markets use settlement-aware win/push/loss probability semantics where applicable.
