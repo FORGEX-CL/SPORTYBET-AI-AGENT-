@@ -2,6 +2,7 @@ import { impliedProbability } from "./analysisEngine.js";
 import { scoreSelection } from "./ticketScoring.js";
 import { evaluateSportEvidence } from "./sportRules.js";
 import { assessSelectionRisk } from "./riskEngine.js";
+import { settlementSupport } from "./settlementCatalogue.js";
 
 function base(event,market,selection){
   return{
@@ -139,6 +140,7 @@ export function riskAnalysis(event,market,selection,risks=[],context={}){
     signal,
     historicalModel:context.historicalModel,
     platinumEnsemble:context.platinumEnsemble,
+    settlement:context.settlement,
     explicitRisks:risks
   });
   return{
@@ -150,7 +152,8 @@ export function riskAnalysis(event,market,selection,risks=[],context={}){
     requiresExtraVerification:assessment.requiresExtraVerification,
     confidence:assessment.confidence,
     dataQuality:signal?Math.max(.7,Number(signal.dataQuality)||0):1,
-    evidence:signal?.evidence??[]
+    evidence:signal?.evidence??[],
+    settlement:context.settlement
   };
 }
 
