@@ -18,10 +18,10 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
       const context=evidence[selectionKey]??{};
       const historical=evidence.__historical??{};
       const historicalEvidence=Array.isArray(historical.evidence)?historical.evidence:[];
-      const statisticsContext={...(context.statistics??{}),evidence:[...(context.statistics?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.statistics?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.statistics?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
-      const footballContext={...(context.football??{}),evidence:[...(context.football?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.football?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.football?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
       const suppliedModel=modelProbabilities[selectionKey];
       const historicalModel=buildHistoricalModel(event,rawMarket,selection,historical);
+      const statisticsContext={...(context.statistics??{}),evidence:[...(context.statistics?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.statistics?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.statistics?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
+      const footballContext={...(context.football??{}),evidence:[...(context.football?.evidence??[]),...historicalEvidence],confidence:Math.max(Number(context.football?.confidence)||0,Number(historical.confidence)||0),dataQuality:Math.max(Number(context.football?.dataQuality)||0,Number(historical.dataQuality)||0),formSignal:historical.formSignal??null,goalSignal:historical.goalSignal??null,historicalModel};
       const modelInput=suppliedModel??combineModelSignals([historicalModel,signal])??signal;
       const reportsForSelection=[
         statisticsAnalysis(event,rawMarket,selection,{...statisticsContext,marketSignal:signal}),
