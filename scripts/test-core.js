@@ -1,4 +1,5 @@
 import "../src/data/sportybetParser.fixture.js";
+import "../src/data/sportybetSportsParser.fixture.js";
 import "../src/data/sportybetWebSource.fixture.js";
 import "../src/core/feedPipeline.fixture.js";
 import "../src/core/feedAnalysis.fixture.js";
@@ -12,6 +13,7 @@ import "../src/core/learning.fixture.js";
 import "../src/core/learningLedger.fixture.js";
 import "../src/data/sportybetResults.fixture.js";
 import "../src/data/sportybetApi.fixture.js";
+import "../src/data/sportybetBasketballApi.fixture.js";
 import "../src/data/sportybetHealth.fixture.js";
 import "../src/core/learningFeedback.fixture.js";
 import { runCoreFixtures } from "../src/core/testSuite.js";
