@@ -6,6 +6,12 @@ if(settleFootballSelection(results[0],{marketName:"1X2",selectionName:"Home"})!=
 if(settleFootballSelection(results[0],{marketName:"Over/Under",selectionName:"Over 3.5"})!=="lost")throw new Error("Total settlement fixture failed");
 if(settleFootballSelection(results[0],{marketName:"Draw No Bet",selectionName:"Home"})!=="won")throw new Error("DNB settlement fixture failed");
 if(settleFootballSelection(results[0],{marketName:"Handicap 0:1",selectionName:"Home (0:1)"})!=="lost")throw new Error("Handicap settlement fixture failed");
+const drawResult={finalScore:{home:1,away:0}};
+if(settleFootballSelection(drawResult,{marketName:"Handicap 0:1",selectionName:"Draw (0:1)"})!=="won")throw new Error("Three-way handicap draw settlement failed");
+const asianTie={finalScore:{home:1,away:0}};
+if(settleFootballSelection(asianTie,{marketName:"Asian Handicap -1",selectionName:"Home (-1)"})!=="void_or_push")throw new Error("Asian handicap push settlement failed");
+const asianQuarter={finalScore:{home:1,away:0}};
+if(settleFootballSelection(asianQuarter,{marketName:"Asian Handicap -0.25",selectionName:"Home (-0.25)"})!=="unknown")throw new Error("Quarter-line Asian handicap guard failed");
 if(settleFootballSelection(results[0],{marketName:"Asian Handicap -0.5",selectionName:"Home (-0.5)"})!=="won")throw new Error("Asian handicap settlement fixture failed");
 if(settleFootballSelection(results[0],{marketName:"Exact Goals",selectionName:"4"})!=="won")throw new Error("Exact goals settlement fixture failed");
 if(settleFootballSelection(results[0],{marketName:"Goal Range",selectionName:"4-6"})!=="won")throw new Error("Goal range settlement fixture failed");
