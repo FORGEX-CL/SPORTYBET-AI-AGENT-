@@ -77,7 +77,11 @@ function teamProfile(history,team,{venue=null,lastN=5}={}){
 }
 
 export function buildHistoricalEvidence(event,history=[]){
-  const source=Array.isArray(history)?history:[];
+  const source=(Array.isArray(history)?history:[]).filter(result=>{
+    const cutoff=event?.startTime?Date.parse(event.startTime):NaN;
+    const played=result?.playedAt?Date.parse(result.playedAt):NaN;
+    return !Number.isFinite(cutoff)||!Number.isFinite(played)||played<cutoff;
+  });
   const home=teamProfile(source,event?.home,{lastN:5});
   const away=teamProfile(source,event?.away,{lastN:5});
   const homeHome=teamProfile(source,event?.home,{venue:"home",lastN:5});
@@ -93,7 +97,9 @@ export function buildHistoricalEvidence(event,history=[]){
   return{
     evidence,home,away,homeHome,awayAway,dataQuality,
     formSignal:formEdge,goalSignal:goalEdge,
-    confidence:clamp(.35+(dataQuality*.45))
+    confidence:clamp(.35+(dataQuality*.45)),
+    historicalCutoff:event?.startTime??null,
+    leakageGuard:true
   };
 }
 
