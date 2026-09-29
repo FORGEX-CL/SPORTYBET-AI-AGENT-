@@ -67,6 +67,8 @@ export function buildPlatinumEnsemble({marketProbability=null,marketConfidence=0
     confidence:clamp((1-uncertainty)*.55+(robustness*.25)+clamp(dataQuality)*.20),
     dataQuality:clamp(dataQuality),
     modelType:"sportybet-platinum-ensemble-v1",
+    historicalModel:independentModels.some(x=>x?.historicalModel===true),
+    independentEvidence:independentModels.length>0,
     components,
     scenarioCount:scenarios.length,
     evidence:[
