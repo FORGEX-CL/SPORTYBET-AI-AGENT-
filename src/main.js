@@ -29,7 +29,7 @@ function render(){
   document.querySelector("#app").innerHTML=`
 <header class="topbar">
   <div class="brand">
-    <div class="brand-mark" aria-label="SportyBet-style brand mark">S</div>
+    <div class="brand-mark" aria-label="SportyBet logo"><img src="https://s.sporty.net/global/main/modules/main/desktop/page503BR/images/SportyBet_Logo_Red_RGB.b5f14649ea.png" alt="SportyBet" /></div>
     <div class="brand-copy">
       <div class="eyebrow">SPORTS INTELLIGENCE</div>
       <h1>SPORTYBET <span>AI AGENT</span></h1>
