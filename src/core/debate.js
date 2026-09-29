@@ -8,6 +8,15 @@ function strongest(reports){
   return [...reports].sort((a,b)=>(Number(b.confidence)||0)-(Number(a.confidence)||0))[0]??null;
 }
 
+function disagreementMetrics(reports){
+  const confidences=predictive(reports).map(r=>Number(r.confidence)).filter(Number.isFinite);
+  if(confidences.length<2)return{meanConfidence:confidences[0]??0,confidenceRange:0,disagreementIndex:0};
+  const mean=confidences.reduce((s,x)=>s+x,0)/confidences.length;
+  const range=Math.max(...confidences)-Math.min(...confidences);
+  const variance=confidences.reduce((s,x)=>s+((x-mean)**2),0)/confidences.length;
+  return{meanConfidence:mean,confidenceRange:range,disagreementIndex:Math.min(1,Math.sqrt(variance)*2.5)};
+}
+
 function buildInitial(item){
   const messages=[];
   const agents=predictive(item.reports);
@@ -57,6 +66,8 @@ function buildInitial(item){
   return messages;
 }
 
+export { disagreementMetrics };
+
 function buildRebuttal(item,initial){
   if(!initial.length)return[];
   const agents=predictive(item.reports);
@@ -90,6 +101,7 @@ function buildResolution(item,initial,rebuttals){
   const medium=initial.filter(x=>x.severity==="medium").length;
   const unresolvedHigh=high>0;
   const support=predictive(item.reports).filter(r=>Number(r.dataQuality)>=.70&&Number(r.confidence)>=.60).length;
+  const metrics=disagreementMetrics(item.reports);
   const decision=unresolvedHigh||support<2?"reject":"conditional";
   return{
     round:3,type:"resolution",from:"head",to:"all",
@@ -98,6 +110,9 @@ function buildResolution(item,initial,rebuttals){
     decision,
     unresolvedHighRisk:unresolvedHigh,
     supportingAgents:support,
+    meanConfidence:metrics.meanConfidence,
+    confidenceRange:metrics.confidenceRange,
+    disagreementIndex:metrics.disagreementIndex,
     message:decision==="reject"
       ?"Resolution: unresolved high-severity risk or insufficient predictive support; selection remains blocked."
       :"Resolution: conditional approval path; selection still requires final Head Analyst score and fresh-feed validation."
