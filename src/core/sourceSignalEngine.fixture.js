@@ -22,6 +22,8 @@ const event={
 };
 const signals=buildSportyBetMarketSignals(event);
 const home=signals["sr:match:fixture:1x2:1"];
+const dnb=signals["sr:match:fixture:dnb:h"];
 if(!home||home.modelProbability<=0||home.sourceFamilies<2||!home.evidence.some(x=>x.includes("Cross-market")))throw new Error("SportyBet source-signal fixture failed");
 if(!Number.isFinite(home.expectedValue))throw new Error("Expected-value proxy missing");
+if(!dnb||!(dnb.pushProbability>0&&dnb.modelProbability>0))throw new Error("DNB win/push probability semantics failed");
 console.log("SportyBet source-signal fixture passed");
