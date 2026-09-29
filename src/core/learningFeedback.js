@@ -61,8 +61,9 @@ export function getAgentHistoricalFeedback(performance={},agentId,{sport="unknow
       return{
         available:true,
         reliability,
-        weight:sampleWeight(candidate.stat),
+        weight:sampleWeight(candidate.stat)*(agent.drift?.reliabilityMultiplier??1),
         source:candidate.source+"+overall_prior",
+        drift:agent.drift??null,
         settled,
         calibration
       };
