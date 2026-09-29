@@ -1,6 +1,4 @@
 import { createSessionToken } from "../../api/auth/_auth.js";
-process.env.SPORTYBET_AUTH_SECRET="basketball-fixture-secret-that-is-long-enough";
-const session=createSessionToken("basketball-user",Math.floor(Date.now()/1000));
 const mockFetch=async()=>new Response(`International - Eurocup, Women
 23/09 Wednesday
 Points
@@ -13,6 +11,8 @@ AEO Proteas Voulas  Elizur Ramla
 <a href="/ng/lite/preMatch/detail?eventId=sr:match:73576406">AEO Proteas Voulas Elizur Ramla</a>`,{status:200,headers:{"content-type":"text/html"}});
 
 const {createBasketballHandler}=await import("../../api/sportybet-basketball.js");
+process.env.SPORTYBET_AUTH_SECRET="basketball-fixture-secret-that-is-long-enough";
+const session=createSessionToken("basketball-user",Math.floor(Date.now()/1000));
 let payload=null,statusCode=null;
 const req={method:"GET",headers:{cookie:`sportybet_ai_session=${session}`}};
 const res={setHeader(){},status(code){statusCode=code;return this;},json(data){payload=data;}};
