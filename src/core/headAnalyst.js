@@ -9,7 +9,7 @@ export function aggregateSelectionReports(reports=[],debate=[]){
   const byKey=new Map();
   for(const r of reports){
     const key=`${r.eventId}:${r.marketId}:${r.selectionId}`;
-    const item=byKey.get(key)||{...r,agents:[],predictiveAgents:[],agreement:0,risk:0,value:0,confidence:0,predictiveConfidence:0,dataQuality:0,predictiveDataQuality:0,independentEvidence:0,debate:[]};
+    const item=byKey.get(key)||{...r,agents:[],predictiveAgents:[],agreement:0,risk:0,value:0,confidence:0,predictiveConfidence:0,predictiveConfidenceWeight:0,dataQuality:0,predictiveDataQuality:0,independentEvidence:0,debate:[]};
     item.agents.push(r.agentId);
     if(PREDICTIVE_AGENTS.has(r.agentId)){
       if(clamp(r.dataQuality)>0&&clamp(r.confidence)>0){
@@ -30,7 +30,7 @@ export function aggregateSelectionReports(reports=[],debate=[]){
     const highChallenges=x.debate.filter(d=>d.severity==="high").length;
     const mediumChallenges=x.debate.filter(d=>d.severity==="medium").length;
     const challengePenalty=Math.min(.35,highChallenges*.20+mediumChallenges*.10+(x.debate.some(d=>d.severity==="unverified")?.03:0));
-    const baseScore=scoreSelection({...x,confidence:x.predictiveConfidence,dataQuality:x.predictiveDataQuality,agreement:x.predictiveAgents.length/4});
+    const baseScore=scoreSelection({...x,confidence:x.confidence,dataQuality:x.dataQuality,agreement:x.predictiveAgents.length/4});
     return{...x,predictiveAgreement:x.predictiveAgents.length/4,agreement:x.predictiveAgents.length/4,challengePenalty,score:Math.max(0,baseScore-challengePenalty)};
   }).sort((a,b)=>b.score-a.score);
 }
