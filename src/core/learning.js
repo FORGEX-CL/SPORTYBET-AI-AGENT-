@@ -14,7 +14,7 @@ const updateBucket=(bucket,result,confidence)=>{
   bucket.predictions++;
   if(result==="void_or_push")bucket.voidOrPush++;
   else bucket[result]++;
-  if(result==="won"||result==="lost")updateCalibration(bucket,confidence,result);
+  if((result==="won"||result==="lost")&&Number.isFinite(Number(confidence)))updateCalibration(bucket,confidence,result);
   return bucket;
 };
 
@@ -110,9 +110,7 @@ export function updateAgentPerformance(performance={},records=[]){
           ["byConfidenceBand",conf]
         ];
         for(const [name,key] of buckets){
-          const bucket=updateBucket(stat[name][key]??{},result,hasPredictiveForecast?forecastConfidence:null);
-          if(!hasPredictiveForecast&&result!=="won"&&result!=="lost")bucket.calibrationSamples=bucket.calibrationSamples??0;
-          stat[name][key]=bucket;
+          stat[name][key]=updateBucket(stat[name][key]??{},result,hasPredictiveForecast?forecastConfidence:null);
         }
       }
 
