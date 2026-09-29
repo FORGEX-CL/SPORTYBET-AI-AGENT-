@@ -34,14 +34,25 @@ function stagedPlan(){
   if(!t.length)return["Refresh the source feed and run analysis first."];
   return t.slice(0,3).map((x,i)=>"Stage "+(i+1)+": "+x.selectionCount+" selections · "+Number(x.combinedOdds).toFixed(2)+" combined odds");
 }
+function rolloverRows(){
+  const stake=Math.max(0,Number(document.querySelector("#rollover-stake")?.value||1500));
+  const odds=Math.max(1,Number(document.querySelector("#rollover-odds")?.value||5));
+  const days=Math.min(30,Math.max(1,Math.floor(Number(document.querySelector("#rollover-days")?.value||5))));
+  let amount=stake;
+  return Array.from({length:days},(_,i)=>{const start=amount;const end=start*odds;amount=end;return{day:i+1,start,end};});
+}
+function renderRolloverRows(){
+  const odds=Math.max(1,Number(document.querySelector("#rollover-odds")?.value||5));
+  return rolloverRows().map(r=>`<div class="rollover-row"><span>DAY ${r.day}</span><span>${formatNaira(r.start)} × <b>${odds.toFixed(2)}</b></span><strong>${formatNaira(r.end)}</strong></div>`).join("");
+}
 function aiPanel(){
-  return `<button class="ai-tab" id="open-ai">AI AGENTS</button><aside class="ai-drawer" id="ai-drawer"><div class="ai-drawer-head"><div><p class="label">SPORTYBET AI</p><h3>Agent room</h3></div><button id="close-ai" class="ai-close">×</button></div><div class="ai-chat" id="ai-chat"><div class="ai-msg agent-msg"><b>AI Agents</b><p>Ask a question about the current dashboard.</p></div></div><div class="ai-quick"><button data-q="What is the current risk?">Risk check</button><button data-q="Show ticket status">Candidates</button><button id="show-plan">Rollover plan</button></div><form id="ai-form" class="ai-form"><input id="ai-input" placeholder="Ask the AI Agents..." autocomplete="off"><button>SEND</button></form><div id="plan-card" class="plan-card"><b>ROLLOVER PLAN</b>${stagedPlan().map(x=>"<div>"+escapeHtml(x)+"</div>").join("")}<small>Built from the current verified source snapshot. Recheck current data before each stage.</small></div></aside>`
+  return `<button class="ai-tab" id="open-ai">AI AGENTS</button><aside class="ai-drawer" id="ai-drawer"><div class="ai-drawer-head"><div><p class="label">SPORTYBET AI</p><h3>Agent room</h3></div><button id="close-ai" class="ai-close">×</button></div><div class="ai-chat" id="ai-chat"><div class="ai-msg agent-msg"><b>AI Agents</b><p>Ask a question about the current dashboard.</p></div></div><div class="ai-quick"><button data-q="What is the current risk?">Risk check</button><button data-q="Show ticket status">Candidates</button><button id="show-plan">Rollover plan</button></div><form id="ai-form" class="ai-form"><input id="ai-input" placeholder="Ask the AI Agents..." autocomplete="off"><button>SEND</button></form><div id="plan-card" class="plan-card"><b>ROLLOVER PLAN</b><div class="rollover-controls"><label>STARTING STAKE<input id="rollover-stake" type="number" value="1500" min="1" step="100"></label><label>DAYS<input id="rollover-days" type="number" value="5" min="1" max="30"></label><label>DAILY ODDS<input id="rollover-odds" type="number" value="5" min="1" step="0.01"></label></div><div class="rollover-table" id="rollover-table">${renderRolloverRows()}</div><small>Example: N1,500 × 5.00 = N7,500, then N7,500 × 5.00 = N37,500. Mathematical projection only; it does not guarantee betting results.</small></div></div></aside>`
 }
 function bindAi(){
   document.querySelector("#open-ai")?.addEventListener("click",()=>document.querySelector("#ai-drawer")?.classList.add("open"));
   document.querySelector("#close-ai")?.addEventListener("click",()=>document.querySelector("#ai-drawer")?.classList.remove("open"));
   document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{const i=document.querySelector("#ai-input");i.value=b.dataset.q;i.focus()}));
-  document.querySelector("#show-plan")?.addEventListener("click",()=>document.querySelector("#plan-card")?.classList.toggle("visible"));
+  document.querySelector("#show-plan")?.addEventListener("click",()=>document.querySelector("#plan-card")?.classList.toggle("visible"));document.querySelectorAll("#rollover-stake,#rollover-days,#rollover-odds").forEach(i=>i.addEventListener("input",()=>{const t=document.querySelector("#rollover-table");if(t)t.innerHTML=renderRolloverRows()}));
   document.querySelector("#ai-form")?.addEventListener("submit",e=>{e.preventDefault();const i=document.querySelector("#ai-input"),q=i.value.trim();if(!q)return;const chat=document.querySelector("#ai-chat");chat.insertAdjacentHTML("beforeend",'<div class="ai-msg user-msg"><p>'+escapeHtml(q)+'</p></div><div class="ai-msg agent-msg"><b>AI Agents</b><p>'+escapeHtml(aiReply(q))+'</p></div>');i.value="";chat.scrollTop=chat.scrollHeight});
 }
 function render(){
