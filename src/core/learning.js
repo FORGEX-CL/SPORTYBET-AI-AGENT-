@@ -1,4 +1,5 @@
 import { updateCalibration, calibrationSummary } from "./agentCalibration.js";
+import { buildAgentDriftReport } from "./modelDrift.js";
 
 const uid=()=>crypto.randomUUID();
 const marketContextKey=(sport,market)=>`${sport??"unknown"}::${market??"unknown"}`;
@@ -125,6 +126,7 @@ export function updateAgentPerformance(performance={},records=[]){
       }
     }
   }
+  for(const agentId of Object.keys(next.agents))next.agents[agentId].drift=buildAgentDriftReport(records,agentId);
   return next;
 }
 
@@ -136,7 +138,7 @@ export function summarizeAgentPerformance(performance={}){
       agentId,predictions:stat.predictions,settled,won:stat.won,lost:stat.lost,unknown:stat.unknown,voidOrPush:stat.voidOrPush,
       winRate:settled?stat.won/settled:null,
       brierScore:calibration.brierScore,logLoss:calibration.logLoss,calibrationGap:calibration.calibrationGap,
-      challengeCount:stat.challengeCount,challengeVindicated:stat.challengeVindicated,challengeFalsePositive:stat.challengeFalsePositive
+      challengeCount:stat.challengeCount,challengeVindicated:stat.challengeVindicated,challengeFalsePositive:stat.challengeFalsePositive,driftStatus:stat.drift?.status??"unknown",driftMultiplier:stat.drift?.reliabilityMultiplier??1
     };
   }).sort((a,b)=>(b.predictions||0)-(a.predictions||0));
 }
