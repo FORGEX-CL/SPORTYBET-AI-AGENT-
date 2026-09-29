@@ -26,7 +26,7 @@ export { parseAuthUsers };
 export async function hashPassword(password){
   if(!password||String(password).length<10)throw new Error("Password must be at least 10 characters");
   const salt=randomBytes(16).toString("base64url");
-  const key=await scrypt(String(password),Buffer.from(salt),64,{N:16384,r:8,p:1});
+  const key=await scrypt(String(password),Buffer.from(salt,"base64url"),64,{N:16384,r:8,p:1});
   return "scrypt$16384$8$1$"+salt+"$"+Buffer.from(key).toString("base64url");
 }
 export async function verifyPassword(password,encoded){
