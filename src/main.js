@@ -9,7 +9,7 @@ import { buildHistoricalEvidenceByEvent } from "./core/sportybetHistory.js";
 import { compareTicketToFeed } from "./core/ticketDelta.js";
 import { recordSportyBetOddsSnapshot, buildOddsMovementBySelection } from "./core/oddsHistory.js";
 
-const emptyFeed=normalizeSportyBetFeed([]);
+// AI side-panel integration point\nconst emptyFeed=normalizeSportyBetFeed([]);
 const initialLedger=loadLearningLedger();
 const state={feed:emptyFeed,analysis:analyzeSportyBetFeed(emptyFeed,{agentPerformance:initialLedger.performance}),ledger:initialLedger,learning:learningSummary(initialLedger),agents:AGENT_ROLES.map(a=>({...a,status:"READY"})),loading:false,error:"",detailFailures:0,resultFailures:0,lastResultSync:null,selectedTicket:null,sourceHealth:{status:"checking",parsedFootballEvents:0,checkedAt:null,latencyMs:null}};
 
