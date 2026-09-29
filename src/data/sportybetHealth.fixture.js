@@ -1,6 +1,4 @@
 import { createSessionToken } from "../../api/auth/_auth.js";
-process.env.SPORTYBET_AUTH_SECRET="health-fixture-secret-that-is-long-enough-123456";
-const session=createSessionToken("health-user",Math.floor(Date.now()/1000));
 const originalFetch=globalThis.fetch;
 let mode="football";
 globalThis.fetch=async()=>new Response(mode==="football"?`<html><body>England - Premier League
@@ -17,8 +15,10 @@ AEO Proteas Voulas  Elizur Ramla
 1.96 1.73
 <a href="/ng/lite/preMatch/detail?eventId=sr:match:73576406">AEO Proteas Voulas Elizur Ramla</a></body></html>`,{status:200});
 const { default: handler }=await import("../../api/health.js");
+process.env.SPORTYBET_AUTH_SECRET="health-fixture-secret-that-is-long-enough-123456";
+const session=createSessionToken("health-user",Math.floor(Date.now()/1000));
 let payload=null,statusCode=null;
-const req={method:"GET",query:{},headers:{cookie:`sportybet_session=${session}`}};
+const req={method:"GET",query:{},headers:{cookie:`sportybet_ai_session=${session}`}};
 const res={setHeader(){},status(code){statusCode=code;return this;},json(data){payload=data;}};
 await handler(req,res);
 if(statusCode!==200||payload?.status!=="ok"||payload?.parsedFootballEvents!==1||payload?.eventsWithMarkets!==1||payload?.pricedSelections!==3)throw new Error("Health endpoint fixture failed");
