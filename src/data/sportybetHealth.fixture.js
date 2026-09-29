@@ -1,8 +1,8 @@
 const originalFetch=globalThis.fetch;
-globalThis.fetch=async()=>new Response(\`<html><body>England - Premier League
+globalThis.fetch=async()=>new Response(`<html><body>England - Premier League
 15:00 ID 22471
 Aston Villa  Brentford
-2.68 3.59 2.58</body></html>\`,{status:200});
+2.68 3.59 2.58</body></html>`,{status:200});
 const { default: handler }=await import("../../api/health.js");
 let payload=null,statusCode=null;
 const req={method:"GET"};
