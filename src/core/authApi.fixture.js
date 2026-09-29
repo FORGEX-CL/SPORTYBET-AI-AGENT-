@@ -1,4 +1,4 @@
-import { hashPassword, createSessionToken } from "../api/auth/_auth.js";
+import { hashPassword, createSessionToken } from "../../api/auth/_auth.js";
 
 process.env.SPORTYBET_AUTH_SECRET="auth-api-fixture-secret-that-is-long-enough-123456";
 const passwordHash=await hashPassword("correct-password-123");
