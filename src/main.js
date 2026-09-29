@@ -70,11 +70,90 @@ function render(){
 <section><div class="section-head"><div><p class="label">TICKET ENGINE</p><h3>Top 10 candidates</h3></div><span class="count">UP TO 50 PICKS EACH</span></div><div class="tickets">${Array.from({length:10},(_,i)=>{const ticket=tickets[i];return`<article class="ticket"><span class="ticket-id">TICKET #${i+1}</span><h4>${ticket?Number(ticket.combinedOdds).toFixed(2):"—"} <small>COMBINED ODDS</small></h4><div class="ticket-meta"><span>${ticket?ticket.selectionCount:0} selections</span><span>${ticket?escapeHtml(ticket.strategyLabel??"Candidate"):"No approved candidate"}</span></div><button data-ticket-index="${i}" ${ticket?"":"disabled"}>${ticket?"VIEW TICKET":"UNAVAILABLE"}</button></article>`}).join("")}</div></section>
 ${renderSelectedTicket(state.selectedTicket)}
 <section class="architecture"><div class="section-head"><div><p class="label">DECISION PIPELINE</p><h3>Evidence before selection</h3></div></div><div class="flow"><span>SportyBet</span><b>→</b><span>Normalize</span><b>→</b><span>Enrich</span><b>→</b><span>6 specialists</span><b>→</b><span>Risk challenge</span><b>→</b><span>Head Analyst</span><b>→</b><span>Tickets</span><b>→</b><span>Results</span><b>→</b><span>Learning</span></div></section>
-</main>${aiPanel()}<footer>SportyBet AI Agent · v1.0 · Private account access · Uses SportyBet as the verified source. No fabricated odds, match IDs or booking codes.</footer>`;
-  document.querySelector("#logout")?.addEventListener("click",logout);document.querySelector("#refresh-feed")?.addEventListener("click",loadFeed);document.querySelectorAll("[data-sport-feed]").forEach(button=>button.addEventListener("click",()=>{const next=button.dataset.sportFeed;if(!next||next===state.selectedSport||state.loading)return;state.selectedSport=next;state.selectedTicket=null;loadFeed();}));bindTicketButtons();bindAi();
+</main>${aiPanel()}<button class="signup-tab" id="open-signup">SIGN UP AI</button>${signupPanel()}<footer>SportyBet AI Agent · v1.0 · Private account access · Uses SportyBet as the verified source. No fabricated odds, match IDs or booking codes.</footer>`;
+  document.querySelector("#logout")?.addEventListener("click",logout);document.querySelector("#refresh-feed")?.addEventListener("click",loadFeed);document.querySelectorAll("[data-sport-feed]").forEach(button=>button.addEventListener("click",()=>{const next=button.dataset.sportFeed;if(!next||next===state.selectedSport||state.loading)return;state.selectedSport=next;state.selectedTicket=null;loadFeed();}));bindTicketButtons();bindAi();bindSignup();
 }
 
 async function syncResults(){const snapshot=await fetchSportyBetResultsApi();state.ledger=recordSportyBetResults(state.ledger,snapshot.results??[],snapshot.capturedAt??null);const pending=state.ledger.predictions.filter(p=>p.status!=="won"&&p.status!=="lost");const selectionResults=[];for(const prediction of pending){for(const selection of prediction.selections){const result=snapshot.results.find(r=>String(r.eventId)===String(selection.eventId));if(!result)continue;const settled=settleFootballSelection(result,{marketName:selection.marketName,selectionName:selection.selection});selectionResults.push({eventId:selection.eventId,marketId:selection.marketId,selectionId:selection.selectionId,result:settled,settlementSource:"SportyBet"});}}if(selectionResults.length)state.ledger=settlePendingFromSportyBetResults(state.ledger,selectionResults);state.learning=learningSummary(state.ledger);safeSaveLearning();state.lastResultSync=String(snapshot.resultCount)+" SportyBet results · "+String(state.ledger.resultHistory?.length??0)+" stored";return snapshot;}
 async function loadFeed({preserveTicketId=null}={}){try{state.sourceHealth=await fetchSportyBetHealthApi(state.selectedSport);}catch{state.sourceHealth={status:"unavailable",parsedEvents:0,parsedFootballEvents:0,eventsWithMarkets:0,pricedSelections:0,checkedAt:new Date().toISOString(),latencyMs:null};}state.loading=true;state.error="";state.detailFailures=0;state.resultFailures=0;state.selectedTicket=preserveTicketId?state.selectedTicket:null;render();try{const snapshot=state.selectedSport==="basketball"?await fetchSportyBetBasketballApi():await fetchSportyBetFootballApi();state.detailFailures=snapshot.detailFailures?.length??0;state.feed=normalizeSportyBetFeed(snapshot.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});const oddsHistory=recordSportyBetOddsSnapshot(state.ledger.oddsHistory??{},state.feed.events,state.feed.capturedAt);state.ledger=recordSportyBetOddsHistory(state.ledger,oddsHistory);if(state.selectedSport==="football"){try{await syncResults();}catch{state.resultFailures=1;state.lastResultSync="RESULT SOURCE UNAVAILABLE";}}else{state.lastResultSync="BASKETBALL SETTLEMENT OFF";}const oddsMovementBySelection=buildOddsMovementBySelection(state.ledger.oddsHistory??{});const historicalEvidence=buildHistoricalEvidenceByEvent(state.feed.events,state.ledger.resultHistory??[]);const evidenceByEvent=Object.fromEntries(Object.entries(historicalEvidence).map(([eventId,historical])=>[eventId,{__historical:historical}]));state.analysis=analyzeSportyBetFeed(state.feed,{evidenceByEvent,agentPerformance:state.ledger.performance,oddsMovementBySelection});state.ledger=registerTickets(state.ledger,state.analysis.tickets??[]);if(preserveTicketId){const replacement=state.analysis.tickets?.find(t=>t.ticketId===preserveTicketId);state.selectedTicket=replacement??state.selectedTicket;}safeSaveLearning();}catch(error){state.feed=normalizeSportyBetFeed([]);state.analysis=analyzeSportyBetFeed(state.feed,{agentPerformance:state.ledger.performance});state.error=error instanceof Error?error.message:"SportyBet feed could not be loaded";}finally{state.loading=false;render();}}
 async function bootstrap(){await checkSession();if(!authState.authenticated){renderLogin();return;}render();await loadFeed();}
-bootstrap();
+
+const authState={status:"checking",authenticated:false,username:null,role:null,error:""};
+function renderLogin(){
+  document.querySelector("#app").innerHTML=`<div class="auth-shell">
+    <div class="auth-card">
+      <p class="label">PRIVATE ACCESS</p><h1>SPORTYBET <span>AI AGENT</span></h1>
+      <p>Sign in with your cloud-verified account to use the AI.</p>
+      <form id="login-form" class="auth-form">
+        <label>USERNAME<input id="login-username" autocomplete="username" required></label>
+        <label>PASSWORD<input id="login-password" type="password" autocomplete="current-password" required></label>
+        <button type="submit">LOGIN</button>
+      </form>
+      <div id="login-error" class="auth-error">${escapeHtml(authState.error||"")}</div>
+      <div class="signup-cta"><span>New user?</span><button id="open-signup" type="button">SIGN UP AI AGENT</button></div>
+      <small>Passwords are entered only in the secure signup/login form. Do not send passwords in the AI chat.</small>
+    </div>
+  </div>${signupPanel()}`;
+  bindSignup();
+  document.querySelector("#login-form")?.addEventListener("submit",async e=>{
+    e.preventDefault();authState.error="";
+    const username=document.querySelector("#login-username").value.trim(),password=document.querySelector("#login-password").value;
+    const button=e.currentTarget.querySelector("button");button.disabled=true;button.textContent="VERIFYING…";
+    try{
+      const response=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})});
+      const payload=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(payload.error||"Login failed");
+      authState={status:"authenticated",authenticated:true,username:payload.username,role:payload.role,error:""};
+      render();await loadFeed();
+    }catch(error){authState.error=error instanceof Error?error.message:"Login failed";document.querySelector("#login-error").textContent=authState.error;button.disabled=false;button.textContent="LOGIN";}
+  });
+}
+async function checkSession(){
+  try{const response=await fetch("/api/auth/me",{headers:{Accept:"application/json"},cache:"no-store"});const payload=await response.json().catch(()=>({}));authState=payload.authenticated?{status:"authenticated",authenticated:true,username:payload.username,role:payload.role,error:""}:{status:"signed-out",authenticated:false,username:null,role:null,error:""};}
+  catch{authState={status:"unavailable",authenticated:false,username:null,role:null,error:"Authentication service unavailable"};}
+}
+async function logout(){
+  try{await fetch("/api/auth/logout",{method:"POST"});}catch{}
+  authState={status:"signed-out",authenticated:false,username:null,role:null,error:""};
+  state.feed=emptyFeed;state.analysis=analyzeSportyBetFeed(emptyFeed,{agentPerformance:state.ledger.performance});state.selectedTicket=null;renderLogin();
+}
+function signupPanel(){
+  return `<aside class="signup-drawer" id="signup-drawer">
+    <div class="signup-head"><div><p class="label">SIGN UP AI AGENT</p><h3>Cloud enrollment</h3></div><button id="close-signup" class="ai-close" type="button">×</button></div>
+    <div class="signup-chat" id="signup-chat"><div class="ai-msg agent-msg"><b>Sign-up Agent</b><p>Choose a username. I will check the cloud registry first. Your password stays inside this secure form.</p></div></div>
+    <form id="signup-form" class="signup-form">
+      <label>USERNAME<input id="signup-username" maxlength="24" autocomplete="username" placeholder="your_username" required></label>
+      <button id="check-username" type="button" class="secondary">CHECK AVAILABILITY</button>
+      <div id="username-status" class="signup-status"></div>
+      <label>PASSWORD<input id="signup-password" type="password" minlength="10" maxlength="128" autocomplete="new-password" placeholder="At least 10 characters" required></label>
+      <label>CONFIRM PASSWORD<input id="signup-confirm" type="password" minlength="10" maxlength="128" autocomplete="new-password" required></label>
+      <button id="create-account" type="submit">CREATE CLOUD ACCOUNT</button>
+      <small>New accounts are created as USER accounts. The AI never receives or displays your password.</small>
+    </form>
+  </aside>`;
+}
+function bindSignup(){
+  document.querySelector("#open-signup")?.addEventListener("click",()=>document.querySelector("#signup-drawer")?.classList.add("open"));
+  document.querySelector("#close-signup")?.addEventListener("click",()=>document.querySelector("#signup-drawer")?.classList.remove("open"));
+  const usernameInput=document.querySelector("#signup-username"),status=document.querySelector("#username-status");
+  document.querySelector("#check-username")?.addEventListener("click",async()=>{
+    const username=usernameInput.value.trim().toLowerCase();status.textContent="Checking cloud…";
+    try{
+      const r=await fetch("/api/auth/availability?username="+encodeURIComponent(username),{cache:"no-store"});const p=await r.json().catch(()=>({}));
+      status.textContent=p.available?"✓ Username available":(p.error||"✕ Username unavailable");status.className="signup-status "+(p.available?"available":"taken");usernameInput.dataset.available=p.available?"true":"false";
+    }catch{status.textContent="Cloud availability check failed";status.className="signup-status taken";usernameInput.dataset.available="false";}
+  });
+  document.querySelector("#signup-form")?.addEventListener("submit",async e=>{
+    e.preventDefault();const username=usernameInput.value.trim().toLowerCase(),password=document.querySelector("#signup-password").value,confirm=document.querySelector("#signup-confirm").value,create=e.currentTarget.querySelector("#create-account");
+    if(password!==confirm){status.textContent="Passwords do not match";status.className="signup-status taken";return;}
+    create.disabled=true;create.textContent="CREATING…";status.textContent="Provisioning cloud account…";status.className="signup-status";
+    try{
+      const r=await fetch("/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})});const p=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(p.error||"Cloud signup failed");
+      status.textContent="✓ Account created. You can log in now.";status.className="signup-status available";
+      document.querySelector("#login-username").value=username;document.querySelector("#signup-drawer").classList.remove("open");
+      document.querySelector("#login-password").focus();
+    }catch(error){status.textContent=error instanceof Error?error.message:"Cloud signup failed";status.className="signup-status taken";create.disabled=false;create.textContent="CREATE CLOUD ACCOUNT";}
+  });
+}
+\nbootstrap();
