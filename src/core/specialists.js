@@ -41,6 +41,7 @@ export function statisticsAnalysis(event,market,selection,stats={}){
     confidence:Math.max(Number(stats.confidence)||0,derived.confidence*.82),
     dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality,historicalSupport?.dataQuality??0),
     historicalSupport,
+    independentEvidence:historicalSupport?1:0,
     sportEvaluation:evaluateSportEvidence(event.sport,{evidenceCount:(externalEvidence.length+derived.evidence.length),dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality),marketName:market.name}),
     analysisBasis:derived.modelType??"no-source-model"
   };
@@ -59,6 +60,7 @@ export function footballAnalysis(event,market,selection,context={}){
     confidence:Math.max(Number(context.confidence)||0,Math.min(1,derived.confidence*.75+consistency*.20)),
     dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),
     historicalSupport,
+    independentEvidence:Number(context.dataQuality)>0?1:0,
     crossMarketAgreement:consistency,
     analysisBasis:derived.modelType??"no-source-model"
   };
@@ -105,7 +107,8 @@ export function oddsAnalysis(event,market,selection,modelProbability=null){
     dataQuality:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.dataQuality??.6)||0)),
     evidence:modelProbability?.evidence??[],
     marketConsensus:modelProbability?.consensusProbability??model,
-    modelType:modelProbability?.modelType??"external-model"
+    modelType:modelProbability?.modelType??"external-model",
+    independentEvidence:modelProbability?.historicalModel||String(modelProbability?.modelType??"").startsWith("external")?1:0
   };
 }
 
