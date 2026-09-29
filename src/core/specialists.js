@@ -107,13 +107,20 @@ export function marketAnalysis(event,market,selection){
 export function oddsAnalysis(event,market,selection,modelProbability=null){
   const implied=impliedProbability(selection.odds);
   const model=typeof modelProbability==="number"?modelProbability:(modelProbability?.modelProbability??null);
-  const value=model==null||implied==null?null:(model*Number(selection.odds))-1;
+  const robust=typeof modelProbability==="object"?(modelProbability.robustProbability??model):model;
+  const value=robust==null||implied==null?null:(robust*Number(selection.odds))-1;
   return{
     ...base(event,market,selection),
     agentId:"odds",
     modelProbability:model,
+    robustProbability:robust,
+    conservativeProbability:modelProbability?.conservativeProbability??robust,
+    optimisticProbability:modelProbability?.optimisticProbability??model,
+    uncertainty:modelProbability?.uncertainty??null,
+    robustness:modelProbability?.robustness??null,
     value,
     expectedValue:value,
+    rawExpectedValue:model==null?null:(model*Number(selection.odds))-1,
     confidence:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.confidence??.5)||0)),
     dataQuality:modelProbability==null?0:Math.max(0,Math.min(1,Number(modelProbability.dataQuality??.6)||0)),
     evidence:modelProbability?.evidence??[],
@@ -153,7 +160,7 @@ export function scoreReport(report,agreement=0){
     score:scoreSelection({
       confidence:report.confidence,
       value:Math.max(0,report.value??0),
-      risk:report.risks?.length?Math.min(1,report.risks.length*.2):0,
+      risk:Number.isFinite(Number(report.riskScore))?Number(report.riskScore):report.risks?.length?Math.min(1,report.risks.length*.2):0,
       dataQuality:report.dataQuality,
       agreement
     })
