@@ -10,8 +10,10 @@ const COMPLEX=[
   "multiscore","smart combo","betbuilder","player props","player","clean sheet"
 ];
 
-export function settlementSupport(marketName=""){
+export function settlementSupport(marketName="",selectionName=""){
   const n=String(marketName).toLowerCase();
+  const s=String(selectionName).toLowerCase();
+  if(n.includes("asian handicap")&&/[+-]?\d+\.\d*(?:25|75)\b/.test(s))return{status:"complex",risk:.30,reason:"Quarter-line Asian Handicap requires half-win/half-loss settlement logic that is not yet enabled."};
   if(SUPPORTED.some(x=>n===x||n.includes(x)))return{status:"supported",risk:0,reason:"Settlement engine has deterministic support for this market family."};
   if(COMPLEX.some(x=>n.includes(x)))return{status:"complex",risk:.25,reason:"This market family requires additional settlement rules before automated learning can be trusted."};
   return{status:"unsupported",risk:.30,reason:"No deterministic settlement rule is currently implemented for this market family."};
