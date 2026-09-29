@@ -6,6 +6,7 @@ import { applyHistoricalFeedback, feedbackForReport } from "./learningFeedback.j
 import { buildSportyBetMarketSignals, getSportyBetMarketSignal } from "./sourceSignalEngine.js";
 import { buildHistoricalModel, buildHistoricalModelContext } from "./historicalModel.js";
 import { buildPlatinumEnsemble } from "./platinumEnsemble.js";
+import { settlementSupport } from "./settlementCatalogue.js";
 
 export function buildAgentCandidates(event,{evidence={},modelProbabilities={},agentPerformance={}}={}){
   const markets=analyzeEventMarkets(event);
@@ -17,6 +18,7 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
     const rawMarket=event.markets.find(m=>m.marketId===market.marketId);
     for(const selection of market.selections){
       const signal=getSportyBetMarketSignal(signals,event,rawMarket,selection);
+      const settlement=settlementSupport(rawMarket.name);
       const selectionKey=selection.selectionId;
       const context=evidence[selectionKey]??{};
       const historicalEvidence=Array.isArray(historical.evidence)?historical.evidence:[];
@@ -39,7 +41,7 @@ export function buildAgentCandidates(event,{evidence={},modelProbabilities={},ag
         multiSportAnalysis(event,rawMarket,selection,{...(context.multiSport??{}),marketSignal:signal}),
         marketAnalysis(event,rawMarket,selection),
         oddsAnalysis(event,rawMarket,selection,modelInput),
-        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel,platinumEnsemble})
+        riskAnalysis(event,rawMarket,selection,context.risks??[],{marketSignal:signal,historicalModel,platinumEnsemble,settlement})
       ].map(report=>{
         const feedback=feedbackForReport(agentPerformance,report);
         const adjusted=applyHistoricalFeedback(report.confidence,feedback);
