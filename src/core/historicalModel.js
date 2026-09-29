@@ -71,46 +71,54 @@ function tailUnderPoisson(lambda,line){
 }
 
 function modelForSelection(market,selection,distribution,goals){
+  const win=p=>({winProbability:clamp(p),pushProbability:0});
   const n=selectionName(selection?.name),m=selectionName(market?.name);
   if(m==="1x2"){
-    if(["home","1"].includes(n))return distribution.home;
-    if(["draw","x"].includes(n))return distribution.draw;
-    if(["away","2"].includes(n))return distribution.away;
+    if(["home","1"].includes(n))return win(distribution.home);
+    if(["draw","x"].includes(n))return win(distribution.draw);
+    if(["away","2"].includes(n))return win(distribution.away);
   }
   if(m.includes("double chance")){
-    if(n.includes("home")&&n.includes("draw"))return distribution.home+distribution.draw;
-    if(n.includes("draw")&&n.includes("away"))return distribution.draw+distribution.away;
-    if(n.includes("home")&&n.includes("away"))return distribution.home+distribution.away;
+    if(n.includes("home")&&n.includes("draw"))return win(distribution.home+distribution.draw);
+    if(n.includes("draw")&&n.includes("away"))return win(distribution.draw+distribution.away);
+    if(n.includes("home")&&n.includes("away"))return win(distribution.home+distribution.away);
   }
   if(m.includes("draw no bet")||m.includes("no bet")){
-    if(["home","1"].includes(n))return distribution.home/(distribution.home+distribution.away);
-    if(["away","2"].includes(n))return distribution.away/(distribution.home+distribution.away);
+    if(["home","1"].includes(n))return {winProbability:clamp(distribution.home),pushProbability:clamp(distribution.draw)};
+    if(["away","2"].includes(n))return {winProbability:clamp(distribution.away),pushProbability:clamp(distribution.draw)};
   }
   if(m.includes("gg/ng")||m.includes("both teams")){
-    if(["yes","gg"].includes(n))return distribution.btts;
-    if(["no","ng"].includes(n))return 1-distribution.btts;
+    if(["yes","gg"].includes(n))return win(distribution.btts);
+    if(["no","ng"].includes(n))return win(1-distribution.btts);
   }
   if(m.includes("over/under")){
     const line=parseLine(selection?.name);
-    const over=1-tailUnderPoisson(goals.homeLambda+goals.awayLambda,line);
-    if(n.includes("over"))return over;
-    if(n.includes("under"))return 1-over;
+    const lambda=goals.homeLambda+goals.awayLambda;
+    const equal=Number.isInteger(line)?poisson(Math.round(line),lambda):0;
+    const over=1-tailUnderPoisson(lambda,line);
+    const under=Number.isInteger(line)?tailUnderPoisson(lambda,line)-equal:1-over;
+    if(n.includes("over"))return {winProbability:clamp(over),pushProbability:clamp(equal)};
+    if(n.includes("under"))return {winProbability:clamp(under),pushProbability:clamp(equal)};
   }
   if(m.includes("home o/u")){
     const line=parseLine(selection?.name);
+    const equal=Number.isInteger(line)?poisson(Math.round(line),goals.homeLambda):0;
     const over=1-tailUnderPoisson(goals.homeLambda,line);
-    if(n.includes("over"))return over;
-    if(n.includes("under"))return 1-over;
+    const under=Number.isInteger(line)?tailUnderPoisson(goals.homeLambda,line)-equal:1-over;
+    if(n.includes("over"))return {winProbability:clamp(over),pushProbability:clamp(equal)};
+    if(n.includes("under"))return {winProbability:clamp(under),pushProbability:clamp(equal)};
   }
   if(m.includes("away o/u")){
     const line=parseLine(selection?.name);
+    const equal=Number.isInteger(line)?poisson(Math.round(line),goals.awayLambda):0;
     const over=1-tailUnderPoisson(goals.awayLambda,line);
-    if(n.includes("over"))return over;
-    if(n.includes("under"))return 1-over;
+    const under=Number.isInteger(line)?tailUnderPoisson(goals.awayLambda,line)-equal:1-over;
+    if(n.includes("over"))return {winProbability:clamp(over),pushProbability:clamp(equal)};
+    if(n.includes("under"))return {winProbability:clamp(under),pushProbability:clamp(equal)};
   }
   if(m.includes("teams to score")){
-    if(n.includes("home"))return distribution.homeScore;
-    if(n.includes("away"))return distribution.awayScore;
+    if(n.includes("home"))return win(distribution.homeScore);
+    if(n.includes("away"))return win(distribution.awayScore);
   }
   return null;
 }
@@ -131,11 +139,12 @@ export function buildHistoricalModel(event,market,selection,historical={},prepar
   const context=preparedContext??buildHistoricalModelContext(event,historical);
   if(!context)return null;
   const {minimumSample,goals,distribution}=context;
-  const probability=modelForSelection(market,selection,distribution,goals);
-  if(!Number.isFinite(probability))return null;
+  const outcome=modelForSelection(market,selection,distribution,goals);
+  if(!outcome||!Number.isFinite(Number(outcome.winProbability)))return null;
   const confidence=clamp(.32+(Math.min(minimumSample,5)/5)*.46+(Math.min(1,Math.abs(goals.homeLambda-goals.awayLambda)/1.2)*.10));
   return{
-    modelProbability:clamp(probability),
+    modelProbability:clamp(outcome.winProbability),
+    pushProbability:clamp(outcome.pushProbability??0),
     confidence,
     dataQuality:clamp(.30+(Math.min(minimumSample,5)/5)*.55),
     sample:minimumSample,
