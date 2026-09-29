@@ -21,10 +21,10 @@ export function updateCalibration(stat={},confidence,result){
 }
 
 export function calibrationSummary(stat={}){
-  const n=Number(stat.calibrationSamples||0);
+  const n=Number(stat.calibrationSamples??stat.samples??0);
   if(n<=0)return{samples:0,meanConfidence:null,empiricalRate:null,brierScore:null,logLoss:null,calibrationGap:null};
-  const meanConfidence=Number(stat.confidenceSum||0)/n;
-  const empiricalRate=Number(stat.outcomeSum||0)/n;
+  const meanConfidence=stat.meanConfidence!=null?Number(stat.meanConfidence):Number(stat.confidenceSum||0)/n;
+  const empiricalRate=stat.empiricalRate!=null?Number(stat.empiricalRate):Number(stat.outcomeSum||0)/n;
   return{
     samples:n,
     meanConfidence,
