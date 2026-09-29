@@ -10,7 +10,7 @@ const historical={
 };
 const model=buildHistoricalModel(event,market,selection,historical);
 if(!model||!Number.isFinite(model.modelProbability))throw new Error("Historical model failed");
-if(model.modelType!=="sportybet-historical-form-v1")throw new Error("Unexpected model type");
+if(model.modelType!=="sportybet-historical-poisson-v2")throw new Error("Unexpected model type");
 const blended=combineModelSignals([model,{modelProbability:.55,confidence:.6,dataQuality:.7,modelType:"sportybet-market-implied-v1"}]);
 if(!blended?.historicalModel)throw new Error("Historical provenance was lost");
 if(!Number.isFinite(blended.modelProbability))throw new Error("Blended probability missing");
