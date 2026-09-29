@@ -1,3 +1,5 @@
+import { calibratedConfidence, calibrationSummary } from "./agentCalibration.js";
+
 const clamp=x=>Math.max(0,Math.min(1,Number(x)||0));
 const DEFAULT_PRIOR=.5;
 
@@ -21,7 +23,7 @@ function contextStat(statStore,key){
 
 export function getAgentHistoricalFeedback(performance={},agentId,{sport="unknown",market="unknown",oddsRange="unknown",confidenceBand="unknown"}={}){
   const agent=performance.agents?.[agentId];
-  if(!agent)return{available:false,reliability:.5,weight:0,source:"none",settled:0};
+  if(!agent)return{available:false,reliability:.5,weight:0,source:"none",settled:0,calibration:null};
 
   const candidates=[
     {source:"sport+market",stat:contextStat(agent.bySportMarket,`${sport}::${market}`)},
@@ -34,12 +36,14 @@ export function getAgentHistoricalFeedback(performance={},agentId,{sport="unknow
   for(const candidate of candidates){
     const settled=settledCount(candidate.stat);
     if(settled>=5){
+      const calibration=calibrationSummary(candidate.stat);
       return{
         available:true,
         reliability:smoothedWinRate(candidate.stat),
         weight:sampleWeight(candidate.stat),
         source:candidate.source,
-        settled
+        settled,
+        calibration
       };
     }
   }
@@ -48,16 +52,24 @@ export function getAgentHistoricalFeedback(performance={},agentId,{sport="unknow
     reliability:.5,
     weight:0,
     source:"insufficient_history",
-    settled:settledCount(agent)
+    settled:settledCount(agent),
+    calibration:calibrationSummary(agent)
   };
 }
 
 export function applyHistoricalFeedback(confidence,feedback,{maxAdjustment=.10}={}){
   const base=clamp(confidence);
-  if(!feedback?.available||feedback.weight<=0)return{confidence:base,adjustment:0,feedback};
-  const raw=(feedback.reliability-.5)*2*maxAdjustment;
-  const adjustment=raw*clamp(feedback.weight);
-  return{confidence:clamp(base+adjustment),adjustment,feedback};
+  if(!feedback?.available||feedback.weight<=0)return{confidence:base,adjustment:0,calibrationAdjustment:0,feedback};
+  const reliabilityAdjustment=(feedback.reliability-.5)*2*maxAdjustment*clamp(feedback.weight);
+  const calibrated=calibratedConfidence(base,{...feedback.calibration,...{}} , .12);
+  const calibrationAdjustment=Number(calibrated.adjustment)||0;
+  const adjustment=reliabilityAdjustment+calibrationAdjustment;
+  return{
+    confidence:clamp(base+adjustment),
+    adjustment,
+    calibrationAdjustment,
+    feedback
+  };
 }
 
 export function feedbackForReport(performance,report){
