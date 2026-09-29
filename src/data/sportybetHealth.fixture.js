@@ -1,4 +1,4 @@
-import { createSessionToken } from "../auth/_auth.js";
+import { createSessionToken } from "../../api/auth/_auth.js";
 process.env.SPORTYBET_AUTH_SECRET="health-fixture-secret-that-is-long-enough-123456";
 const session=createSessionToken("health-user",Math.floor(Date.now()/1000));
 const originalFetch=globalThis.fetch;
