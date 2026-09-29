@@ -26,12 +26,14 @@ export function buildPlatinumEnsemble({marketProbability=null,marketConfidence=0
     const confidence=clamp(model.confidence??.5);
     const quality=clamp(model.dataQuality??.5);
     const weight=.45*confidence*(.65+.35*quality);
-    components.push({id:model.modelType??"independent",probability:Number(model.modelProbability),weight});
+    components.push({id:model.modelType??"independent",probability:Number(model.modelProbability),pushProbability:Number(model.pushProbability)||0,weight});
   }
   const base=weightedMean(components);
   if(base==null)return null;
 
   const market=Number.isFinite(Number(marketProbability))?clamp(marketProbability):base;
+  const pushComponents=components.filter(x=>Number(x.pushProbability)>0);
+  const pushProbability=pushComponents.length?weightedMean(pushComponents.map(x=>({probability:x.pushProbability,weight:x.weight}))):0;
   const independent=independentModels.map(x=>Number(x?.modelProbability)).filter(Number.isFinite);
   const modelDisagreement=independent.length?disagreement(independent.map((p,i)=>({probability:p,weight:1}))):0;
   const marketDisagreement=Math.abs(base-market);
@@ -48,13 +50,19 @@ export function buildPlatinumEnsemble({marketProbability=null,marketConfidence=0
   const optimistic=Math.max(...scenarios);
   const robustness=clamp(1-((optimistic-conservative)*1.35));
   const robustProbability=clamp((conservative*.70)+(base*.30));
-  const value=Number.isFinite(Number(odds))?((robustProbability*Number(odds))-1):null;
-  const upsideValue=Number.isFinite(Number(odds))?((optimistic*Number(odds))-1):null;
-  const downsideValue=Number.isFinite(Number(odds))?((conservative*Number(odds))-1):null;
+  const robustPush=clamp(pushProbability);
+  const robustLoss=clamp(1-robustProbability-robustPush);
+  const optimisticPush=robustPush;
+  const conservativePush=robustPush;
+  const value=Number.isFinite(Number(odds))?((robustProbability*(Number(odds)-1))-robustLoss):null;
+  const upsideValue=Number.isFinite(Number(odds))?((optimistic*(Number(odds)-1))-clamp(1-optimistic-optimisticPush)):null;
+  const downsideValue=Number.isFinite(Number(odds))?((conservative*(Number(odds)-1))-clamp(1-conservative-conservativePush)):null;
 
   return{
     modelProbability:base,
     robustProbability,
+    pushProbability:robustPush,
+    lossProbability:robustLoss,
     conservativeProbability:conservative,
     optimisticProbability:optimistic,
     uncertainty,
