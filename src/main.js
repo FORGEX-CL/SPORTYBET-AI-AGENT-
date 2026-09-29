@@ -21,6 +21,29 @@ function ticketCopyText(ticket){return[`SPORTYBET AI AGENT · ${ticket.strategyL
 async function copyTicket(ticket){const text=ticketCopyText(ticket);try{await navigator.clipboard.writeText(text);state.error="Ticket copied to clipboard.";}catch{const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove();state.error="Ticket copied to clipboard.";}render();}
 function bindTicketButtons(){document.querySelectorAll("[data-ticket-index]").forEach(button=>button.addEventListener("click",()=>{const index=Number(button.getAttribute("data-ticket-index"));state.selectedTicket=state.analysis.tickets?.[index]??null;render();}));document.querySelector("#copy-ticket")?.addEventListener("click",()=>copyTicket(state.selectedTicket));document.querySelector("#close-ticket")?.addEventListener("click",()=>{state.selectedTicket=null;render();});document.querySelector("#recheck-ticket")?.addEventListener("click",()=>loadFeed({preserveTicketId:state.selectedTicket?.ticketId??null}));}
 
+function aiReply(q){
+  const s=String(q||"").toLowerCase();
+  if(!state.feed.eventCount)return"Refresh the source feed first.";
+  if(s.includes("risk"))return"Current risk challenges: "+(state.analysis.debate?.length??0)+". Recheck the latest source data before using a candidate.";
+  if(s.includes("ticket"))return"Current candidates: "+(state.analysis.tickets?.length??0)+". Open a candidate to inspect its selections.";
+  if(s.includes("odds"))return"Priced selections: "+(state.analysis.modelSummary?.pricedSelections??0)+". Refresh the feed because prices can move.";
+  return"Ask me about the current feed, agents, candidates, risk checks, odds or the staged plan.";
+}
+function stagedPlan(){
+  const t=state.analysis.tickets??[];
+  if(!t.length)return["Refresh the source feed and run analysis first."];
+  return t.slice(0,3).map((x,i)=>"Stage "+(i+1)+": "+x.selectionCount+" selections · "+Number(x.combinedOdds).toFixed(2)+" combined odds");
+}
+function aiPanel(){
+  return `<button class="ai-tab" id="open-ai">AI AGENTS</button><aside class="ai-drawer" id="ai-drawer"><div class="ai-drawer-head"><div><p class="label">SPORTYBET AI</p><h3>Agent room</h3></div><button id="close-ai" class="ai-close">×</button></div><div class="ai-chat" id="ai-chat"><div class="ai-msg agent-msg"><b>AI Agents</b><p>Ask a question about the current dashboard.</p></div></div><div class="ai-quick"><button data-q="What is the current risk?">Risk check</button><button data-q="Show ticket status">Candidates</button><button id="show-plan">Rollover plan</button></div><form id="ai-form" class="ai-form"><input id="ai-input" placeholder="Ask the AI Agents..." autocomplete="off"><button>SEND</button></form><div id="plan-card" class="plan-card"><b>ROLLOVER PLAN</b>${stagedPlan().map(x=>"<div>"+escapeHtml(x)+"</div>").join("")}<small>Built from the current verified source snapshot. Recheck current data before each stage.</small></div></aside>`
+}
+function bindAi(){
+  document.querySelector("#open-ai")?.addEventListener("click",()=>document.querySelector("#ai-drawer")?.classList.add("open"));
+  document.querySelector("#close-ai")?.addEventListener("click",()=>document.querySelector("#ai-drawer")?.classList.remove("open"));
+  document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{const i=document.querySelector("#ai-input");i.value=b.dataset.q;i.focus()}));
+  document.querySelector("#show-plan")?.addEventListener("click",()=>document.querySelector("#plan-card")?.classList.toggle("visible"));
+  document.querySelector("#ai-form")?.addEventListener("submit",e=>{e.preventDefault();const i=document.querySelector("#ai-input"),q=i.value.trim();if(!q)return;const chat=document.querySelector("#ai-chat");chat.insertAdjacentHTML("beforeend",'<div class="ai-msg user-msg"><p>'+escapeHtml(q)+'</p></div><div class="ai-msg agent-msg"><b>AI Agents</b><p>'+escapeHtml(aiReply(q))+'</p></div>');i.value="";chat.scrollTop=chat.scrollHeight});
+}
 function render(){
   const fresh=requireFreshFeed(state.feed),agents=renderAgentStatus();
   const status=state.loading?"Syncing SportyBet…":state.feed.eventCount?"Verified normalized feed":"Awaiting verified SportyBet feed";
@@ -43,8 +66,8 @@ function render(){
 <section><div class="section-head"><div><p class="label">TICKET ENGINE</p><h3>Top 10 candidates</h3></div><span class="count">UP TO 50 PICKS EACH</span></div><div class="tickets">${Array.from({length:10},(_,i)=>{const ticket=tickets[i];return`<article class="ticket"><span class="ticket-id">TICKET #${i+1}</span><h4>${ticket?Number(ticket.combinedOdds).toFixed(2):"—"} <small>COMBINED ODDS</small></h4><div class="ticket-meta"><span>${ticket?ticket.selectionCount:0} selections</span><span>${ticket?escapeHtml(ticket.strategyLabel??"Candidate"):"No approved candidate"}</span></div><button data-ticket-index="${i}" ${ticket?"":"disabled"}>${ticket?"VIEW TICKET":"UNAVAILABLE"}</button></article>`}).join("")}</div></section>
 ${renderSelectedTicket(state.selectedTicket)}
 <section class="architecture"><div class="section-head"><div><p class="label">DECISION PIPELINE</p><h3>Evidence before selection</h3></div></div><div class="flow"><span>SportyBet</span><b>→</b><span>Normalize</span><b>→</b><span>Enrich</span><b>→</b><span>6 specialists</span><b>→</b><span>Risk challenge</span><b>→</b><span>Head Analyst</span><b>→</b><span>Tickets</span><b>→</b><span>Results</span><b>→</b><span>Learning</span></div></section>
-</main><footer>SportyBet AI Agent · v1.0 · Uses SportyBet as the verified source. No fabricated odds, match IDs or booking codes.</footer>`;
-  document.querySelector("#refresh-feed")?.addEventListener("click",loadFeed);bindTicketButtons();
+</main>${aiPanel()}<footer>SportyBet AI Agent · v1.0 · Uses SportyBet as the verified source. No fabricated odds, match IDs or booking codes.</footer>`;
+  document.querySelector("#refresh-feed")?.addEventListener("click",loadFeed);bindTicketButtons();bindAi();
 }
 
 async function syncResults(){const snapshot=await fetchSportyBetResultsApi();state.ledger=recordSportyBetResults(state.ledger,snapshot.results??[],snapshot.capturedAt??null);const pending=state.ledger.predictions.filter(p=>p.status!=="won"&&p.status!=="lost");const selectionResults=[];for(const prediction of pending){for(const selection of prediction.selections){const result=snapshot.results.find(r=>String(r.eventId)===String(selection.eventId));if(!result)continue;const settled=settleFootballSelection(result,{marketName:selection.marketName,selectionName:selection.selection});selectionResults.push({eventId:selection.eventId,marketId:selection.marketId,selectionId:selection.selectionId,result:settled,settlementSource:"SportyBet"});}}if(selectionResults.length)state.ledger=settlePendingFromSportyBetResults(state.ledger,selectionResults);state.learning=learningSummary(state.ledger);safeSaveLearning();state.lastResultSync=String(snapshot.resultCount)+" SportyBet results · "+String(state.ledger.resultHistory?.length??0)+" stored";return snapshot;}
