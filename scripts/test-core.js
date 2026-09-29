@@ -6,6 +6,7 @@ import "../src/core/debate.fixture.js";
 import "../src/core/headAnalyst.fixture.js";
 import "../src/core/ticketPortfolio.fixture.js";
 import "../src/core/ticketDelta.fixture.js";
+import "../src/core/validation.fixture.js";
 import "../src/core/sourceSignalEngine.fixture.js";
 import "../src/core/learning.fixture.js";
 import "../src/core/learningLedger.fixture.js";
