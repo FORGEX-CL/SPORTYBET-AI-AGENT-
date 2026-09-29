@@ -2,11 +2,12 @@ import "./styles.css";
 import { AGENT_ROLES } from "./core/agents.js";
 import { analyzeSportyBetFeed } from "./core/feedAnalysis.js";
 import { normalizeSportyBetFeed, requireFreshFeed } from "./core/feedPipeline.js";
-import { loadLearningLedger, learningSummary, registerTickets, saveLearningLedger, settlePendingFromSportyBetResults, recordSportyBetResults } from "./core/learningLedger.js";
+import { loadLearningLedger, learningSummary, registerTickets, saveLearningLedger, settlePendingFromSportyBetResults, recordSportyBetResults, recordSportyBetOddsHistory } from "./core/learningLedger.js";
 import { fetchSportyBetFootballApi, fetchSportyBetResultsApi, fetchSportyBetHealthApi } from "./data/sportybetApi.js";
 import { settleFootballSelection } from "./data/sportybetResultsParser.js";
 import { buildHistoricalEvidenceByEvent } from "./core/sportybetHistory.js";
 import { compareTicketToFeed } from "./core/ticketDelta.js";
+import { recordSportyBetOddsSnapshot, buildOddsMovementBySelection } from "./core/oddsHistory.js";
 
 const emptyFeed=normalizeSportyBetFeed([]);
 const initialLedger=loadLearningLedger();
@@ -129,10 +130,13 @@ async function loadFeed({preserveTicketId=null}={}){
     const snapshot=await fetchSportyBetFootballApi();
     state.detailFailures=snapshot.detailFailures?.length??0;
     state.feed=normalizeSportyBetFeed(snapshot.events,{sourceUrl:snapshot.sourceUrl,capturedAt:snapshot.capturedAt});
+    const oddsHistory=recordSportyBetOddsSnapshot(state.ledger.oddsHistory??{},state.feed.events,state.feed.capturedAt);
+    state.ledger=recordSportyBetOddsHistory(state.ledger,oddsHistory);
     try{await syncResults();}catch{state.resultFailures=1;state.lastResultSync="RESULT SOURCE UNAVAILABLE";}
+    const oddsMovementBySelection=buildOddsMovementBySelection(state.ledger.oddsHistory??{});
     const historicalEvidence=buildHistoricalEvidenceByEvent(state.feed.events,state.ledger.resultHistory??[]);
     const evidenceByEvent=Object.fromEntries(Object.entries(historicalEvidence).map(([eventId,historical])=>[eventId,{__historical:historical}]));
-    state.analysis=analyzeSportyBetFeed(state.feed,{evidenceByEvent,agentPerformance:state.ledger.performance});
+    state.analysis=analyzeSportyBetFeed(state.feed,{evidenceByEvent,agentPerformance:state.ledger.performance,oddsMovementBySelection});
     state.ledger=registerTickets(state.ledger,state.analysis.tickets??[]);
     if(preserveTicketId){const replacement=state.analysis.tickets?.find(t=>t.ticketId===preserveTicketId);state.selectedTicket=replacement??state.selectedTicket;}
     safeSaveLearning();
