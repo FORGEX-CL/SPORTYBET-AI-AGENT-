@@ -18,7 +18,7 @@ const eventKey=s=>String(s.eventId);
 const contextKey=s=>`${s.sport??"unknown"}::${s.league??"unknown"}::${s.marketName??"unknown"}`;
 const leagueKey=s=>`${s.sport??"unknown"}::${s.league??"unknown"}`;
 
-function candidatePriority(selection,usedContexts){
+function candidatePriority(selection,usedContexts,usedLeagues){
   const base=Number(selection.score)||0;
   const context=contextKey(selection);
   const penalty=usedContexts.has(context)?0.06:0;
@@ -33,7 +33,7 @@ function selectForTarget(candidates,target,seed=[]){
   const usedLeagues=new Set(chosen.map(leagueKey));
   const remaining=candidates.filter(s=>!usedEvents.has(eventKey(s)));
   while(chosen.length<target&&remaining.length){
-    remaining.sort((a,b)=>candidatePriority(b,usedContexts)-candidatePriority(a,usedContexts));
+    remaining.sort((a,b)=>candidatePriority(b,usedContexts,usedLeagues)-candidatePriority(a,usedContexts,usedLeagues));
     const next=remaining.shift();
     chosen.push(next);
     usedEvents.add(eventKey(next));
