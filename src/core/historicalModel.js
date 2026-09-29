@@ -16,6 +16,15 @@ function blend(a,b,wa=.5){
 
 function selectionName(name){return String(name??"").trim().toLowerCase();}
 
+function outcomeProbabilities(homeEdge){
+  const closeness=1-Math.min(1,Math.abs(homeEdge-.5)*2);
+  const rawHome=.45+(.40*(homeEdge-.5));
+  const rawAway=.45+(.40*(.5-homeEdge));
+  const rawDraw=.20+(.20*closeness);
+  const total=rawHome+rawDraw+rawAway;
+  return {home:rawHome/total,draw:rawDraw/total,away:rawAway/total};
+}
+
 function probabilityForFootball(event,market,selection,historical){
   const home=historical?.home, away=historical?.away;
   if(!home&&!away)return null;
@@ -26,9 +35,10 @@ function probabilityForFootball(event,market,selection,historical){
   const m=selectionName(market?.name);
 
   if(m==="1x2"){
-    if(["home","1"].includes(n))return clamp(.32+(homeEdge*.50));
-    if(["draw","x"].includes(n))return clamp(.18+((1-Math.abs(homeEdge-.5)*2)*.18));
-    if(["away","2"].includes(n))return clamp(.32+((1-homeEdge)*.50));
+    const outcome=outcomeProbabilities(homeEdge);
+    if(["home","1"].includes(n))return clamp(outcome.home);
+    if(["draw","x"].includes(n))return clamp(outcome.draw);
+    if(["away","2"].includes(n))return clamp(outcome.away);
   }
 
   if(m.includes("double chance")){
