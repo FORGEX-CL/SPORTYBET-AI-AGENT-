@@ -9,13 +9,13 @@ export function aggregateSelectionReports(reports=[],debate=[]){
   const byKey=new Map();
   for(const r of reports){
     const key=`${r.eventId}:${r.marketId}:${r.selectionId}`;
-    const item=byKey.get(key)||{...r,agents:[],predictiveAgents:[],agreement:0,risk:0,value:0,confidence:0,predictiveConfidence:0,dataQuality:0,predictiveDataQuality:0,debate:[]};
+    const item=byKey.get(key)||{...r,agents:[],predictiveAgents:[],agreement:0,risk:0,value:0,confidence:0,predictiveConfidence:0,dataQuality:0,predictiveDataQuality:0,independentEvidence:0,debate:[]};
     item.agents.push(r.agentId);
     if(PREDICTIVE_AGENTS.has(r.agentId)){
       if(clamp(r.dataQuality)>0&&clamp(r.confidence)>0){
         item.predictiveAgents.push(r.agentId);
         item.predictiveConfidence+=clamp(r.confidence);
-        item.predictiveDataQuality+=clamp(r.dataQuality);
+        item.predictiveDataQuality+=clamp(r.dataQuality);\n        item.independentEvidence+=Number(r.independentEvidence)||0;
       }
       item.value=Math.max(item.value,Number(r.value)||0);
     }
@@ -36,8 +36,8 @@ export function aggregateSelectionReports(reports=[],debate=[]){
 
 export function runHeadAnalyst(reports,{debate=[],minScore=.55,maxSelections=50,minPredictiveAgents=2,minDataQuality=.5}={}){
   const aggregated=aggregateSelectionReports(reports,debate);
-  const candidates=aggregated.filter(x=>x.predictiveAgents.length>=minPredictiveAgents&&x.predictiveDataQuality>=minDataQuality&&x.score>=minScore&&!x.debate.some(d=>d.severity==="high"));
+  const candidates=aggregated.filter(x=>x.predictiveAgents.length>=minPredictiveAgents&&x.independentEvidence>=1&&x.predictiveDataQuality>=minDataQuality&&x.score>=minScore&&!x.debate.some(d=>d.severity==="high"));
   const rejected=aggregated.filter(x=>!candidates.includes(x));
   const accepted=candidates.slice(0,maxSelections);
-  return{accepted,rejected,noBet:accepted.length===0,reasoning:accepted.length?"Accepted only selections supported by predictive-agent evidence, adequate data quality and a survived Risk/Contrarian challenge.":"NO BET: no selection met predictive-agent, data-quality and Risk/Contrarian challenge requirements.",requirements:{minScore,minPredictiveAgents,minDataQuality},debateCount:debate.length,decidedAt:new Date().toISOString()};
+  return{accepted,rejected,noBet:accepted.length===0,reasoning:accepted.length?"Accepted only selections supported by predictive-agent evidence, adequate data quality and a survived Risk/Contrarian challenge.":"NO BET: no selection met predictive-agent, data-quality and Risk/Contrarian challenge requirements.",requirements:{minScore,minPredictiveAgents,minDataQuality,minIndependentEvidence:1},debateCount:debate.length,decidedAt:new Date().toISOString()};
 }
