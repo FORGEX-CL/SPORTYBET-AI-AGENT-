@@ -30,7 +30,8 @@ export function createPredictionRecord(ticket){
         challenges:Array.isArray(s.debate)?s.debate.map(d=>({...d})):[],
         scoreAtCreation:Number(s.score)||0,
         confidenceAtCreation:Number(s.confidence)||null,
-        dataQualityAtCreation:Number(s.dataQuality)||0
+        dataQualityAtCreation:Number(s.dataQuality)||0,
+        agentForecasts:Array.isArray(s.agentForecasts)?s.agentForecasts.map(f=>({...f})):[]
       }
     })),
     combinedOddsAtCreation:ticket.combinedOdds,status:"pending"
@@ -86,6 +87,7 @@ export function updateAgentPerformance(performance={},records=[]){
       if(!["won","lost","unknown","void_or_push"].includes(result))continue;
       const a=selection.agentAttribution??{};
       const agents=new Set([...(a.predictiveAgents??[]),...(a.supportingAgents??[])]);
+      const forecastByAgent=new Map((a.agentForecasts??[]).map(f=>[f.agentId,f]));
       const sport=selection.sport??"unknown";
       const market=selection.marketName??"unknown";
       const oddsRange=bucketOdds(selection.odds);
@@ -96,7 +98,9 @@ export function updateAgentPerformance(performance={},records=[]){
         stat.predictions++;
         if(result==="void_or_push")stat.voidOrPush++;
         else stat[result]++;
-        if(result==="won"||result==="lost")updateCalibration(stat,a.confidenceAtCreation,result);
+        const forecast=forecastByAgent.get(agentId);
+        const forecastConfidence=forecast?.confidence??a.confidenceAtCreation;
+        if(result==="won"||result==="lost")updateCalibration(stat,forecastConfidence,result);
 
         const buckets=[
           ["bySport",sport],
@@ -106,7 +110,7 @@ export function updateAgentPerformance(performance={},records=[]){
           ["byConfidenceBand",conf]
         ];
         for(const [name,key] of buckets){
-          stat[name][key]=updateBucket(stat[name][key]??{},result,a.confidenceAtCreation);
+          stat[name][key]=updateBucket(stat[name][key]??{},result,forecastConfidence);
         }
       }
 
