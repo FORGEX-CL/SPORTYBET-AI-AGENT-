@@ -156,4 +156,5 @@ function bindSignup(){
     }catch(error){status.textContent=error instanceof Error?error.message:"Cloud signup failed";status.className="signup-status taken";create.disabled=false;create.textContent="CREATE CLOUD ACCOUNT";}
   });
 }
-\nbootstrap();
+
+bootstrap();
