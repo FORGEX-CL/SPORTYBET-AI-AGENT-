@@ -93,7 +93,7 @@ export function parseMarketBlock(text="",{eventId="",sport="football"}={}){
     const odds=oddsAtEnd(header);
     if(!Number.isFinite(odds)||odds<=1)continue;
     const name=header.slice(0,header.lastIndexOf(String(odds))).trim().replace(/\s+$/,"");
-    if(!name||/^\d+(?:\.\d+)?$/.test(name))continue;
+    const numericSelection=/^\d+(?:\.\d+)?(?:\+)?$/.test(name);\n    const numericMarketAllowed=/(Exact Goals|Goal Range|Goal Bounds|Excluded Number of Goals)/i.test(current.name);\n    if(!name||(numericSelection&&!numericMarketAllowed))continue;
     current.selections.push(normalizeSelection({selectionId:current.name+":"+name,name,odds}));
   }
   return markets.filter(m=>m.selections.length).map((m,index)=>normalizeMarket({...m,marketId:eventId+":market:"+(index+1)}));
