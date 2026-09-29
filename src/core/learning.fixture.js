@@ -1,11 +1,12 @@
 import { createPredictionRecord, settlePrediction, updateAgentPerformance, summarizeAgentPerformance } from "./learning.js";
-const ticket={ticketId:"t1",createdAt:new Date().toISOString(),combinedOdds:4,selections:[{eventId:"e1",marketId:"m1",selectionId:"1",sport:"football",marketName:"1X2",odds:2,score:.8,confidence:.8,dataQuality:.9,predictiveAgents:["statistics","football"],agents:["statistics","football","market","risk"],debate:[{from:"risk",severity:"high"}]}]};
+const ticket={ticketId:"t1",createdAt:new Date().toISOString(),combinedOdds:4,selections:[{eventId:"e1",marketId:"m1",selectionId:"1",sport:"football",marketName:"1X2",odds:2,score:.8,confidence:.8,dataQuality:.9,predictiveAgents:["statistics","football"],agents:["statistics","football","market","risk"],debate:[{from:"risk",severity:"high"}],agentForecasts:[{agentId:"statistics",confidence:.95,dataQuality:.9},{agentId:"football",confidence:.55,dataQuality:.8}]}]};
 const record=createPredictionRecord(ticket);
 const settled=settlePrediction(record,[{eventId:"e1",marketId:"m1",selectionId:"1",result:"lost",source:"fixture"}]);
 const performance=updateAgentPerformance({},[settled]);
 const summary=summarizeAgentPerformance(performance);
 if(summary.length!==4)throw new Error("Agent performance attribution fixture failed");
 if(summary.find(x=>x.agentId==="statistics")?.lost!==1)throw new Error("Predictive agent loss tracking failed");
+if(!(summary.find(x=>x.agentId==="statistics")?.brierScore<summary.find(x=>x.agentId==="football")?.brierScore))throw new Error("Per-agent calibration attribution failed");
 if(summary.find(x=>x.agentId==="statistics")?.challengeVindicated!==1)throw new Error("Risk challenge attribution failed");
 const voidTicket={ticketId:"t2",createdAt:new Date().toISOString(),combinedOdds:2,selections:[{eventId:"e2",marketId:"m2",selectionId:"h",sport:"football",marketName:"Draw No Bet",odds:1.5,score:.7,confidence:.7,dataQuality:.8,predictiveAgents:["odds"],agents:["odds","market","risk"],debate:[]},{eventId:"e3",marketId:"m3",selectionId:"1",sport:"football",marketName:"1X2",odds:1.8,score:.7,confidence:.7,dataQuality:.8,predictiveAgents:["odds"],agents:["odds","market"],debate:[]}]};
 const voidRecord=createPredictionRecord(voidTicket);
