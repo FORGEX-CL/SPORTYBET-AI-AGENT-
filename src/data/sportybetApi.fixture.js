@@ -1,14 +1,11 @@
-const originalFetch=globalThis.fetch;
-globalThis.fetch=async()=>({
+const mockFetch=async()=>({
   ok:true,
   status:200,
   async json(){return {source:"SportyBet",eventCount:1,events:[]};}
 });
-try{
-  const {fetchSportyBetFootballApi}=await import("./sportybetApi.js");
-  const result=await fetchSportyBetFootballApi();
-  if(result?.source!=="SportyBet"||result?.eventCount!==1)throw new Error("SportyBet API client fixture failed");
-}finally{
-  globalThis.fetch=originalFetch;
-}
+
+const {createSportyBetApiClient}=await import("./sportybetApi.js");
+const client=createSportyBetApiClient(mockFetch);
+const result=await client.football();
+if(result?.source!=="SportyBet"||result?.eventCount!==1)throw new Error("SportyBet API client fixture failed");
 console.log("SportyBet API client fixture passed");
