@@ -24,3 +24,5 @@ import "../src/core/riskEngine.fixture.js";
 
 import "../src/core/platinumEnsemble.fixture.js";
 import "../src/core/correlationEngine.fixture.js";
+
+import "../src/core/settlementCatalogue.fixture.js";
