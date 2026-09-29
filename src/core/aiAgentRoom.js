@@ -57,6 +57,8 @@ export function ticketSelectionAnswer(state,ticket,index){
 export function buildAiReply(state,q){
   const raw=String(q||"").trim(),s=raw.toLowerCase();
   if(!state.feed?.eventCount)return"No verified SportyBet feed is loaded. Refresh the source first.";
+  const agentMatch=AGENT_ROLES.find(a=>s.includes(a.name.toLowerCase())||s.includes(a.id.toLowerCase()));
+  if(agentMatch)return agentAnswer(state,agentMatch.id);
   if(state.selectedTicket){
     const match=s.match(/(?:selection|pick|leg)\s*(\d+)/);
     if(match)return ticketSelectionAnswer(state,state.selectedTicket,Math.max(0,Number(match[1])-1));
@@ -64,8 +66,6 @@ export function buildAiReply(state,q){
       return state.selectedTicket.selections.map((_,i)=>ticketSelectionAnswer(state,state.selectedTicket,i)).join(" ");
     }
   }
-  const agentMatch=AGENT_ROLES.find(a=>s.includes(a.name.toLowerCase())||s.includes(a.id.toLowerCase()));
-  if(agentMatch)return agentAnswer(state,agentMatch.id);
   if(s.includes("who are")||s.includes("agents"))return"The room has 7 agents: Statistics, Football, Multi-Sport, SportyBet Market Intelligence, Odds & Value, Risk / Contrarian, and Head Analyst.";
   if(s.includes("risk"))return agentAnswer(state,"risk");
   if(s.includes("odds"))return agentAnswer(state,"odds");
