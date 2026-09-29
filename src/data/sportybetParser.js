@@ -49,8 +49,8 @@ export function parseFootballMainRows(text=""){
   const lines=cleanLines(text),events=[];let league="";
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    if(/^\d{1,2}:\d{2}\s+ID\s+\d+$/i.test(line)){
-      const id=line.match(ID)?.[1],startTime=line.match(/^\d{1,2}:\d{2}/)?.[0]??"";
+    if(/^(?:\d{1,2}\/\d{1,2}(?:\/\d{4})?\s+\w+\s+)?\d{1,2}:\d{2}\s+ID\s+\d+$/i.test(line)){
+      const id=line.match(ID)?.[1],startTime=line.match(/\d{1,2}:\d{2}/)?.[0]??"";
       const teams=splitTeams(lines[i+1]??""),odds=numericTokens(lines[i+2]??"");
       if(!id||teams.length!==2||odds.length<3)continue;
       events.push(normalizeEvent({eventId:id,sourceEventId:id,sport:"football",league,home:teams[0],away:teams[1],startTime,
