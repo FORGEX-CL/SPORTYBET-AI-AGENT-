@@ -15,6 +15,9 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Production SportyBet source health endpoint.
 - Server ingestion uses bounded five-request concurrency for event-detail enrichment and 15-second source-request timeouts.
 - Dashboard refresh control that requests a verified SportyBet snapshot and then attempts event-detail enrichment for up to 20 football events.
+- Sport-aware SportyBet ingestion now includes a Basketball source route and compact Football/Basketball dashboard switch. Basketball currently parses verified Points totals with canonical SportyBet detail IDs and feeds the same specialist/debate pipeline.
+- SportyBet health is sport-aware and reports parsed events, market coverage, priced selections, canonical detail-ID coverage, and source-contract status.
+
 - Six specialist analysis passes plus a Head Analyst decision layer (7-agent architecture).
 - Predictive-evidence gate: market existence alone cannot approve a selection.
 - Risk/Contrarian challenge round with severity and Head Analyst veto for high-severity challenges.
@@ -48,7 +51,7 @@ Event-detail enrichment is best-effort and fail-closed per event: if a detail pa
 
 The learning ledger stores predictions locally in the browser. It is updated only from explicit settlement results supplied to the settlement layer; it does not manufacture wins, losses or historical performance.
 
-The current implementation is source-backed for football ingestion. It does not claim that the public page exposes every internal SportyBet identifier needed for external booking-code generation.
+The current implementation is source-backed for football ingestion and now has a source-backed basketball feed boundary for analysis. Basketball result settlement remains fail-closed until deterministic settlement rules are implemented. It does not claim that the public page exposes every internal SportyBet identifier needed for external booking-code generation.
 
 ## Pipeline
 
