@@ -91,8 +91,6 @@ export function updateAgentPerformance(performance={},records=[]){
       const sport=selection.sport??"unknown";
       const market=selection.marketName??"unknown";
       const oddsRange=bucketOdds(selection.odds);
-      const conf=confidenceBand(a.confidenceAtCreation);
-
       for(const agentId of agents){
         const stat=ensureAgentStat(next.agents[agentId]??={});
         stat.predictions++;
@@ -100,6 +98,7 @@ export function updateAgentPerformance(performance={},records=[]){
         else stat[result]++;
         const forecast=forecastByAgent.get(agentId);
         const forecastConfidence=forecast?.confidence??a.confidenceAtCreation;
+        const conf=confidenceBand(forecastConfidence);
         if(result==="won"||result==="lost")updateCalibration(stat,forecastConfidence,result);
 
         const buckets=[
