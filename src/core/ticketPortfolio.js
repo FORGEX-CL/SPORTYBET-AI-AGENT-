@@ -52,7 +52,8 @@ function scorePortfolio(selections){
   const contextDiversity=contexts/selections.length;
   const eventDiversity=new Set(selections.map(eventKey)).size/selections.length;
   const leagueDiversity=new Set(selections.map(leagueKey)).size/selections.length;
-  return (average*.55)+(contextDiversity*.15)+(leagueDiversity*.15)+(eventDiversity*.15);
+  const correlation=portfolioCorrelation(selections);
+  return (average*.55)+(contextDiversity*.15)+(leagueDiversity*.15)+(eventDiversity*.15)-(correlation*.20);
 }
 
 function stableSortCandidates(selections){
@@ -91,7 +92,7 @@ export function buildTicketPortfolio(selections,{maxTickets=MAX_TICKETS,sourceUr
         strategyLabel:profile.label,
         score:portfolioScore,
         correlationScore:portfolioCorrelation(picks),
-        selectionProfile:{target,actual:picks.length,uniqueEvents:new Set(picks.map(eventKey)).size,uniqueContexts:new Set(picks.map(contextKey)).size}
+        selectionProfile:{target,actual:picks.length,uniqueEvents:new Set(picks.map(eventKey)).size,uniqueContexts:new Set(picks.map(contextKey)).size,correlation:portfolioCorrelation(picks)}
       }));
     }catch{}
   }
