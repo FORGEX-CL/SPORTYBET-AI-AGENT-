@@ -1,6 +1,7 @@
 import { impliedProbability } from "./analysisEngine.js";
 import { scoreSelection } from "./ticketScoring.js";
 import { evaluateSportEvidence } from "./sportRules.js";
+import { assessSelectionRisk } from "./riskEngine.js";
 
 function base(event,market,selection){
   return{
@@ -124,17 +125,22 @@ export function oddsAnalysis(event,market,selection,modelProbability=null){
 
 export function riskAnalysis(event,market,selection,risks=[],context={}){
   const signal=context.marketSignal;
-  const derived=[];
-  if(signal?.overround>.12)derived.push("High market overround reduces pricing confidence.");
-  if(signal?.marketDepth<2)derived.push("Low market depth limits cross-checking.");
-  if(Number(signal?.crossMarketAgreement)<.70)derived.push("Cross-market prices are inconsistent.");
-  if(Number(selection.odds)>=8)derived.push("Long-odds selection has high variance and requires stronger evidence.");
-  const allRisks=[...(risks??[]),...derived];
+  const assessment=assessSelectionRisk({
+    event,
+    market,
+    selection,
+    signal,
+    historicalModel:context.historicalModel,
+    explicitRisks:risks
+  });
   return{
     ...base(event,market,selection),
     agentId:"risk",
-    risks:allRisks,
-    confidence:allRisks.length?Math.max(0,1-allRisks.length*.15):1,
+    risks:assessment.risks,
+    riskScore:assessment.riskScore,
+    riskSeverity:assessment.severity,
+    requiresExtraVerification:assessment.requiresExtraVerification,
+    confidence:assessment.confidence,
     dataQuality:signal?Math.max(.7,Number(signal.dataQuality)||0):1,
     evidence:signal?.evidence??[]
   };
