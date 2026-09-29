@@ -1,4 +1,4 @@
-import { createSessionToken } from "../auth/_auth.js";
+import { createSessionToken } from "../../api/auth/_auth.js";
 process.env.SPORTYBET_AUTH_SECRET="basketball-fixture-secret-that-is-long-enough";
 const session=createSessionToken("basketball-user",Math.floor(Date.now()/1000));
 const mockFetch=async()=>new Response(`International - Eurocup, Women
