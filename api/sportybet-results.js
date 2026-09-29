@@ -1,5 +1,6 @@
 import { createSportyBetAdapter } from "../src/data/sportybetAdapter.js";
 import { parseSportyBetFootballResults } from "../src/data/sportybetResultsParser.js";
+import { requireAuth } from "./auth/_auth.js";
 
 const RESULTS_URL="https://www.sportybet.com/ng/liveResult/";
 
@@ -22,6 +23,7 @@ export default async function handler(req,res){
     res.status(405).json({error:"Method not allowed"});
     return;
   }
+  if(!requireAuth(req,res))return;
 
   try{
     const adapter=createSportyBetAdapter();
