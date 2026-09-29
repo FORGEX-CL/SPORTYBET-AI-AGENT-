@@ -15,7 +15,7 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Production SportyBet source health endpoint.
 - Server ingestion uses bounded five-request concurrency for event-detail enrichment and 15-second source-request timeouts.
 - Dashboard refresh control that requests a verified SportyBet snapshot and then attempts event-detail enrichment for up to 20 football events.
-- Six specialist analysis passes plus a Head Analyst decision layer.
+- Six specialist analysis passes plus a Head Analyst decision layer (7-agent architecture).
 - Predictive-evidence gate: market existence alone cannot approve a selection.
 - Risk/Contrarian challenge round with severity and Head Analyst veto for high-severity challenges.
 - Feed-level report aggregation and candidate scoring.
@@ -28,7 +28,7 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Prediction records retain agent attribution, challenge context, sport, market, odds range and confidence band.
 - Persistent browser learning ledger with deduplication across feed refreshes.
 - Agent performance summaries by sport, sport-market context, odds range and confidence band, plus Risk challenge vindication/false-positive counts.
-- Conservative historical feedback: only contexts with at least five settled outcomes can adjust a future specialist confidence, with small sample sizes shrunk toward neutral.
+- Conservative learning: only contexts with at least five settled outcomes can adjust future specialist confidence; each agent now records its own forecast calibration using Brier score, log loss and calibration gap, with small samples shrunk toward neutral.
 - Fresh-feed ticket revalidation and odds-change detection.
 - Official SportyBet Results ingestion for football settlement, including event IDs and final scores.
 - Prediction settlement, error classification and learning summary.
@@ -66,13 +66,17 @@ npm run dev
 - Football result settlement now covers 1X2, Double Chance, Draw No Bet, handicap, Asian handicap, totals, GG/NG, exact goals, goal ranges, goal bounds, winning margin, odd/even, correct score and half-time/full-time where the published result contains the required information.
 - Void legs in accumulators are now handled as void/push outcomes; a void leg plus winning remaining legs can settle as a ticket win.
 - SportyBet result history is persisted locally and reused as historical evidence for the Statistics and Football specialists.
-- Historical evidence includes recent form, home/away splits, goals scored/conceded, clean-sheet rate, both-teams-to-score rate and over-2.5 rate when enough verified SportyBet results have been accumulated.
+- Historical evidence includes recent form, home/away splits, goals scored/conceded, clean-sheet rate, both-teams-to-score rate and over-2.5 rate when enough verified SportyBet results have been accumulated. The football probability engine now uses a smoothed Poisson score model (sportybet-historical-poisson-v2) and derives 1X2, BTTS and totals probabilities from the same score distribution.
 - The first installation starts with no historical sample; the system does not invent missing form or statistics.
 - Verified football event enrichment now supports up to 50 event detail pages per feed run.
 ## Agent intelligence hardening
 
-The analysis layer now separates SportyBet market-derived consensus from independent historical evidence. A football historical-form model (sportybet-historical-form-v1) is built only from stored, settled SportyBet results and is withheld when the available team sample is too small. The Odds Agent can blend that model with SportyBet market pricing, while preserving provenance.
+The analysis layer now separates SportyBet market-derived consensus from independent historical evidence. A football historical-form model (sportybet-historical-form-v1) is built only from stored, settled SportyBet results and is withheld when the available team sample is too small. The Odds Agent can blend that model with SportyBet market pricing, while preserving provenance. Model arbitration is calibration-weighted, and the Head Analyst retains per-agent forecast attribution for future learning.
 
-The Head Analyst now requires at least one independent evidence source before approving a selection. Market-only confidence cannot approve a bet. Historical-model provenance, model confidence, data quality, challenge penalties, and SportyBet market consensus remain visible to the decision layer.
+The Head Analyst now requires at least one independent evidence source before approving a selection. Agent arbitration weights historical calibration, data quality and evidence provenance rather than treating all specialist confidence as equally reliable. Market-only confidence cannot approve a bet. Historical-model provenance, model confidence, data quality, challenge penalties, and SportyBet market consensus remain visible to the decision layer.
 
-The observed football catalogue is also aligned with currently exposed SportyBet markets such as Home O/U, Away O/U, 1st Half O/U, Corners O/U, 1X2 - Never Down, GG/NG, and goal-streak markets. SportyBet remains the source of truth for event IDs, markets, selections, and odds.
+The Risk Agent now applies market-aware failure-mode analysis for early-goals, 1UP, Correct Score, player, combination/Bet Builder and live markets, plus overround, market-depth, cross-market disagreement and model/price divergence checks. The observed football catalogue is aligned with currently exposed SportyBet markets such as Home O/U, Away O/U, 1st Half O/U, Corners O/U, 1X2 - Never Down, GG/NG, and goal-streak markets. SportyBet remains the source of truth for event IDs, markets, selections, and odds.
+
+## Verification
+
+GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` and on pull requests. Local execution has not been represented as passing unless the commands actually run successfully.
