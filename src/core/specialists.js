@@ -42,14 +42,15 @@ export function statisticsAnalysis(event,market,selection,stats={}){
   return{
     ...base(event,market,selection),
     agentId:"statistics",
-    evidence:[...externalEvidence,...derived.evidence],
+    evidence:[...externalEvidence,...derived.evidence,...(stats.oddsMovement&&Math.abs(Number(stats.oddsMovement.change||0))>=.10?[`Observed SportyBet odds movement: ${((Number(stats.oddsMovement.change)||0)*100).toFixed(1)}% since the stored snapshot; movement is context, not proof.`]:[])],
     confidence:Math.max(Number(stats.confidence)||0,derived.confidence*.82,modelConfidence),
     dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality,historicalSupport?.dataQuality??0),
     historicalSupport,
     independentEvidence:historicalSupport?1:0,
     sportEvaluation:evaluateSportEvidence(event.sport,{evidenceCount:(externalEvidence.length+derived.evidence.length),dataQuality:Math.max(Number(stats.dataQuality)||0,derived.dataQuality),marketName:market.name}),
     analysisBasis:historicalModel?.modelType??derived.modelType??"no-source-model",
-    modelProbability:historicalModel?.modelProbability??null
+    modelProbability:historicalModel?.modelProbability??null,
+    oddsMovement:stats.oddsMovement??null
   };
 }
 
@@ -65,14 +66,15 @@ export function footballAnalysis(event,market,selection,context={}){
   return{
     ...base(event,market,selection),
     agentId:"football",
-    evidence:[...externalEvidence,...derived.evidence],
+    evidence:[...externalEvidence,...derived.evidence,...(context.oddsMovement&&Math.abs(Number(context.oddsMovement.change||0))>=.10?[`Observed SportyBet odds movement: ${((Number(context.oddsMovement.change)||0)*100).toFixed(1)}% since the stored snapshot; movement is context, not proof.`]:[])],
     confidence:Math.max(Number(context.confidence)||0,Math.min(1,derived.confidence*.75+consistency*.20),historicalModelConfidence),
     dataQuality:Math.max(Number(context.dataQuality)||0,derived.dataQuality),
     historicalSupport,
     independentEvidence:Number(context.dataQuality)>0?1:0,
     crossMarketAgreement:consistency,
     analysisBasis:historicalModel?.modelType??derived.modelType??"no-source-model",
-    modelProbability:historicalModel?.modelProbability??null
+    modelProbability:historicalModel?.modelProbability??null,
+    oddsMovement:context.oddsMovement??null
   };
 }
 
