@@ -131,6 +131,7 @@ export function riskAnalysis(event,market,selection,risks=[],context={}){
     selection,
     signal,
     historicalModel:context.historicalModel,
+    platinumEnsemble:context.platinumEnsemble,
     explicitRisks:risks
   });
   return{
