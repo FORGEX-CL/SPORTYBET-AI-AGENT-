@@ -1,4 +1,4 @@
-import { buildChallengeRound } from "./debate.js";
+import { buildChallengeRound, disagreementMetrics } from "./debate.js";
 import { runHeadAnalyst } from "./headAnalyst.js";
 const reports=[
  {agentId:"statistics",eventId:"e1",marketId:"m1",selectionId:"1",selection:"Home",odds:2,dataQuality:.8,confidence:.8},
@@ -8,6 +8,9 @@ const reports=[
  {agentId:"market",eventId:"e1",marketId:"m1",selectionId:"1",selection:"Home",odds:2,dataQuality:1,confidence:1}
 ];
 const debate=buildChallengeRound(reports);
+const metrics=disagreementMetrics(reports);
+if(metrics.confidenceRange<.09||metrics.disagreementIndex<=0)throw new Error("Disagreement metrics fixture failed");
+if(!debate.some(x=>x.round===3&&x.disagreementIndex>0))throw new Error("Resolution disagreement metrics missing");
 if(!debate.some(x=>x.round===1&&x.from==="risk"&&x.severity==="high"))throw new Error("Risk debate challenge fixture failed");
 if(!debate.some(x=>x.round===2&&x.type==="rebuttal"))throw new Error("Debate rebuttal fixture failed");
 if(!debate.some(x=>x.round===3&&x.type==="resolution"&&x.decision==="reject"))throw new Error("Debate resolution fixture failed");
