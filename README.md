@@ -14,7 +14,7 @@ Autonomous multi-agent sports analysis dashboard focused on SportyBet.
 - Same-origin production API routes for SportyBet football ingestion and Results ingestion, avoiding direct browser-to-SportyBet requests.
 - Production SportyBet source health endpoint.
 - Server ingestion uses bounded five-request concurrency for event-detail enrichment and 15-second source-request timeouts.
-- Dashboard refresh control that requests a verified SportyBet snapshot and then attempts event-detail enrichment for up to 20 football events.
+- Dashboard refresh control that requests one verified SportyBet snapshot, keeps the full source event list, and boundedly enriches the first 5 football events.
 - Sport-aware SportyBet ingestion now includes a Basketball source route and compact Football/Basketball dashboard switch. Basketball currently parses verified Points totals with canonical SportyBet detail IDs and feeds the same specialist/debate pipeline.
 - SportyBet health is sport-aware and reports parsed events, market coverage, priced selections, canonical detail-ID coverage, and source-contract status.
 
@@ -73,7 +73,7 @@ npm run dev
 - SportyBet result history is persisted locally and reused as historical evidence for the Statistics and Football specialists.
 - Historical evidence includes recent form, home/away splits, goals scored/conceded, clean-sheet rate, both-teams-to-score rate and over-2.5 rate when enough verified SportyBet results have been accumulated. The football probability engine now uses a smoothed Poisson score model (sportybet-historical-poisson-v2) and derives 1X2, BTTS and totals probabilities from the same score distribution.
 - The first installation starts with no historical sample; the system does not invent missing form or statistics.
-- Verified football event enrichment now supports up to 50 event detail pages per feed run.
+- Verified football event enrichment is deliberately bounded to the first 5 event detail pages per feed run so the server remains responsive; all source events remain available from the verified list snapshot.
 ## Agent intelligence hardening
 
 The analysis layer now separates SportyBet market-derived consensus from independent historical evidence. A football smoothed Poisson historical model (sportybet-historical-poisson-v2) is built only from stored, settled SportyBet results and is withheld when the available team sample is too small. The Odds Agent can blend that model with SportyBet market pricing, while preserving provenance. Model arbitration is calibration-weighted, and the Head Analyst retains per-agent forecast attribution for future learning.
