@@ -375,46 +375,10 @@ footer{border-top:1px solid #dddfe3;background:#fff;padding:18px 5vw;color:#777f
 }
 
 
-/* Stable split-screen AI workspace */
-html,body{width:100%;min-height:100%;overflow-x:hidden}
-body.ai-open{overflow:hidden;overscroll-behavior:none}
-body.ai-open #app{width:50vw;max-width:50vw;height:100dvh;overflow-y:auto;overflow-x:hidden}
-body.ai-open #app main{width:min(94%,1240px);margin-left:auto;margin-right:auto}
-.ai-workspace{
-  position:fixed !important;top:0 !important;right:0 !important;bottom:0 !important;left:auto !important;
-  width:50vw !important;height:100dvh !important;max-width:760px !important;min-width:390px !important;
-  inset:auto 0 0 auto !important;z-index:55 !important;
-  transform:translateX(100%) !important;transition:transform .22s ease !important;
-  border-left:1px solid #dedede !important;border-top:0 !important;border-bottom:0 !important;border-right:0 !important;
-  border-radius:0 !important;box-shadow:-8px 0 28px rgba(0,0,0,.12) !important;
-}
-.ai-workspace.open{transform:translateX(0) !important}
-.ai-workspace .ai-chat{min-width:0;width:100%;padding-left:clamp(14px,3vw,28px);padding-right:clamp(14px,3vw,28px)}
-.ai-workspace .ai-form{width:min(92%,820px);max-width:820px}
-.ai-workspace .ai-prompt-grid{width:min(720px,100%)}
-@media(max-width:900px){
-  body.ai-open #app{width:46vw;max-width:46vw}
-  .ai-workspace{width:54vw !important;min-width:360px !important}
-}
-@media(max-width:760px){
-  body.ai-open #app{display:none !important;width:0 !important;max-width:0 !important}
-  .ai-workspace{width:100vw !important;min-width:0 !important;max-width:none !important}
-}
-@media(min-width:761px){
-  body.ai-open #app .ai-tab{display:none}
-}
-
-
-/* FINAL: single stable AI viewport — never resize or split the homepage */
-html{
+/* Stable AI workspace — single full-screen viewport, no page split, no transform-based blank state */
+html,body{
   width:100%;
   min-height:100%;
-  overflow-x:hidden;
-  scrollbar-gutter:stable;
-}
-body{
-  width:100%;
-  min-width:0;
   overflow-x:hidden;
 }
 body.ai-open{
@@ -434,25 +398,27 @@ body.ai-open #app{
   width:100vw !important;
   min-width:0 !important;
   max-width:none !important;
+  height:100vh !important;
+  min-height:100vh !important;
   height:100dvh !important;
   min-height:100dvh !important;
   z-index:100 !important;
-  transform:translateY(100%) !important;
-  transition:transform .2s ease !important;
-  display:flex !important;
+  display:none !important;
   flex-direction:column !important;
   overflow:hidden !important;
+  transform:none !important;
+  transition:none !important;
   background:#fff !important;
   border:0 !important;
   border-radius:0 !important;
   box-shadow:none !important;
 }
 .ai-workspace.open{
-  transform:translateY(0) !important;
+  display:flex !important;
 }
 .ai-workspace .ai-chat{
-  flex:1 1 auto;
-  min-height:0;
+  flex:1 1 auto !important;
+  min-height:0 !important;
   width:min(900px,100%) !important;
   max-width:900px;
   margin:0 auto;
@@ -466,7 +432,8 @@ body.ai-open #app{
 @media(max-width:760px){
   .ai-workspace{
     width:100vw !important;
-    height:100dvh !important;
+    max-width:none !important;
+    min-width:0 !important;
   }
   .ai-workspace .ai-chat{
     width:100% !important;
