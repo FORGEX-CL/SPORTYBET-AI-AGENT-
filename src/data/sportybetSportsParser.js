@@ -77,3 +77,37 @@ export function parseBasketballMainPage(html=""){
   const text=stripHtml(html);
   return mapCanonicalLinks(parseBasketballMainRows(text),html);
 }
+
+export function parseSportyBetWinnerRows(text="",sport="unknown"){
+  const lines=cleanLines(text),events=[];
+  let league="";
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    const match=line.match(/\b(\d{1,2}:\d{2})\s+ID\s*:?\s*(\d+)\b/i);
+    if(!match)continue;
+    const startTime=match[1],sourceEventId=match[2];
+    const leaguePart=line.replace(match[0],"").trim();
+    if(leaguePart)league=leaguePart;
+    const teams=splitBasketballTeams(lines[i+1]??"");
+    const odds=numbers(lines[i+2]??"").filter(x=>x>1);
+    if(teams.length!==2||odds.length<2)continue;
+    events.push(normalizeEvent({
+      eventId:sourceEventId,sourceEventId,sport,league,
+      home:teams[0],away:teams[1],startTime,
+      markets:[normalizeMarket({
+        marketId:"main-winner",name:"Winner",group:"Main",
+        selections:[
+          normalizeSelection({selectionId:"1",name:"Home",odds:odds[0]}),
+          normalizeSelection({selectionId:"2",name:"Away",odds:odds[1]})
+        ]
+      })]
+    }));
+    i+=2;
+  }
+  return events;
+}
+
+export function parseSportyBetWinnerPage(html="",sport="unknown"){
+  const text=stripHtml(html);
+  return mapCanonicalLinks(parseSportyBetWinnerRows(text,sport),html);
+}
