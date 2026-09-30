@@ -1,6 +1,6 @@
 import { normalizeEvent, normalizeMarket, normalizeSelection } from "../core/types.js";
 
-const ID=/ID\s+(\d+)/i;
+const ID=/ID\s*:?\s*(\d+)/i;
 const NUMBER=/\d+(?:\.\d+)?/;
 const cleanLines=text=>text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 const numericTokens=line=>[...line.matchAll(new RegExp(NUMBER.source,"g"))].map(x=>Number(x[0]));
@@ -49,7 +49,7 @@ export function parseFootballMainRows(text=""){
   const lines=cleanLines(text),events=[];let league="";
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    const eventLine=line.match(/\b(\d{1,2}:\d{2})\s+ID\s+(\d+)\b/i);
+    const eventLine=line.match(/\b(\d{1,2}:\d{2})\s+ID\s*:?\s*(\d+)\b/i);
     if(eventLine){
       const id=eventLine[2],startTime=eventLine[1];
       const teams=splitTeams(lines[i+1]??""),odds=numericTokens(lines[i+2]??"");
@@ -67,7 +67,7 @@ function parseDetailEventMeta(text=""){
   const lines=cleanLines(text);
   const displayIndex=lines.findIndex(line=>/(?:\d{1,2}\/\d{1,2}\/\d{4}\s+)?\d{1,2}:\d{2}\s+ID\s+\d+/i.test(line));
   if(displayIndex<0)return{};
-  const match=lines[displayIndex].match(/(?:^|\s)(\d{1,2}:\d{2})\s+ID\s+(\d+)/i);
+  const match=lines[displayIndex].match(/(?:^|\s)(\d{1,2}:\d{2})\s+ID\s*:?\s*(\d+)/i);
   return {displayIndex,sourceEventId:match?.[2]??"",startTime:match?.[1]??"",home:lines[displayIndex+1]??"",away:lines[displayIndex+2]??""};
 }
 
