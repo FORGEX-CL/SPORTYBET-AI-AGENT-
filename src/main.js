@@ -3,7 +3,7 @@ import { AGENT_ROLES } from "./core/agents.js";
 import { analyzeSportyBetFeed } from "./core/feedAnalysis.js";
 import { normalizeSportyBetFeed, requireFreshFeed } from "./core/feedPipeline.js";
 import { loadLearningLedger, learningSummary, registerTickets, saveLearningLedger, settlePendingFromSportyBetResults, recordSportyBetResults, recordSportyBetOddsHistory } from "./core/learningLedger.js";
-import { fetchSportyBetFootballApi, fetchSportyBetBasketballApi , fetchSportyBetResultsApi } from "./data/sportybetApi.js";
+import { fetchSportyBetFootballApi, fetchSportyBetBasketballApi, fetchSportyBetResultsApi } from "./data/sportybetApi.js";
 import { settleFootballSelection } from "./data/sportybetResultsParser.js";
 import { buildHistoricalEvidenceByEvent } from "./core/sportybetHistory.js";
 import { compareTicketToFeed } from "./core/ticketDelta.js";
