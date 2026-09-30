@@ -7,6 +7,12 @@ export const AGENT_ROLES=Object.freeze([
 {id:"risk",name:"Risk / Contrarian Agent",focus:"counter-evidence and failure modes"},
 {id:"head",name:"Head Analyst",focus:"debate, filtering and ticket construction"}
 ]);
-export function createAnalysisCase(event){return{caseId:crypto.randomUUID(),eventId:event.eventId,createdAt:new Date().toISOString(),agentReports:[],debate:[],decision:null};}
+function createCaseId(){
+  try{
+    if(typeof globalThis.crypto?.randomUUID==="function")return globalThis.crypto.randomUUID();
+  }catch{}
+  return "case-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12);
+}
+export function createAnalysisCase(event){return{caseId:createCaseId(),eventId:event.eventId,createdAt:new Date().toISOString(),agentReports:[],debate:[],decision:null};}
 export function recordAgentReport(c,agentId,report){return{...c,agentReports:[...c.agentReports,{agentId,report,recordedAt:new Date().toISOString()}]};}
 export function addDebateMessage(c,from,to,message){return{...c,debate:[...c.debate,{from,to,message,createdAt:new Date().toISOString()}]};}
