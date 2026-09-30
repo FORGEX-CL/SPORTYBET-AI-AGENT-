@@ -44,108 +44,294 @@ function renderRolloverRows(){
   return rolloverRows().map(r=>`<div class="rollover-row"><span>DAY ${r.day}</span><span>${formatNaira(r.start)} × <b>${odds.toFixed(2)}</b></span><strong>${formatNaira(r.end)}</strong></div>`).join("");
 }
 function aiPanel(){
-  return `<button class="ai-tab" id="open-ai" type="button" aria-label="Open SportyBet AI" title="Drag to move · Tap to open"><span class="ai-orbit" aria-hidden="true"><span class="ai-glyph">AI</span><i></i><i></i><i></i></span></button>
-  <section class="ai-drawer ai-workspace" id="ai-drawer" aria-label="SportyBet AI workspace">
-    <div class="ai-workspace-bar">
-      <div class="ai-workspace-brand"><span class="ai-mini-orb">AI</span><div><b>SPORTYBET AI</b><small>AI Agent Workspace</small></div></div>
-      <button id="close-ai" class="ai-close" type="button" aria-label="Close AI">×</button>
-    </div>
-    <div class="ai-chat" id="ai-chat">
-      <div class="ai-welcome" id="ai-welcome">
-        <div class="ai-welcome-orb">AI</div>
-        <h2>What can I help with?</h2>
-        <p>Ask about the current SportyBet feed, tickets, odds, agents, or analysis.</p>
-        <div class="ai-prompt-grid">
-          <button class="ai-prompt-card" data-q="Build a mixed-sport ticket from the strongest current SportyBet selections."><span>✦</span><strong>Build a ticket</strong><small>Find the strongest cross-sport selections</small></button>
-          <button class="ai-prompt-card" id="show-plan"><span>⌁</span><strong>Make a plan</strong><small>Open a rollover plan in the center</small></button>
-          <button class="ai-prompt-card" data-q="Explain the current ticket selection by selection."><span>◌</span><strong>Explain a ticket</strong><small>Show the reasoning behind each pick</small></button>
-          <button class="ai-prompt-card" data-q="Show me where the agents disagree and why."><span>◈</span><strong>Agent debate</strong><small>See the strongest disagreements</small></button>
-        </div>
-        <div id="plan-card" class="plan-card">
-          <div class="plan-card-head"><b>MAKE A PLAN</b><button id="close-plan" type="button" aria-label="Close plan">×</button></div>
-          <div class="rollover-controls"><label>STARTING STAKE<input id="rollover-stake" type="number" value="1500" min="1" step="100"></label><label>DAYS<input id="rollover-days" type="number" value="5" min="1" max="30"></label><label>DAILY ODDS<input id="rollover-odds" type="number" value="5" min="1" step="0.01"></label></div>
-          <div class="rollover-table" id="rollover-table">${renderRolloverRows()}</div>
-          <small>Mathematical projection only; it does not guarantee betting results.</small>
+  return `<button class="ai-tab" id="open-ai" type="button" aria-label="Open SportyBet AI" title="Open SportyBet AI"><span class="ai-orbit" aria-hidden="true"><span class="ai-glyph">AI</span><i></i><i></i><i></i></span></button>
+  <section class="ai-workspace" id="ai-drawer" aria-label="SportyBet AI chat">
+    <aside class="ai-sidebar" id="ai-sidebar">
+      <div class="ai-sidebar-top">
+        <button class="ai-new-chat" id="ai-new-chat" type="button"><span>＋</span><b>New chat</b><kbd>Ctrl K</kbd></button>
+      </div>
+      <div class="ai-sidebar-section">
+        <div class="ai-sidebar-label">SPORTYBET AI</div>
+        <button class="ai-nav-item active" type="button"><span>◉</span><span>Current analysis</span></button>
+        <button class="ai-nav-item" id="ai-nav-image" type="button"><span>▧</span><span>Analyze an image</span></button>
+        <button class="ai-nav-item" id="ai-nav-ticket" type="button"><span>◆</span><span>Ticket review</span></button>
+      </div>
+      <div class="ai-sidebar-spacer"></div>
+      <div class="ai-sidebar-bottom"><span class="ai-source-dot"></span><span>SportyBet verified source</span></div>
+    </aside>
+
+    <div class="ai-main">
+      <header class="ai-topbar">
+        <button class="ai-menu" id="ai-menu" type="button" aria-label="Toggle chat navigation">☰</button>
+        <div class="ai-top-title"><strong>SportyBet AI</strong><span>Analysis workspace</span></div>
+        <button id="close-ai" class="ai-close" type="button" aria-label="Close SportyBet AI">×</button>
+      </header>
+
+      <div class="ai-chat" id="ai-chat">
+        <div class="ai-welcome" id="ai-welcome">
+          <div class="ai-welcome-orb">AI</div>
+          <h2>How can I help you?</h2>
+          <p>Ask about SportyBet markets, current analysis, tickets, or send a betting screenshot for image analysis.</p>
+          <div class="ai-prompt-grid">
+            <button class="ai-prompt-card" data-q="Build a mixed-sport ticket from the strongest current SportyBet selections."><span>✦</span><strong>Build a ticket</strong><small>Use the current verified SportyBet feed</small></button>
+            <button class="ai-prompt-card" data-q="Explain the strongest current SportyBet selections and the evidence behind them."><span>◌</span><strong>Explain the picks</strong><small>Show the reasoning and risk checks</small></button>
+            <button class="ai-prompt-card" id="show-plan"><span>⌁</span><strong>Make a plan</strong><small>Open a simple rollover projection</small></button>
+            <button class="ai-prompt-card" data-q="Show me where the agents disagree and why."><span>◈</span><strong>Agent debate</strong><small>See disagreement and risk challenges</small></button>
+          </div>
+          <div id="plan-card" class="plan-card">
+            <div class="plan-card-head"><b>MAKE A PLAN</b><button id="close-plan" type="button" aria-label="Close plan">×</button></div>
+            <div class="rollover-controls"><label>STARTING STAKE<input id="rollover-stake" type="number" value="1500" min="1" step="100"></label><label>DAYS<input id="rollover-days" type="number" value="5" min="1" max="30"></label><label>DAILY ODDS<input id="rollover-odds" type="number" value="5" min="1" step="0.01"></label></div>
+            <div class="rollover-table" id="rollover-table">${renderRolloverRows()}</div>
+            <small>Mathematical projection only; it does not guarantee betting results.</small>
+          </div>
         </div>
       </div>
+
+      <div id="ai-attachment-preview" class="ai-attachment-preview" aria-live="polite"></div>
+
+      <form id="ai-form" class="ai-form">
+        <button class="ai-compose-add" id="ai-attach" type="button" aria-label="Attach an image" title="Attach image">+</button>
+        <input id="ai-image-input" type="file" accept="image/*" hidden>
+        <div class="ai-composer-main">
+          <textarea id="ai-input" rows="1" placeholder="Message SportyBet AI" autocomplete="off"></textarea>
+        </div>
+        <button class="ai-compose-send" id="ai-send" type="submit" aria-label="Send message" title="Send">↑</button>
+      </form>
+      <div class="ai-compose-hint">AI can inspect uploaded betting screenshots. Live odds and event data remain sourced from SportyBet.</div>
     </div>
-    <form id="ai-form" class="ai-form">
-      <button class="ai-compose-add" type="button" aria-label="Open quick actions">+</button>
-      <input id="ai-input" placeholder="Message SportyBet AI..." autocomplete="off">
-      <button class="ai-compose-send" aria-label="Send message">↑</button>
-    </form>
-    <div class="ai-compose-hint">SportyBet source · Current dashboard context</div>
-  </section>`
+  </section>`;
 }
+
+async function resizeImageForAi(file){
+  if(!file||!file.type.startsWith("image/"))throw new Error("Please choose an image file.");
+  if(file.size>12*1024*1024)throw new Error("Image is too large. Please choose an image under 12 MB.");
+  const objectUrl=URL.createObjectURL(file);
+  try{
+    const image=await new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onload=()=>resolve(img);
+      img.onerror=()=>reject(new Error("The image could not be read."));
+      img.src=objectUrl;
+    });
+    const maxSide=1800;
+    const scale=Math.min(1,maxSide/Math.max(image.naturalWidth,image.naturalHeight));
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
+    canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+    const ctx=canvas.getContext("2d");
+    if(!ctx)throw new Error("Image processing is unavailable in this browser.");
+    ctx.drawImage(image,0,0,canvas.width,canvas.height);
+    return canvas.toDataURL("image/jpeg",0.84);
+  }finally{
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function dashboardAiContext(){
+  const tickets=(state.analysis?.tickets??[]).slice(0,5).map(t=>({
+    ticketId:t.ticketId,
+    strategy:t.strategyLabel,
+    combinedOdds:t.combinedOdds,
+    selections:(t.selections??[]).slice(0,12).map(s=>({eventId:s.eventId,sourceEventId:s.sourceEventId,market:s.marketName,selection:s.selection,odds:s.odds}))
+  }));
+  const events=(state.feed?.events??[]).slice(0,40).map(e=>({
+    sport:e.sport,
+    eventId:e.eventId,
+    sourceEventId:e.sourceEventId,
+    home:e.homeTeam,
+    away:e.awayTeam,
+    startTime:e.startTime,
+    markets:(e.markets??[]).slice(0,6).map(m=>({name:m.name,selections:(m.selections??[]).slice(0,8).map(s=>({id:s.id,name:s.name,odds:s.odds}))}))
+  }));
+  return{
+    source:"SportyBet",
+    capturedAt:state.feed?.capturedAt??null,
+    eventCount:state.feed?.eventCount??0,
+    marketCount:state.feed?.marketCount??0,
+    decision:state.analysis?.decision?.noBet?"NO BET":"CANDIDATES READY",
+    headAnalystReasoning:state.analysis?.decision?.reasoning??null,
+    tickets,
+    events
+  };
+}
+
+async function requestAiReply(question,imageDataUrl){
+  const response=await fetch("/api/ai-chat",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      message:String(question||""),
+      image:imageDataUrl||null,
+      context:dashboardAiContext()
+    })
+  });
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload.error||"AI service is unavailable.");
+  return String(payload.text||"I could not generate a response.");
+}
+
 function bindAi(){
   const aiButton=document.querySelector("#open-ai");
   const aiDrawer=document.querySelector("#ai-drawer");
-  aiButton?.addEventListener("click",()=>{
-    if(aiButton.dataset.dragged==="true"){
-      aiButton.dataset.dragged="false";
-      return;
+  const aiSidebar=document.querySelector("#ai-sidebar");
+  const aiInput=document.querySelector("#ai-input");
+  const aiSend=document.querySelector("#ai-send");
+  const aiChat=document.querySelector("#ai-chat");
+  const aiImageInput=document.querySelector("#ai-image-input");
+  const aiPreview=document.querySelector("#ai-attachment-preview");
+  let attachedImage=null;
+  let attachedImageName="";
+
+  const syncComposer=()=>{
+    const hasText=Boolean(aiInput?.value.trim());
+    if(aiSend)aiSend.disabled=(!hasText&&!attachedImage);
+    if(aiInput){
+      aiInput.style.height="auto";
+      aiInput.style.height=Math.min(150,Math.max(44,aiInput.scrollHeight))+"px";
     }
-    aiDrawer?.classList.add("open");document.body.classList.add("ai-open");
-  });
+  };
+
+  const clearAttachment=()=>{
+    attachedImage=null;attachedImageName="";
+    if(aiImageInput)aiImageInput.value="";
+    if(aiPreview)aiPreview.innerHTML="";
+    syncComposer();
+  };
+
+  const showImagePreview=(name,dataUrl)=>{
+    if(!aiPreview)return;
+    aiPreview.innerHTML=`<div class="ai-preview-card"><img src="${dataUrl}" alt="Attached betting screenshot"><div><b>${escapeHtml(name||"Image")}</b><small>Ready for AI analysis</small></div><button id="ai-remove-image" type="button" aria-label="Remove image">×</button></div>`;
+    aiPreview.querySelector("#ai-remove-image")?.addEventListener("click",clearAttachment);
+  };
+
+  const openAi=()=>{
+    aiDrawer?.classList.add("open");
+    document.body.classList.add("ai-open");
+    syncComposer();
+    setTimeout(()=>aiInput?.focus(),60);
+  };
+
+  aiButton?.addEventListener("click",openAi);
   aiButton?.addEventListener("pointerdown",event=>{
     if(event.pointerType==="mouse"&&event.button!==0)return;
-    const rect=aiButton.getBoundingClientRect();
-    const startX=event.clientX;
-    const startY=event.clientY;
-    const offsetX=event.clientX-rect.left;
-    const offsetY=event.clientY-rect.top;
+    if(event.pointerType==="touch")return;
+    const rect=aiButton.getBoundingClientRect(),startX=event.clientX,startY=event.clientY,offsetX=event.clientX-rect.left,offsetY=event.clientY-rect.top;
     let moved=false;
     const move=moveEvent=>{
-      const dx=moveEvent.clientX-startX;
-      const dy=moveEvent.clientY-startY;
+      const dx=moveEvent.clientX-startX,dy=moveEvent.clientY-startY;
       if(!moved&&Math.hypot(dx,dy)<5)return;
       moved=true;
-      const width=rect.width,height=rect.height;
-      const maxLeft=Math.max(6,window.innerWidth-width-6);
-      const maxTop=Math.max(6,window.innerHeight-height-6);
-      const left=Math.min(maxLeft,Math.max(6,moveEvent.clientX-offsetX));
-      const top=Math.min(maxTop,Math.max(6,moveEvent.clientY-offsetY));
-      aiButton.style.left=`${left}px`;
-      aiButton.style.top=`${top}px`;
-      aiButton.style.right="auto";
-      aiButton.style.bottom="auto";
-      aiButton.dataset.dragged="true";
+      const left=Math.min(Math.max(6,window.innerWidth-rect.width-6),Math.max(6,moveEvent.clientX-offsetX));
+      const top=Math.min(Math.max(6,window.innerHeight-rect.height-6),Math.max(6,moveEvent.clientY-offsetY));
+      aiButton.style.left=`${left}px`;aiButton.style.top=`${top}px`;aiButton.style.right="auto";aiButton.style.bottom="auto";aiButton.dataset.dragged="true";
       try{localStorage.setItem("sportybet-ai-button-position",JSON.stringify({left,top}));}catch{}
     };
-    const end=()=>{
-      window.removeEventListener("pointermove",move);
-      window.removeEventListener("pointerup",end);
-      window.removeEventListener("pointercancel",end);
-      aiButton.classList.remove("dragging");
-    };
-    window.addEventListener("pointermove",move,{passive:true});
-    window.addEventListener("pointerup",end,{once:true});
-    window.addEventListener("pointercancel",end,{once:true});
-    aiButton.classList.add("dragging");
-    event.preventDefault();
+    const end=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",end);window.removeEventListener("pointercancel",end);aiButton.classList.remove("dragging");};
+    window.addEventListener("pointermove",move,{passive:true});window.addEventListener("pointerup",end,{once:true});window.addEventListener("pointercancel",end,{once:true});aiButton.classList.add("dragging");event.preventDefault();
   });
+
   try{
     const saved=JSON.parse(localStorage.getItem("sportybet-ai-button-position")||"null");
-    if(Number.isFinite(saved?.left)&&Number.isFinite(saved?.top)){
-      const maxLeft=Math.max(6,window.innerWidth-aiButton.offsetWidth-6);
-      const maxTop=Math.max(6,window.innerHeight-aiButton.offsetHeight-6);
-      const left=Math.min(maxLeft,Math.max(6,saved.left));
-      const top=Math.min(maxTop,Math.max(6,saved.top));
-      aiButton.style.left=`${left}px`;
-      aiButton.style.top=`${top}px`;
-      aiButton.style.right="auto";
-      aiButton.style.bottom="auto";
+    if(Number.isFinite(saved?.left)&&Number.isFinite(saved?.top)&&aiButton){
+      const maxLeft=Math.max(6,window.innerWidth-aiButton.offsetWidth-6),maxTop=Math.max(6,window.innerHeight-aiButton.offsetHeight-6);
+      aiButton.style.left=`${Math.min(maxLeft,Math.max(6,saved.left))}px`;aiButton.style.top=`${Math.min(maxTop,Math.max(6,saved.top))}px`;aiButton.style.right="auto";aiButton.style.bottom="auto";
     }
   }catch{}
+
   document.querySelector("#close-ai")?.addEventListener("click",()=>{aiDrawer?.classList.remove("open");document.body.classList.remove("ai-open");});
-  const welcome=document.querySelector("#ai-welcome");
-  const openPrompt=q=>{if(welcome)welcome.classList.add("has-chat");const i=document.querySelector("#ai-input");if(i){i.value=q;i.focus()}};
-  document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>openPrompt(b.dataset.q)));
-  document.querySelector("#show-plan")?.addEventListener("click",()=>{if(welcome)welcome.classList.add("has-chat");document.querySelector("#plan-card")?.classList.add("visible")});
+  document.querySelector("#ai-menu")?.addEventListener("click",()=>aiSidebar?.classList.toggle("collapsed"));
+  document.querySelector("#ai-new-chat")?.addEventListener("click",()=>{
+    if(aiChat)aiChat.innerHTML=`<div class="ai-welcome" id="ai-welcome"><div class="ai-welcome-orb">AI</div><h2>How can I help you?</h2><p>Ask about SportyBet markets, current analysis, tickets, or send a betting screenshot for image analysis.</p><div class="ai-prompt-grid"><button class="ai-prompt-card" data-q="Build a mixed-sport ticket from the strongest current SportyBet selections."><span>✦</span><strong>Build a ticket</strong><small>Use the current verified SportyBet feed</small></button><button class="ai-prompt-card" data-q="Explain the strongest current SportyBet selections and the evidence behind them."><span>◌</span><strong>Explain the picks</strong><small>Show the reasoning and risk checks</small></button><button class="ai-prompt-card" data-q="Show me where the agents disagree and why."><span>◈</span><strong>Agent debate</strong><small>See disagreement and risk challenges</small></button></div></div>`;
+    clearAttachment();
+    if(aiInput)aiInput.value="";
+    syncComposer();
+    bindQuickPrompts();
+  });
+
+  document.querySelector("#ai-attach")?.addEventListener("click",()=>aiImageInput?.click());
+  document.querySelector("#ai-nav-image")?.addEventListener("click",()=>aiImageInput?.click());
+  document.querySelector("#ai-nav-ticket")?.addEventListener("click",()=>{
+    if(aiInput){aiInput.value="Review the current ticket selections and explain the strongest risks and changes I should check.";syncComposer();aiInput.focus();}
+  });
+
+  aiImageInput?.addEventListener("change",async()=>{
+    const file=aiImageInput.files?.[0];
+    if(!file)return;
+    try{
+      if(aiPreview)aiPreview.innerHTML='<div class="ai-preview-loading">Preparing image…</div>';
+      attachedImage=await resizeImageForAi(file);
+      attachedImageName=file.name;
+      showImagePreview(file.name,attachedImage);
+    }catch(error){
+      clearAttachment();
+      if(aiPreview)aiPreview.innerHTML=`<div class="ai-preview-error">${escapeHtml(error?.message||"Could not read image.")}</div>`;
+    }
+  });
+
+  const appendMessage=(kind,text,image=null)=>{
+    if(!aiChat)return;
+    const imageHtml=image?`<div class="ai-user-image"><img src="${image}" alt="User-uploaded betting screenshot"></div>`:"";
+    const cls=kind==="user"?"user-msg":"agent-msg";
+    const label=kind==="user"?"You":"SportyBet AI";
+    aiChat.insertAdjacentHTML("beforeend",`<article class="ai-msg ${cls}"><div class="ai-msg-label">${label}</div>${imageHtml}<p>${escapeHtml(text).replace(/\\n/g,"<br>")}</p></article>`);
+    aiChat.scrollTop=aiChat.scrollHeight;
+  };
+
+  const bindQuickPrompts=()=>{
+    document.querySelectorAll("#ai-chat [data-q]").forEach(b=>b.addEventListener("click",()=>{
+      if(aiInput){aiInput.value=b.dataset.q||"";syncComposer();aiInput.focus();}
+    }));
+  };
+
+  document.querySelector("#show-plan")?.addEventListener("click",()=>{document.querySelector("#plan-card")?.classList.add("visible");});
   document.querySelector("#close-plan")?.addEventListener("click",()=>document.querySelector("#plan-card")?.classList.remove("visible"));
   document.querySelectorAll("#rollover-stake,#rollover-days,#rollover-odds").forEach(i=>i.addEventListener("input",()=>{const t=document.querySelector("#rollover-table");if(t)t.innerHTML=renderRolloverRows()}));
-  document.querySelector(".ai-compose-add")?.addEventListener("click",()=>{const i=document.querySelector("#ai-input");i?.focus()});
-  document.querySelector("#ai-form")?.addEventListener("submit",e=>{e.preventDefault();const i=document.querySelector("#ai-input"),q=i.value.trim();if(!q)return;const welcomeNode=document.querySelector("#ai-welcome");if(welcomeNode)welcomeNode.classList.add("has-chat");const chat=document.querySelector("#ai-chat");chat.insertAdjacentHTML("beforeend",'<div class="ai-msg user-msg"><p>'+escapeHtml(q)+'</p></div><div class="ai-msg agent-msg"><b>SportyBet AI</b><p>'+escapeHtml(buildAiReply(state,q))+'</p></div>');i.value="";chat.scrollTop=chat.scrollHeight});
+
+  document.querySelector(".ai-compose-add")?.addEventListener("contextmenu",event=>event.preventDefault());
+  aiInput?.addEventListener("input",syncComposer);
+  aiInput?.addEventListener("keydown",event=>{
+    if(event.key==="Enter"&&!event.shiftKey){
+      event.preventDefault();
+      document.querySelector("#ai-form")?.requestSubmit();
+    }
+  });
+
+  document.querySelector("#ai-form")?.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const question=aiInput?.value.trim()||"";
+    if(!question&&!attachedImage)return;
+    const imageToSend=attachedImage;
+    const imageName=attachedImageName;
+    const sendButton=aiSend;
+    if(sendButton)sendButton.disabled=true;
+    const welcomeNode=document.querySelector("#ai-welcome");
+    welcomeNode?.remove();
+    appendMessage("user",question||"Please analyze this betting screenshot.",imageToSend);
+    clearAttachment();
+    if(aiInput)aiInput.value="";
+    syncComposer();
+
+    const loadingId="ai-thinking-"+Date.now();
+    aiChat?.insertAdjacentHTML("beforeend",`<article class="ai-msg agent-msg ai-thinking" id="${loadingId}"><div class="ai-msg-label">SportyBet AI</div><div class="ai-thinking-row"><span></span><span></span><span></span><em>Thinking…</em></div></article>`);
+    aiChat.scrollTop=aiChat.scrollHeight;
+
+    try{
+      const text=await requestAiReply(question||"Analyze this betting screenshot. Read the teams, markets, selections and visible odds, explain what is visible, and compare against the current SportyBet dashboard context when possible.",imageToSend);
+      document.querySelector("#"+loadingId)?.remove();
+      appendMessage("agent",text);
+    }catch(error){
+      document.querySelector("#"+loadingId)?.remove();
+      if(!imageToSend){
+        appendMessage("agent",buildAiReply(state,question));
+      }else{
+        appendMessage("agent",`I received the image ${imageName||"you uploaded"}, but the multimodal AI service is not configured yet. Add AI_GATEWAY_API_KEY in Vercel to enable full image reading.`);
+      }
+    }
+    syncComposer();
+  });
+
+  bindQuickPrompts();
+  syncComposer();
 }
 function render(){
   const fresh=requireFreshFeed(state.feed),agents=renderAgentStatus();
