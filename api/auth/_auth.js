@@ -5,7 +5,7 @@ const scrypt=promisify(nodeScrypt);
 export const COOKIE="sportybet_ai_session";
 export const SESSION_TTL_SECONDS=8*60*60;
 const CLOUD_URL=String(process.env.SUPABASE_URL??"").replace(/\/$/,"");
-const CLOUD_SECRET=String(process.env.SUPABASE_SECRET_KEY??"");
+const CLOUD_SECRET=String(process.env.SUPABASE_SECRET_KEY??process.env.SUPABASE_SERVICE_ROLE_KEY??"");
 const CLOUD_AUTH_KEY=String(process.env.SUPABASE_PUBLISHABLE_KEY??process.env.SUPABASE_ANON_KEY??"");
 const RESERVED=new Set(["admin","administrator","root","system","support","owner","sportybet","sportybetai","sportybet_ai","superadmin"]);
 
