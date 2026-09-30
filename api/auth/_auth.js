@@ -61,7 +61,11 @@ export function verifySessionToken(token,now=Math.floor(Date.now()/1000)){
 }
 export function getCookie(req,name=COOKIE){
   const raw=String(req?.headers?.cookie??"");
-  for(const part of raw.split(";")){const [key,...rest]=part.trim().split("=");if(key===name)return decodeURIComponent(rest.join("="));}
+  for(const part of raw.split(";")){
+    const [key,...rest]=part.trim().split("=");
+    if(key!==name)continue;
+    try{return decodeURIComponent(rest.join("="));}catch{return null;}
+  }
   return null;
 }
 export function sessionCookie(token){return COOKIE+"="+encodeURIComponent(token)+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age="+SESSION_TTL_SECONDS;}
