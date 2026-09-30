@@ -155,13 +155,14 @@ function dashboardAiContext(){
   };
 }
 
-async function requestAiReply(question,imageDataUrl){
+async function requestAiReply(question,imageDataUrl,history=[]){
   const response=await fetch("/api/ai-chat",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       message:String(question||""),
       image:imageDataUrl||null,
+      history:Array.isArray(history)?history.slice(-12):[],
       context:dashboardAiContext()
     })
   });
@@ -181,6 +182,7 @@ function bindAi(){
   const aiPreview=document.querySelector("#ai-attachment-preview");
   let attachedImage=null;
   let attachedImageName="";
+  const aiHistory=[];
 
   const syncComposer=()=>{
     const hasText=Boolean(aiInput?.value.trim());
@@ -243,6 +245,7 @@ function bindAi(){
   document.querySelector("#ai-new-chat")?.addEventListener("click",()=>{
     if(aiChat)aiChat.innerHTML=`<div class="ai-welcome" id="ai-welcome"><div class="ai-welcome-orb">AI</div><h2>How can I help you?</h2><p>Ask about SportyBet markets, current analysis, tickets, or send a betting screenshot for image analysis.</p><div class="ai-prompt-grid"><button class="ai-prompt-card" data-q="Build a mixed-sport ticket from the strongest current SportyBet selections."><span>✦</span><strong>Build a ticket</strong><small>Use the current verified SportyBet feed</small></button><button class="ai-prompt-card" data-q="Explain the strongest current SportyBet selections and the evidence behind them."><span>◌</span><strong>Explain the picks</strong><small>Show the reasoning and risk checks</small></button><button class="ai-prompt-card" data-q="Show me where the agents disagree and why."><span>◈</span><strong>Agent debate</strong><small>See disagreement and risk challenges</small></button></div></div>`;
     clearAttachment();
+    aiHistory.length=0;
     if(aiInput)aiInput.value="";
     syncComposer();
     bindQuickPrompts();
@@ -306,7 +309,9 @@ function bindAi(){
     if(sendButton)sendButton.disabled=true;
     const welcomeNode=document.querySelector("#ai-welcome");
     welcomeNode?.remove();
-    appendMessage("user",question||"Please analyze this betting screenshot.",imageToSend);
+    const userPrompt=question||"Please analyze this betting screenshot.";
+    appendMessage("user",userPrompt,imageToSend);
+    aiHistory.push({role:"user",content:userPrompt});
     clearAttachment();
     if(aiInput)aiInput.value="";
     syncComposer();
@@ -316,9 +321,10 @@ function bindAi(){
     aiChat.scrollTop=aiChat.scrollHeight;
 
     try{
-      const text=await requestAiReply(question||"Analyze this betting screenshot. Read the teams, markets, selections and visible odds, explain what is visible, and compare against the current SportyBet dashboard context when possible.",imageToSend);
+      const text=await requestAiReply(question||"Analyze this betting screenshot. Read the teams, markets, selections and visible odds, explain what is visible, and compare against the current SportyBet dashboard context when possible.",imageToSend,aiHistory.slice(0,-1));
       document.querySelector("#"+loadingId)?.remove();
       appendMessage("agent",text);
+      aiHistory.push({role:"assistant",content:text});
     }catch(error){
       document.querySelector("#"+loadingId)?.remove();
       if(!imageToSend){
