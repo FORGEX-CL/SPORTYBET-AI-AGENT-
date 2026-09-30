@@ -126,3 +126,13 @@ GitHub Actions runs `npm run test:core` and `npm run build` on pushes to `main` 
 - Cloud provisioning requires `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and the existing `SPORTYBET_AUTH_SECRET` deployment secrets.
 - The Supabase secret key is server-only and must never be exposed in browser code or committed to GitHub.
 - Username availability and signup endpoints include basic rate limiting and reject reserved administrator/system usernames.
+
+
+### ChatGPT-style multimodal AI workspace
+
+- Full-screen ChatGPT-style navigation with desktop chat sidebar and mobile-friendly single-column chat.
+- Composer uses an attachment  button, expandable message box, circular up-arrow send control, Enter-to-send and Shift+Enter for a new line.
+- Betting screenshots can be attached and previewed before sending.
+- Uploaded images are resized in-browser before being sent to the authenticated multimodal AI endpoint.
+- Multimodal analysis is routed through Vercel AI Gateway using `openai/gpt-5.6-sol`; the gateway key is server-side only.
+- Image analysis treats screenshots as user-provided snapshots and still uses SportyBet as the source of truth for current event/market/odds data.
