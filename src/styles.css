@@ -267,3 +267,5 @@ footer{border-top:1px solid #dddfe3;background:#fff;padding:18px 5vw;color:#777f
 .signup-drawer{position:fixed;right:18px;bottom:68px;width:min(390px,calc(100vw - 36px));max-height:calc(100vh - 100px);overflow:auto;background:#fff;border:1px solid #ddd;border-radius:16px;box-shadow:0 18px 55px rgba(0,0,0,.2);padding:18px;z-index:999;display:none}
 .signup-drawer.open{display:block}.signup-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.signup-head h3{margin:0}.signup-chat{display:grid;gap:8px;margin-bottom:12px}.signup-status{min-height:18px;font-size:12px;font-weight:800}.signup-status.available{color:#0d8a3b}.signup-status.taken{color:#c9000b}.signup-form .secondary{background:#222}
 @media(max-width:600px){.auth-card{padding:22px}.signup-tab{right:10px;bottom:10px}.signup-drawer{right:10px;bottom:58px;width:calc(100vw - 20px)}}
+
+.sport-auto-note{font-size:8px;color:#68707b;font-weight:700;line-height:1.35}
