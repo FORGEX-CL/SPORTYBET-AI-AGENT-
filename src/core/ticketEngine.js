@@ -1,6 +1,12 @@
 export const MAX_SELECTIONS_PER_TICKET=50;
 export const MAX_TICKETS=10;
 export const selectionKey=s=>`${s.eventId}:${s.marketId}:${s.selectionId}`;
+function createTicketId(){
+  try{
+    if(typeof globalThis.crypto?.randomUUID==="function")return globalThis.crypto.randomUUID();
+  }catch{}
+  return "ticket-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12);
+}
 
 export function calculateCombinedOdds(selections){return selections.reduce((t,s)=>t*Number(s.odds),1);}
 
@@ -24,7 +30,7 @@ export function buildTicket(selections,metadata={}){
   if(selections.some(s=>!s.eventId||!s.marketId||!s.selectionId||!Number.isFinite(Number(s.odds))||Number(s.odds)<=1))throw new Error("Invalid selection");
   const keys=selections.map(selectionKey);
   if(new Set(keys).size!==keys.length)throw new Error("Duplicate selection");
-  const ticket={ticketId:metadata.ticketId??crypto.randomUUID(),createdAt:new Date().toISOString(),selections,selectionCount:selections.length,combinedOdds:calculateCombinedOdds(selections),status:"candidate",...metadata};
+  const ticket={ticketId:metadata.ticketId??createTicketId(),createdAt:new Date().toISOString(),selections,selectionCount:selections.length,combinedOdds:calculateCombinedOdds(selections),status:"candidate",...metadata};
   return metadata.frozen?ticket:freezeTicket(ticket,metadata.snapshot??{});
 }
 
