@@ -1,7 +1,19 @@
 import { updateCalibration, calibrationSummary } from "./agentCalibration.js";
 import { buildAgentDriftReport } from "./modelDrift.js";
 
-const uid=()=>crypto.randomUUID();
+const cloneValue=value=>{
+  if(value==null)return value;
+  if(typeof structuredClone==="function"){
+    try{return structuredClone(value);}catch{}
+  }
+  return JSON.parse(JSON.stringify(value));
+};
+const uid=()=>{
+  try{
+    if(typeof globalThis.crypto?.randomUUID==="function")return globalThis.crypto.randomUUID();
+  }catch{}
+  return "prediction-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,12);
+};
 const marketContextKey=(sport,market)=>`${sport??"unknown"}::${market??"unknown"}`;
 const bucketOdds=odds=>{const n=Number(odds);if(!Number.isFinite(n))return"unknown";if(n<1.5)return"<1.50";if(n<2)return"1.50-1.99";if(n<3)return"2.00-2.99";if(n<5)return"3.00-4.99";return"5.00+";};
 const ensureAgentStat=stat=>{
@@ -79,7 +91,7 @@ function confidenceBand(value){
 }
 
 export function updateAgentPerformance(performance={},records=[]){
-  const next=structuredClone(performance);
+  const next=cloneValue(performance);
   next.updatedAt=new Date().toISOString();
   next.agents=next.agents??{};
   for(const record of records){
