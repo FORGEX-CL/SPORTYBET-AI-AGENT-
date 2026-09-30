@@ -61,6 +61,22 @@ main{width:min(1240px,94vw);margin:0 auto;padding:18px 0 60px}
   border:1px solid var(--line);border-top:3px solid var(--sporty-red);
   border-radius:4px;padding:28px
 }
+.hero-title-only{
+  min-height:180px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.hero-title-only h2{
+  margin:0;
+  max-width:none;
+  font-size:clamp(30px,4vw,48px);
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:-.04em;
+  color:#171717;
+}
 .label,.count,.ticket-id{
   font-size:9px;letter-spacing:.13em;color:#737b86;font-weight:800
 }
