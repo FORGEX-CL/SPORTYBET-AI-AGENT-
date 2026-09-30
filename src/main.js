@@ -85,7 +85,7 @@ function bindAi(){
       aiButton.dataset.dragged="false";
       return;
     }
-    aiDrawer?.classList.add("open");
+    aiDrawer?.classList.add("open");document.body.classList.add("ai-open");
   });
   aiButton?.addEventListener("pointerdown",event=>{
     if(event.pointerType==="mouse"&&event.button!==0)return;
@@ -137,7 +137,7 @@ function bindAi(){
       aiButton.style.bottom="auto";
     }
   }catch{}
-  document.querySelector("#close-ai")?.addEventListener("click",()=>aiDrawer?.classList.remove("open"));
+  document.querySelector("#close-ai")?.addEventListener("click",()=>{aiDrawer?.classList.remove("open");document.body.classList.remove("ai-open");});
   const welcome=document.querySelector("#ai-welcome");
   const openPrompt=q=>{if(welcome)welcome.classList.add("has-chat");const i=document.querySelector("#ai-input");if(i){i.value=q;i.focus()}};
   document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>openPrompt(b.dataset.q)));
