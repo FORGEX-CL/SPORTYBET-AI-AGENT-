@@ -21,6 +21,7 @@ export function createSportyBetApiClient(fetchImpl=globalThis.fetch){
     football:()=>request("/api/sportybet-football",60000),
     basketball:()=>request("/api/sportybet-basketball",20000),
     results:()=>request("/api/sportybet-results",30000),
+    multisport:(sports)=>request(`/api/sportybet-multisport?sports=${encodeURIComponent(sports||"football,basketball,tennis,volleyball,tableTennis")}`,60000),
     health:(sport="football")=>request(`/api/health?sport=${encodeURIComponent(String(sport).toLowerCase())}`,18000)
   });
 }
@@ -39,4 +40,8 @@ export async function fetchSportyBetResultsApi(){
 
 export async function fetchSportyBetHealthApi(sport="football"){
   return createSportyBetApiClient(globalThis.fetch).health(sport);
+}
+
+export async function fetchSportyBetMultiSportApi(sports){
+  return createSportyBetApiClient(globalThis.fetch).multisport(sports);
 }
