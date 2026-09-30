@@ -403,3 +403,75 @@ body.ai-open #app main{width:min(94%,1240px);margin-left:auto;margin-right:auto}
 @media(min-width:761px){
   body.ai-open #app .ai-tab{display:none}
 }
+
+
+/* FINAL: single stable AI viewport — never resize or split the homepage */
+html{
+  width:100%;
+  min-height:100%;
+  overflow-x:hidden;
+  scrollbar-gutter:stable;
+}
+body{
+  width:100%;
+  min-width:0;
+  overflow-x:hidden;
+}
+body.ai-open{
+  width:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+body.ai-open #app{
+  width:100% !important;
+  max-width:none !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+.ai-workspace{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  min-width:0 !important;
+  max-width:none !important;
+  height:100dvh !important;
+  min-height:100dvh !important;
+  z-index:100 !important;
+  transform:translateY(100%) !important;
+  transition:transform .2s ease !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+  background:#fff !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+.ai-workspace.open{
+  transform:translateY(0) !important;
+}
+.ai-workspace .ai-chat{
+  flex:1 1 auto;
+  min-height:0;
+  width:min(900px,100%) !important;
+  max-width:900px;
+  margin:0 auto;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch;
+}
+.ai-workspace .ai-form{
+  flex:0 0 auto;
+}
+@media(max-width:760px){
+  .ai-workspace{
+    width:100vw !important;
+    height:100dvh !important;
+  }
+  .ai-workspace .ai-chat{
+    width:100% !important;
+    max-width:none;
+    padding-left:14px;
+    padding-right:14px;
+  }
+}
