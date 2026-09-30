@@ -71,9 +71,17 @@ export function requireAuth(req,res){const session=getSession(req);if(!session){
 export function requireAdmin(req,res){const session=requireAuth(req,res);if(!session)return null;if(session.role!=="admin"){res.status(403).json({authenticated:true,error:"Administrator access required"});return null;}return session;}
 export function findUser(username){const normalized=normalizeUsername(username);return parseAuthUsers().find(user=>user.username===normalized)??null;}
 
+function apiKeyHeaders(key,extra={}){
+  const headers={"apikey":key,"Content-Type":"application/json",...extra};
+  // New sb_* keys are API keys, not JWTs. Legacy anon/service_role keys may still use Bearer auth.
+  if(!/^sb_(?:publishable|secret)_/i.test(key)){
+    headers.Authorization="Bearer "+key;
+  }
+  return headers;
+}
 async function cloudFetch(path,options={}){
   if(!isCloudAuthConfigured())throw new Error("Cloud authentication is not configured");
-  const response=await fetch(CLOUD_URL+path,{...options,headers:{"apikey":CLOUD_SECRET,"Authorization":"Bearer "+CLOUD_SECRET,"Content-Type":"application/json",...(options.headers??{})}});
+  const response=await fetch(CLOUD_URL+path,{...options,headers:apiKeyHeaders(CLOUD_SECRET,options.headers??{})});
   const payload=await response.json().catch(()=>null);
   if(!response.ok)throw new Error(payload?.msg||payload?.message||payload?.error_description||payload?.error||("Cloud authentication request failed: "+response.status));
   return payload;
@@ -114,7 +122,7 @@ export async function cloudLogin(username,password){
   if(!profile||!profile.active)return null;
   const response=await fetch(CLOUD_URL+"/auth/v1/token?grant_type=password",{
     method:"POST",
-    headers:{"apikey":CLOUD_AUTH_KEY,"Authorization":"Bearer "+CLOUD_AUTH_KEY,"Content-Type":"application/json"},
+    headers:apiKeyHeaders(CLOUD_AUTH_KEY),
     body:JSON.stringify({email:syntheticEmail(profile.username),password})
   });
   const token=await response.json().catch(()=>null);
