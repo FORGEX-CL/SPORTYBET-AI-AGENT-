@@ -16,12 +16,12 @@ async function getJson(url,fetchImpl=globalThis.fetch,timeoutMs=12000){
 }
 
 export function createSportyBetApiClient(fetchImpl=globalThis.fetch){
-  const request=url=>getJson(url,fetchImpl);
+  const request=(url,timeoutMs)=>getJson(url,fetchImpl,timeoutMs);
   return Object.freeze({
-    football:()=>request("/api/sportybet-football"),
-    basketball:()=>request("/api/sportybet-basketball"),
-    results:()=>request("/api/sportybet-results"),
-    health:(sport="football")=>request(`/api/health?sport=${encodeURIComponent(String(sport).toLowerCase())}`)
+    football:()=>request("/api/sportybet-football",60000),
+    basketball:()=>request("/api/sportybet-basketball",20000),
+    results:()=>request("/api/sportybet-results",30000),
+    health:(sport="football")=>request(`/api/health?sport=${encodeURIComponent(String(sport).toLowerCase())}`,18000)
   });
 }
 
