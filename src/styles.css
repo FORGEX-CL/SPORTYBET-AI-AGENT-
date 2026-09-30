@@ -225,7 +225,7 @@ footer{border-top:1px solid #dddfe3;background:#fff;padding:18px 5vw;color:#777f
 .plan-card>div{margin-top:6px;padding:7px;background:#fff;border:1px solid #e5e9e7;border-radius:3px}
 .plan-card small{display:block;margin-top:8px;color:#727a83}
 @media(max-width:760px){
-  .ai-tab{top:auto;bottom:82px;padding:12px 8px}
+  .ai-tab{right:14px;bottom:78px;width:52px;height:52px}
   .ai-drawer{width:100%;max-width:430px}
 }
 
