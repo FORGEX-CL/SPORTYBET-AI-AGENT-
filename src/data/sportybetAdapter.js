@@ -1,4 +1,4 @@
-const ALLOWED_SPORTYBET_HOSTS=new Set(["sportybet.com","www.sportybet.com","lite.sportybet.com"]);
+const ALLOWED_SPORTYBET_HOSTS=new Set(["sportybet.com","www.sportybet.com","lite.sportybet.com","mobile.sportybet.com"]);
 export const SPORTYBET_BASE="https://www.sportybet.com/ng/";
 export const SPORTYBET_LITE="https://lite.sportybet.com/ng/lite";
 
